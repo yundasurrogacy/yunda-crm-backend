@@ -1,0 +1,1896 @@
+schema {
+  query: query_root
+  mutation: mutation_root
+  subscription: subscription_root
+}
+
+"""whether this query should be cached (Hasura Cloud only)"""
+directive @cached(
+  """refresh the cache entry"""
+  refresh: Boolean! = false
+
+  """measured in seconds"""
+  ttl: Int! = 60
+) on QUERY
+
+"""
+Boolean expression to compare columns of type "Int". All fields are combined with logical 'AND'.
+"""
+input Int_comparison_exp {
+  _eq: Int
+  _gt: Int
+  _gte: Int
+  _in: [Int!]
+  _is_null: Boolean
+  _lt: Int
+  _lte: Int
+  _neq: Int
+  _nin: [Int!]
+}
+
+"""
+Boolean expression to compare columns of type "String". All fields are combined with logical 'AND'.
+"""
+input String_comparison_exp {
+  _eq: String
+  _gt: String
+  _gte: String
+
+  """does the column match the given case-insensitive pattern"""
+  _ilike: String
+  _in: [String!]
+
+  """
+  does the column match the given POSIX regular expression, case insensitive
+  """
+  _iregex: String
+  _is_null: Boolean
+
+  """does the column match the given pattern"""
+  _like: String
+  _lt: String
+  _lte: String
+  _neq: String
+
+  """does the column NOT match the given case-insensitive pattern"""
+  _nilike: String
+  _nin: [String!]
+
+  """
+  does the column NOT match the given POSIX regular expression, case insensitive
+  """
+  _niregex: String
+
+  """does the column NOT match the given pattern"""
+  _nlike: String
+
+  """
+  does the column NOT match the given POSIX regular expression, case sensitive
+  """
+  _nregex: String
+
+  """does the column NOT match the given SQL regular expression"""
+  _nsimilar: String
+
+  """
+  does the column match the given POSIX regular expression, case sensitive
+  """
+  _regex: String
+
+  """does the column match the given SQL regular expression"""
+  _similar: String
+}
+
+"""账户表，存放一些第三方账号等，方便用户登录"""
+type accounts {
+  """账户信息，如授权后返回的头像、用户昵称等"""
+  account_info(
+    """JSON select path"""
+    path: String
+  ): json
+
+  """
+  账号提供商，可选：1.weixin_mini_program（微信小程序）2.weixin_public_account（微信公众号）3.tencent_open_platform（腾讯开放平台）
+  """
+  account_provider: String!
+
+  """账号提供商对应的应用appid"""
+  account_provider_appid: String!
+
+  """账号授权的openid"""
+  account_provider_openid: String!
+  created_at: timestamptz!
+  id: bigint!
+  updated_at: timestamptz!
+
+  """An array relationship"""
+  user_accounts(
+    """distinct select on columns"""
+    distinct_on: [user_accounts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [user_accounts_order_by!]
+
+    """filter the rows returned"""
+    where: user_accounts_bool_exp
+  ): [user_accounts!]!
+
+  """An aggregate relationship"""
+  user_accounts_aggregate(
+    """distinct select on columns"""
+    distinct_on: [user_accounts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [user_accounts_order_by!]
+
+    """filter the rows returned"""
+    where: user_accounts_bool_exp
+  ): user_accounts_aggregate!
+}
+
+"""
+aggregated selection of "accounts"
+"""
+type accounts_aggregate {
+  aggregate: accounts_aggregate_fields
+  nodes: [accounts!]!
+}
+
+"""
+aggregate fields of "accounts"
+"""
+type accounts_aggregate_fields {
+  avg: accounts_avg_fields
+  count(columns: [accounts_select_column!], distinct: Boolean): Int!
+  max: accounts_max_fields
+  min: accounts_min_fields
+  stddev: accounts_stddev_fields
+  stddev_pop: accounts_stddev_pop_fields
+  stddev_samp: accounts_stddev_samp_fields
+  sum: accounts_sum_fields
+  var_pop: accounts_var_pop_fields
+  var_samp: accounts_var_samp_fields
+  variance: accounts_variance_fields
+}
+
+"""aggregate avg on columns"""
+type accounts_avg_fields {
+  id: Float
+}
+
+"""
+Boolean expression to filter rows from the table "accounts". All fields are combined with a logical 'AND'.
+"""
+input accounts_bool_exp {
+  _and: [accounts_bool_exp!]
+  _not: accounts_bool_exp
+  _or: [accounts_bool_exp!]
+  account_info: json_comparison_exp
+  account_provider: String_comparison_exp
+  account_provider_appid: String_comparison_exp
+  account_provider_openid: String_comparison_exp
+  created_at: timestamptz_comparison_exp
+  id: bigint_comparison_exp
+  updated_at: timestamptz_comparison_exp
+  user_accounts: user_accounts_bool_exp
+  user_accounts_aggregate: user_accounts_aggregate_bool_exp
+}
+
+"""
+unique or primary key constraints on table "accounts"
+"""
+enum accounts_constraint {
+  """
+  unique or primary key constraint on columns "account_provider_appid", "account_provider", "account_provider_openid"
+  """
+  accounts_account_provider_account_provider_appid_account_pr_key
+
+  """
+  unique or primary key constraint on columns "id"
+  """
+  accounts_pkey
+}
+
+"""
+input type for incrementing numeric columns in table "accounts"
+"""
+input accounts_inc_input {
+  id: bigint
+}
+
+"""
+input type for inserting data into table "accounts"
+"""
+input accounts_insert_input {
+  """账户信息，如授权后返回的头像、用户昵称等"""
+  account_info: json
+
+  """
+  账号提供商，可选：1.weixin_mini_program（微信小程序）2.weixin_public_account（微信公众号）3.tencent_open_platform（腾讯开放平台）
+  """
+  account_provider: String
+
+  """账号提供商对应的应用appid"""
+  account_provider_appid: String
+
+  """账号授权的openid"""
+  account_provider_openid: String
+  created_at: timestamptz
+  id: bigint
+  updated_at: timestamptz
+  user_accounts: user_accounts_arr_rel_insert_input
+}
+
+"""aggregate max on columns"""
+type accounts_max_fields {
+  """
+  账号提供商，可选：1.weixin_mini_program（微信小程序）2.weixin_public_account（微信公众号）3.tencent_open_platform（腾讯开放平台）
+  """
+  account_provider: String
+
+  """账号提供商对应的应用appid"""
+  account_provider_appid: String
+
+  """账号授权的openid"""
+  account_provider_openid: String
+  created_at: timestamptz
+  id: bigint
+  updated_at: timestamptz
+}
+
+"""aggregate min on columns"""
+type accounts_min_fields {
+  """
+  账号提供商，可选：1.weixin_mini_program（微信小程序）2.weixin_public_account（微信公众号）3.tencent_open_platform（腾讯开放平台）
+  """
+  account_provider: String
+
+  """账号提供商对应的应用appid"""
+  account_provider_appid: String
+
+  """账号授权的openid"""
+  account_provider_openid: String
+  created_at: timestamptz
+  id: bigint
+  updated_at: timestamptz
+}
+
+"""
+response of any mutation on the table "accounts"
+"""
+type accounts_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [accounts!]!
+}
+
+"""
+input type for inserting object relation for remote table "accounts"
+"""
+input accounts_obj_rel_insert_input {
+  data: accounts_insert_input!
+
+  """upsert condition"""
+  on_conflict: accounts_on_conflict
+}
+
+"""
+on_conflict condition type for table "accounts"
+"""
+input accounts_on_conflict {
+  constraint: accounts_constraint!
+  update_columns: [accounts_update_column!]! = []
+  where: accounts_bool_exp
+}
+
+"""Ordering options when selecting data from "accounts"."""
+input accounts_order_by {
+  account_info: order_by
+  account_provider: order_by
+  account_provider_appid: order_by
+  account_provider_openid: order_by
+  created_at: order_by
+  id: order_by
+  updated_at: order_by
+  user_accounts_aggregate: user_accounts_aggregate_order_by
+}
+
+"""primary key columns input for table: accounts"""
+input accounts_pk_columns_input {
+  id: bigint!
+}
+
+"""
+select columns of table "accounts"
+"""
+enum accounts_select_column {
+  """column name"""
+  account_info
+
+  """column name"""
+  account_provider
+
+  """column name"""
+  account_provider_appid
+
+  """column name"""
+  account_provider_openid
+
+  """column name"""
+  created_at
+
+  """column name"""
+  id
+
+  """column name"""
+  updated_at
+}
+
+"""
+input type for updating data in table "accounts"
+"""
+input accounts_set_input {
+  """账户信息，如授权后返回的头像、用户昵称等"""
+  account_info: json
+
+  """
+  账号提供商，可选：1.weixin_mini_program（微信小程序）2.weixin_public_account（微信公众号）3.tencent_open_platform（腾讯开放平台）
+  """
+  account_provider: String
+
+  """账号提供商对应的应用appid"""
+  account_provider_appid: String
+
+  """账号授权的openid"""
+  account_provider_openid: String
+  created_at: timestamptz
+  id: bigint
+  updated_at: timestamptz
+}
+
+"""aggregate stddev on columns"""
+type accounts_stddev_fields {
+  id: Float
+}
+
+"""aggregate stddev_pop on columns"""
+type accounts_stddev_pop_fields {
+  id: Float
+}
+
+"""aggregate stddev_samp on columns"""
+type accounts_stddev_samp_fields {
+  id: Float
+}
+
+"""
+Streaming cursor of the table "accounts"
+"""
+input accounts_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: accounts_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input accounts_stream_cursor_value_input {
+  """账户信息，如授权后返回的头像、用户昵称等"""
+  account_info: json
+
+  """
+  账号提供商，可选：1.weixin_mini_program（微信小程序）2.weixin_public_account（微信公众号）3.tencent_open_platform（腾讯开放平台）
+  """
+  account_provider: String
+
+  """账号提供商对应的应用appid"""
+  account_provider_appid: String
+
+  """账号授权的openid"""
+  account_provider_openid: String
+  created_at: timestamptz
+  id: bigint
+  updated_at: timestamptz
+}
+
+"""aggregate sum on columns"""
+type accounts_sum_fields {
+  id: bigint
+}
+
+"""
+update columns of table "accounts"
+"""
+enum accounts_update_column {
+  """column name"""
+  account_info
+
+  """column name"""
+  account_provider
+
+  """column name"""
+  account_provider_appid
+
+  """column name"""
+  account_provider_openid
+
+  """column name"""
+  created_at
+
+  """column name"""
+  id
+
+  """column name"""
+  updated_at
+}
+
+input accounts_updates {
+  """increments the numeric columns with given value of the filtered values"""
+  _inc: accounts_inc_input
+
+  """sets the columns of the filtered rows to the given values"""
+  _set: accounts_set_input
+
+  """filter the rows which have to be updated"""
+  where: accounts_bool_exp!
+}
+
+"""aggregate var_pop on columns"""
+type accounts_var_pop_fields {
+  id: Float
+}
+
+"""aggregate var_samp on columns"""
+type accounts_var_samp_fields {
+  id: Float
+}
+
+"""aggregate variance on columns"""
+type accounts_variance_fields {
+  id: Float
+}
+
+scalar bigint
+
+"""
+Boolean expression to compare columns of type "bigint". All fields are combined with logical 'AND'.
+"""
+input bigint_comparison_exp {
+  _eq: bigint
+  _gt: bigint
+  _gte: bigint
+  _in: [bigint!]
+  _is_null: Boolean
+  _lt: bigint
+  _lte: bigint
+  _neq: bigint
+  _nin: [bigint!]
+}
+
+"""ordering argument of a cursor"""
+enum cursor_ordering {
+  """ascending ordering of the cursor"""
+  ASC
+
+  """descending ordering of the cursor"""
+  DESC
+}
+
+scalar json
+
+"""
+Boolean expression to compare columns of type "json". All fields are combined with logical 'AND'.
+"""
+input json_comparison_exp {
+  _eq: json
+  _gt: json
+  _gte: json
+  _in: [json!]
+  _is_null: Boolean
+  _lt: json
+  _lte: json
+  _neq: json
+  _nin: [json!]
+}
+
+"""mutation root"""
+type mutation_root {
+  """
+  delete data from the table: "accounts"
+  """
+  delete_accounts(
+    """filter the rows which have to be deleted"""
+    where: accounts_bool_exp!
+  ): accounts_mutation_response
+
+  """
+  delete single row from the table: "accounts"
+  """
+  delete_accounts_by_pk(id: bigint!): accounts
+
+  """
+  delete data from the table: "user_accounts"
+  """
+  delete_user_accounts(
+    """filter the rows which have to be deleted"""
+    where: user_accounts_bool_exp!
+  ): user_accounts_mutation_response
+
+  """
+  delete single row from the table: "user_accounts"
+  """
+  delete_user_accounts_by_pk(id: bigint!): user_accounts
+
+  """
+  delete data from the table: "users"
+  """
+  delete_users(
+    """filter the rows which have to be deleted"""
+    where: users_bool_exp!
+  ): users_mutation_response
+
+  """
+  delete single row from the table: "users"
+  """
+  delete_users_by_pk(id: bigint!): users
+
+  """
+  insert data into the table: "accounts"
+  """
+  insert_accounts(
+    """the rows to be inserted"""
+    objects: [accounts_insert_input!]!
+
+    """upsert condition"""
+    on_conflict: accounts_on_conflict
+  ): accounts_mutation_response
+
+  """
+  insert a single row into the table: "accounts"
+  """
+  insert_accounts_one(
+    """the row to be inserted"""
+    object: accounts_insert_input!
+
+    """upsert condition"""
+    on_conflict: accounts_on_conflict
+  ): accounts
+
+  """
+  insert data into the table: "user_accounts"
+  """
+  insert_user_accounts(
+    """the rows to be inserted"""
+    objects: [user_accounts_insert_input!]!
+
+    """upsert condition"""
+    on_conflict: user_accounts_on_conflict
+  ): user_accounts_mutation_response
+
+  """
+  insert a single row into the table: "user_accounts"
+  """
+  insert_user_accounts_one(
+    """the row to be inserted"""
+    object: user_accounts_insert_input!
+
+    """upsert condition"""
+    on_conflict: user_accounts_on_conflict
+  ): user_accounts
+
+  """
+  insert data into the table: "users"
+  """
+  insert_users(
+    """the rows to be inserted"""
+    objects: [users_insert_input!]!
+
+    """upsert condition"""
+    on_conflict: users_on_conflict
+  ): users_mutation_response
+
+  """
+  insert a single row into the table: "users"
+  """
+  insert_users_one(
+    """the row to be inserted"""
+    object: users_insert_input!
+
+    """upsert condition"""
+    on_conflict: users_on_conflict
+  ): users
+
+  """
+  update data of the table: "accounts"
+  """
+  update_accounts(
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: accounts_inc_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: accounts_set_input
+
+    """filter the rows which have to be updated"""
+    where: accounts_bool_exp!
+  ): accounts_mutation_response
+
+  """
+  update single row of the table: "accounts"
+  """
+  update_accounts_by_pk(
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: accounts_inc_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: accounts_set_input
+    pk_columns: accounts_pk_columns_input!
+  ): accounts
+
+  """
+  update multiples rows of table: "accounts"
+  """
+  update_accounts_many(
+    """updates to execute, in order"""
+    updates: [accounts_updates!]!
+  ): [accounts_mutation_response]
+
+  """
+  update data of the table: "user_accounts"
+  """
+  update_user_accounts(
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: user_accounts_inc_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: user_accounts_set_input
+
+    """filter the rows which have to be updated"""
+    where: user_accounts_bool_exp!
+  ): user_accounts_mutation_response
+
+  """
+  update single row of the table: "user_accounts"
+  """
+  update_user_accounts_by_pk(
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: user_accounts_inc_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: user_accounts_set_input
+    pk_columns: user_accounts_pk_columns_input!
+  ): user_accounts
+
+  """
+  update multiples rows of table: "user_accounts"
+  """
+  update_user_accounts_many(
+    """updates to execute, in order"""
+    updates: [user_accounts_updates!]!
+  ): [user_accounts_mutation_response]
+
+  """
+  update data of the table: "users"
+  """
+  update_users(
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: users_inc_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: users_set_input
+
+    """filter the rows which have to be updated"""
+    where: users_bool_exp!
+  ): users_mutation_response
+
+  """
+  update single row of the table: "users"
+  """
+  update_users_by_pk(
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: users_inc_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: users_set_input
+    pk_columns: users_pk_columns_input!
+  ): users
+
+  """
+  update multiples rows of table: "users"
+  """
+  update_users_many(
+    """updates to execute, in order"""
+    updates: [users_updates!]!
+  ): [users_mutation_response]
+}
+
+"""column ordering options"""
+enum order_by {
+  """in ascending order, nulls last"""
+  asc
+
+  """in ascending order, nulls first"""
+  asc_nulls_first
+
+  """in ascending order, nulls last"""
+  asc_nulls_last
+
+  """in descending order, nulls first"""
+  desc
+
+  """in descending order, nulls first"""
+  desc_nulls_first
+
+  """in descending order, nulls last"""
+  desc_nulls_last
+}
+
+type query_root {
+  """
+  fetch data from the table: "accounts"
+  """
+  accounts(
+    """distinct select on columns"""
+    distinct_on: [accounts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [accounts_order_by!]
+
+    """filter the rows returned"""
+    where: accounts_bool_exp
+  ): [accounts!]!
+
+  """
+  fetch aggregated fields from the table: "accounts"
+  """
+  accounts_aggregate(
+    """distinct select on columns"""
+    distinct_on: [accounts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [accounts_order_by!]
+
+    """filter the rows returned"""
+    where: accounts_bool_exp
+  ): accounts_aggregate!
+
+  """fetch data from the table: "accounts" using primary key columns"""
+  accounts_by_pk(id: bigint!): accounts
+
+  """An array relationship"""
+  user_accounts(
+    """distinct select on columns"""
+    distinct_on: [user_accounts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [user_accounts_order_by!]
+
+    """filter the rows returned"""
+    where: user_accounts_bool_exp
+  ): [user_accounts!]!
+
+  """An aggregate relationship"""
+  user_accounts_aggregate(
+    """distinct select on columns"""
+    distinct_on: [user_accounts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [user_accounts_order_by!]
+
+    """filter the rows returned"""
+    where: user_accounts_bool_exp
+  ): user_accounts_aggregate!
+
+  """fetch data from the table: "user_accounts" using primary key columns"""
+  user_accounts_by_pk(id: bigint!): user_accounts
+
+  """
+  fetch data from the table: "users"
+  """
+  users(
+    """distinct select on columns"""
+    distinct_on: [users_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [users_order_by!]
+
+    """filter the rows returned"""
+    where: users_bool_exp
+  ): [users!]!
+
+  """
+  fetch aggregated fields from the table: "users"
+  """
+  users_aggregate(
+    """distinct select on columns"""
+    distinct_on: [users_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [users_order_by!]
+
+    """filter the rows returned"""
+    where: users_bool_exp
+  ): users_aggregate!
+
+  """fetch data from the table: "users" using primary key columns"""
+  users_by_pk(id: bigint!): users
+}
+
+type subscription_root {
+  """
+  fetch data from the table: "accounts"
+  """
+  accounts(
+    """distinct select on columns"""
+    distinct_on: [accounts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [accounts_order_by!]
+
+    """filter the rows returned"""
+    where: accounts_bool_exp
+  ): [accounts!]!
+
+  """
+  fetch aggregated fields from the table: "accounts"
+  """
+  accounts_aggregate(
+    """distinct select on columns"""
+    distinct_on: [accounts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [accounts_order_by!]
+
+    """filter the rows returned"""
+    where: accounts_bool_exp
+  ): accounts_aggregate!
+
+  """fetch data from the table: "accounts" using primary key columns"""
+  accounts_by_pk(id: bigint!): accounts
+
+  """
+  fetch data from the table in a streaming manner: "accounts"
+  """
+  accounts_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [accounts_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: accounts_bool_exp
+  ): [accounts!]!
+
+  """An array relationship"""
+  user_accounts(
+    """distinct select on columns"""
+    distinct_on: [user_accounts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [user_accounts_order_by!]
+
+    """filter the rows returned"""
+    where: user_accounts_bool_exp
+  ): [user_accounts!]!
+
+  """An aggregate relationship"""
+  user_accounts_aggregate(
+    """distinct select on columns"""
+    distinct_on: [user_accounts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [user_accounts_order_by!]
+
+    """filter the rows returned"""
+    where: user_accounts_bool_exp
+  ): user_accounts_aggregate!
+
+  """fetch data from the table: "user_accounts" using primary key columns"""
+  user_accounts_by_pk(id: bigint!): user_accounts
+
+  """
+  fetch data from the table in a streaming manner: "user_accounts"
+  """
+  user_accounts_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [user_accounts_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: user_accounts_bool_exp
+  ): [user_accounts!]!
+
+  """
+  fetch data from the table: "users"
+  """
+  users(
+    """distinct select on columns"""
+    distinct_on: [users_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [users_order_by!]
+
+    """filter the rows returned"""
+    where: users_bool_exp
+  ): [users!]!
+
+  """
+  fetch aggregated fields from the table: "users"
+  """
+  users_aggregate(
+    """distinct select on columns"""
+    distinct_on: [users_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [users_order_by!]
+
+    """filter the rows returned"""
+    where: users_bool_exp
+  ): users_aggregate!
+
+  """fetch data from the table: "users" using primary key columns"""
+  users_by_pk(id: bigint!): users
+
+  """
+  fetch data from the table in a streaming manner: "users"
+  """
+  users_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [users_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: users_bool_exp
+  ): [users!]!
+}
+
+scalar timestamptz
+
+"""
+Boolean expression to compare columns of type "timestamptz". All fields are combined with logical 'AND'.
+"""
+input timestamptz_comparison_exp {
+  _eq: timestamptz
+  _gt: timestamptz
+  _gte: timestamptz
+  _in: [timestamptz!]
+  _is_null: Boolean
+  _lt: timestamptz
+  _lte: timestamptz
+  _neq: timestamptz
+  _nin: [timestamptz!]
+}
+
+"""用户授权账号表"""
+type user_accounts {
+  """An object relationship"""
+  account: accounts!
+  account_accounts: bigint!
+  created_at: timestamptz!
+  id: bigint!
+  updated_at: timestamptz!
+
+  """An object relationship"""
+  user: users!
+  user_users: bigint!
+}
+
+"""
+aggregated selection of "user_accounts"
+"""
+type user_accounts_aggregate {
+  aggregate: user_accounts_aggregate_fields
+  nodes: [user_accounts!]!
+}
+
+input user_accounts_aggregate_bool_exp {
+  count: user_accounts_aggregate_bool_exp_count
+}
+
+input user_accounts_aggregate_bool_exp_count {
+  arguments: [user_accounts_select_column!]
+  distinct: Boolean
+  filter: user_accounts_bool_exp
+  predicate: Int_comparison_exp!
+}
+
+"""
+aggregate fields of "user_accounts"
+"""
+type user_accounts_aggregate_fields {
+  avg: user_accounts_avg_fields
+  count(columns: [user_accounts_select_column!], distinct: Boolean): Int!
+  max: user_accounts_max_fields
+  min: user_accounts_min_fields
+  stddev: user_accounts_stddev_fields
+  stddev_pop: user_accounts_stddev_pop_fields
+  stddev_samp: user_accounts_stddev_samp_fields
+  sum: user_accounts_sum_fields
+  var_pop: user_accounts_var_pop_fields
+  var_samp: user_accounts_var_samp_fields
+  variance: user_accounts_variance_fields
+}
+
+"""
+order by aggregate values of table "user_accounts"
+"""
+input user_accounts_aggregate_order_by {
+  avg: user_accounts_avg_order_by
+  count: order_by
+  max: user_accounts_max_order_by
+  min: user_accounts_min_order_by
+  stddev: user_accounts_stddev_order_by
+  stddev_pop: user_accounts_stddev_pop_order_by
+  stddev_samp: user_accounts_stddev_samp_order_by
+  sum: user_accounts_sum_order_by
+  var_pop: user_accounts_var_pop_order_by
+  var_samp: user_accounts_var_samp_order_by
+  variance: user_accounts_variance_order_by
+}
+
+"""
+input type for inserting array relation for remote table "user_accounts"
+"""
+input user_accounts_arr_rel_insert_input {
+  data: [user_accounts_insert_input!]!
+
+  """upsert condition"""
+  on_conflict: user_accounts_on_conflict
+}
+
+"""aggregate avg on columns"""
+type user_accounts_avg_fields {
+  account_accounts: Float
+  id: Float
+  user_users: Float
+}
+
+"""
+order by avg() on columns of table "user_accounts"
+"""
+input user_accounts_avg_order_by {
+  account_accounts: order_by
+  id: order_by
+  user_users: order_by
+}
+
+"""
+Boolean expression to filter rows from the table "user_accounts". All fields are combined with a logical 'AND'.
+"""
+input user_accounts_bool_exp {
+  _and: [user_accounts_bool_exp!]
+  _not: user_accounts_bool_exp
+  _or: [user_accounts_bool_exp!]
+  account: accounts_bool_exp
+  account_accounts: bigint_comparison_exp
+  created_at: timestamptz_comparison_exp
+  id: bigint_comparison_exp
+  updated_at: timestamptz_comparison_exp
+  user: users_bool_exp
+  user_users: bigint_comparison_exp
+}
+
+"""
+unique or primary key constraints on table "user_accounts"
+"""
+enum user_accounts_constraint {
+  """
+  unique or primary key constraint on columns "id"
+  """
+  user_accounts_pkey
+
+  """
+  unique or primary key constraint on columns "user_users", "account_accounts"
+  """
+  user_accounts_user_users_account_accounts_key
+}
+
+"""
+input type for incrementing numeric columns in table "user_accounts"
+"""
+input user_accounts_inc_input {
+  account_accounts: bigint
+  id: bigint
+  user_users: bigint
+}
+
+"""
+input type for inserting data into table "user_accounts"
+"""
+input user_accounts_insert_input {
+  account: accounts_obj_rel_insert_input
+  account_accounts: bigint
+  created_at: timestamptz
+  id: bigint
+  updated_at: timestamptz
+  user: users_obj_rel_insert_input
+  user_users: bigint
+}
+
+"""aggregate max on columns"""
+type user_accounts_max_fields {
+  account_accounts: bigint
+  created_at: timestamptz
+  id: bigint
+  updated_at: timestamptz
+  user_users: bigint
+}
+
+"""
+order by max() on columns of table "user_accounts"
+"""
+input user_accounts_max_order_by {
+  account_accounts: order_by
+  created_at: order_by
+  id: order_by
+  updated_at: order_by
+  user_users: order_by
+}
+
+"""aggregate min on columns"""
+type user_accounts_min_fields {
+  account_accounts: bigint
+  created_at: timestamptz
+  id: bigint
+  updated_at: timestamptz
+  user_users: bigint
+}
+
+"""
+order by min() on columns of table "user_accounts"
+"""
+input user_accounts_min_order_by {
+  account_accounts: order_by
+  created_at: order_by
+  id: order_by
+  updated_at: order_by
+  user_users: order_by
+}
+
+"""
+response of any mutation on the table "user_accounts"
+"""
+type user_accounts_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [user_accounts!]!
+}
+
+"""
+on_conflict condition type for table "user_accounts"
+"""
+input user_accounts_on_conflict {
+  constraint: user_accounts_constraint!
+  update_columns: [user_accounts_update_column!]! = []
+  where: user_accounts_bool_exp
+}
+
+"""Ordering options when selecting data from "user_accounts"."""
+input user_accounts_order_by {
+  account: accounts_order_by
+  account_accounts: order_by
+  created_at: order_by
+  id: order_by
+  updated_at: order_by
+  user: users_order_by
+  user_users: order_by
+}
+
+"""primary key columns input for table: user_accounts"""
+input user_accounts_pk_columns_input {
+  id: bigint!
+}
+
+"""
+select columns of table "user_accounts"
+"""
+enum user_accounts_select_column {
+  """column name"""
+  account_accounts
+
+  """column name"""
+  created_at
+
+  """column name"""
+  id
+
+  """column name"""
+  updated_at
+
+  """column name"""
+  user_users
+}
+
+"""
+input type for updating data in table "user_accounts"
+"""
+input user_accounts_set_input {
+  account_accounts: bigint
+  created_at: timestamptz
+  id: bigint
+  updated_at: timestamptz
+  user_users: bigint
+}
+
+"""aggregate stddev on columns"""
+type user_accounts_stddev_fields {
+  account_accounts: Float
+  id: Float
+  user_users: Float
+}
+
+"""
+order by stddev() on columns of table "user_accounts"
+"""
+input user_accounts_stddev_order_by {
+  account_accounts: order_by
+  id: order_by
+  user_users: order_by
+}
+
+"""aggregate stddev_pop on columns"""
+type user_accounts_stddev_pop_fields {
+  account_accounts: Float
+  id: Float
+  user_users: Float
+}
+
+"""
+order by stddev_pop() on columns of table "user_accounts"
+"""
+input user_accounts_stddev_pop_order_by {
+  account_accounts: order_by
+  id: order_by
+  user_users: order_by
+}
+
+"""aggregate stddev_samp on columns"""
+type user_accounts_stddev_samp_fields {
+  account_accounts: Float
+  id: Float
+  user_users: Float
+}
+
+"""
+order by stddev_samp() on columns of table "user_accounts"
+"""
+input user_accounts_stddev_samp_order_by {
+  account_accounts: order_by
+  id: order_by
+  user_users: order_by
+}
+
+"""
+Streaming cursor of the table "user_accounts"
+"""
+input user_accounts_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: user_accounts_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input user_accounts_stream_cursor_value_input {
+  account_accounts: bigint
+  created_at: timestamptz
+  id: bigint
+  updated_at: timestamptz
+  user_users: bigint
+}
+
+"""aggregate sum on columns"""
+type user_accounts_sum_fields {
+  account_accounts: bigint
+  id: bigint
+  user_users: bigint
+}
+
+"""
+order by sum() on columns of table "user_accounts"
+"""
+input user_accounts_sum_order_by {
+  account_accounts: order_by
+  id: order_by
+  user_users: order_by
+}
+
+"""
+update columns of table "user_accounts"
+"""
+enum user_accounts_update_column {
+  """column name"""
+  account_accounts
+
+  """column name"""
+  created_at
+
+  """column name"""
+  id
+
+  """column name"""
+  updated_at
+
+  """column name"""
+  user_users
+}
+
+input user_accounts_updates {
+  """increments the numeric columns with given value of the filtered values"""
+  _inc: user_accounts_inc_input
+
+  """sets the columns of the filtered rows to the given values"""
+  _set: user_accounts_set_input
+
+  """filter the rows which have to be updated"""
+  where: user_accounts_bool_exp!
+}
+
+"""aggregate var_pop on columns"""
+type user_accounts_var_pop_fields {
+  account_accounts: Float
+  id: Float
+  user_users: Float
+}
+
+"""
+order by var_pop() on columns of table "user_accounts"
+"""
+input user_accounts_var_pop_order_by {
+  account_accounts: order_by
+  id: order_by
+  user_users: order_by
+}
+
+"""aggregate var_samp on columns"""
+type user_accounts_var_samp_fields {
+  account_accounts: Float
+  id: Float
+  user_users: Float
+}
+
+"""
+order by var_samp() on columns of table "user_accounts"
+"""
+input user_accounts_var_samp_order_by {
+  account_accounts: order_by
+  id: order_by
+  user_users: order_by
+}
+
+"""aggregate variance on columns"""
+type user_accounts_variance_fields {
+  account_accounts: Float
+  id: Float
+  user_users: Float
+}
+
+"""
+order by variance() on columns of table "user_accounts"
+"""
+input user_accounts_variance_order_by {
+  account_accounts: order_by
+  id: order_by
+  user_users: order_by
+}
+
+"""用户表"""
+type users {
+  """用户头像url"""
+  avatar_url: String
+
+  """用户简介，富文本"""
+  bio: String
+  created_at: timestamptz!
+
+  """用户邮箱账号"""
+  email: String
+  id: bigint!
+
+  """手机号"""
+  mobile: String
+
+  """用户昵称"""
+  nickname: String
+
+  """密码，md5 32位小写"""
+  password: String
+  updated_at: timestamptz!
+
+  """An array relationship"""
+  user_accounts(
+    """distinct select on columns"""
+    distinct_on: [user_accounts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [user_accounts_order_by!]
+
+    """filter the rows returned"""
+    where: user_accounts_bool_exp
+  ): [user_accounts!]!
+
+  """An aggregate relationship"""
+  user_accounts_aggregate(
+    """distinct select on columns"""
+    distinct_on: [user_accounts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [user_accounts_order_by!]
+
+    """filter the rows returned"""
+    where: user_accounts_bool_exp
+  ): user_accounts_aggregate!
+}
+
+"""
+aggregated selection of "users"
+"""
+type users_aggregate {
+  aggregate: users_aggregate_fields
+  nodes: [users!]!
+}
+
+"""
+aggregate fields of "users"
+"""
+type users_aggregate_fields {
+  avg: users_avg_fields
+  count(columns: [users_select_column!], distinct: Boolean): Int!
+  max: users_max_fields
+  min: users_min_fields
+  stddev: users_stddev_fields
+  stddev_pop: users_stddev_pop_fields
+  stddev_samp: users_stddev_samp_fields
+  sum: users_sum_fields
+  var_pop: users_var_pop_fields
+  var_samp: users_var_samp_fields
+  variance: users_variance_fields
+}
+
+"""aggregate avg on columns"""
+type users_avg_fields {
+  id: Float
+}
+
+"""
+Boolean expression to filter rows from the table "users". All fields are combined with a logical 'AND'.
+"""
+input users_bool_exp {
+  _and: [users_bool_exp!]
+  _not: users_bool_exp
+  _or: [users_bool_exp!]
+  avatar_url: String_comparison_exp
+  bio: String_comparison_exp
+  created_at: timestamptz_comparison_exp
+  email: String_comparison_exp
+  id: bigint_comparison_exp
+  mobile: String_comparison_exp
+  nickname: String_comparison_exp
+  password: String_comparison_exp
+  updated_at: timestamptz_comparison_exp
+  user_accounts: user_accounts_bool_exp
+  user_accounts_aggregate: user_accounts_aggregate_bool_exp
+}
+
+"""
+unique or primary key constraints on table "users"
+"""
+enum users_constraint {
+  """
+  unique or primary key constraint on columns "mobile"
+  """
+  users_mobile_key
+
+  """
+  unique or primary key constraint on columns "id"
+  """
+  users_pkey
+}
+
+"""
+input type for incrementing numeric columns in table "users"
+"""
+input users_inc_input {
+  id: bigint
+}
+
+"""
+input type for inserting data into table "users"
+"""
+input users_insert_input {
+  """用户头像url"""
+  avatar_url: String
+
+  """用户简介，富文本"""
+  bio: String
+  created_at: timestamptz
+
+  """用户邮箱账号"""
+  email: String
+  id: bigint
+
+  """手机号"""
+  mobile: String
+
+  """用户昵称"""
+  nickname: String
+
+  """密码，md5 32位小写"""
+  password: String
+  updated_at: timestamptz
+  user_accounts: user_accounts_arr_rel_insert_input
+}
+
+"""aggregate max on columns"""
+type users_max_fields {
+  """用户头像url"""
+  avatar_url: String
+
+  """用户简介，富文本"""
+  bio: String
+  created_at: timestamptz
+
+  """用户邮箱账号"""
+  email: String
+  id: bigint
+
+  """手机号"""
+  mobile: String
+
+  """用户昵称"""
+  nickname: String
+
+  """密码，md5 32位小写"""
+  password: String
+  updated_at: timestamptz
+}
+
+"""aggregate min on columns"""
+type users_min_fields {
+  """用户头像url"""
+  avatar_url: String
+
+  """用户简介，富文本"""
+  bio: String
+  created_at: timestamptz
+
+  """用户邮箱账号"""
+  email: String
+  id: bigint
+
+  """手机号"""
+  mobile: String
+
+  """用户昵称"""
+  nickname: String
+
+  """密码，md5 32位小写"""
+  password: String
+  updated_at: timestamptz
+}
+
+"""
+response of any mutation on the table "users"
+"""
+type users_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [users!]!
+}
+
+"""
+input type for inserting object relation for remote table "users"
+"""
+input users_obj_rel_insert_input {
+  data: users_insert_input!
+
+  """upsert condition"""
+  on_conflict: users_on_conflict
+}
+
+"""
+on_conflict condition type for table "users"
+"""
+input users_on_conflict {
+  constraint: users_constraint!
+  update_columns: [users_update_column!]! = []
+  where: users_bool_exp
+}
+
+"""Ordering options when selecting data from "users"."""
+input users_order_by {
+  avatar_url: order_by
+  bio: order_by
+  created_at: order_by
+  email: order_by
+  id: order_by
+  mobile: order_by
+  nickname: order_by
+  password: order_by
+  updated_at: order_by
+  user_accounts_aggregate: user_accounts_aggregate_order_by
+}
+
+"""primary key columns input for table: users"""
+input users_pk_columns_input {
+  id: bigint!
+}
+
+"""
+select columns of table "users"
+"""
+enum users_select_column {
+  """column name"""
+  avatar_url
+
+  """column name"""
+  bio
+
+  """column name"""
+  created_at
+
+  """column name"""
+  email
+
+  """column name"""
+  id
+
+  """column name"""
+  mobile
+
+  """column name"""
+  nickname
+
+  """column name"""
+  password
+
+  """column name"""
+  updated_at
+}
+
+"""
+input type for updating data in table "users"
+"""
+input users_set_input {
+  """用户头像url"""
+  avatar_url: String
+
+  """用户简介，富文本"""
+  bio: String
+  created_at: timestamptz
+
+  """用户邮箱账号"""
+  email: String
+  id: bigint
+
+  """手机号"""
+  mobile: String
+
+  """用户昵称"""
+  nickname: String
+
+  """密码，md5 32位小写"""
+  password: String
+  updated_at: timestamptz
+}
+
+"""aggregate stddev on columns"""
+type users_stddev_fields {
+  id: Float
+}
+
+"""aggregate stddev_pop on columns"""
+type users_stddev_pop_fields {
+  id: Float
+}
+
+"""aggregate stddev_samp on columns"""
+type users_stddev_samp_fields {
+  id: Float
+}
+
+"""
+Streaming cursor of the table "users"
+"""
+input users_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: users_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input users_stream_cursor_value_input {
+  """用户头像url"""
+  avatar_url: String
+
+  """用户简介，富文本"""
+  bio: String
+  created_at: timestamptz
+
+  """用户邮箱账号"""
+  email: String
+  id: bigint
+
+  """手机号"""
+  mobile: String
+
+  """用户昵称"""
+  nickname: String
+
+  """密码，md5 32位小写"""
+  password: String
+  updated_at: timestamptz
+}
+
+"""aggregate sum on columns"""
+type users_sum_fields {
+  id: bigint
+}
+
+"""
+update columns of table "users"
+"""
+enum users_update_column {
+  """column name"""
+  avatar_url
+
+  """column name"""
+  bio
+
+  """column name"""
+  created_at
+
+  """column name"""
+  email
+
+  """column name"""
+  id
+
+  """column name"""
+  mobile
+
+  """column name"""
+  nickname
+
+  """column name"""
+  password
+
+  """column name"""
+  updated_at
+}
+
+input users_updates {
+  """increments the numeric columns with given value of the filtered values"""
+  _inc: users_inc_input
+
+  """sets the columns of the filtered rows to the given values"""
+  _set: users_set_input
+
+  """filter the rows which have to be updated"""
+  where: users_bool_exp!
+}
+
+"""aggregate var_pop on columns"""
+type users_var_pop_fields {
+  id: Float
+}
+
+"""aggregate var_samp on columns"""
+type users_var_samp_fields {
+  id: Float
+}
+
+"""aggregate variance on columns"""
+type users_variance_fields {
+  id: Float
+}

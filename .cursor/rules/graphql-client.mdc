@@ -1,0 +1,22 @@
+---
+alwaysApply: true
+---
+项目的 GraphQL 请求统一使用 config-lib 下的自封装客户端：
+
+- 核心工具：`@/config-lib/graphql-client`（可多实例、execute、可选内存缓存、请求/响应拦截器）
+- 默认实例：`@/config-lib/graphql-client`（getClient / GraphqlClientInstance / default export）
+
+使用方式：
+
+```ts
+import { getClient } from '@/config-lib/graphql-client';
+
+const client = getClient();
+const result = await client.execute<{ users: User[] }>({
+  query: `query GetUsers { users { id name } }`,
+  variables: {},
+  cacheMs: 60_000, // 可选：60 秒内相同 query+variables 用内存缓存
+});
+```
+
+多 endpoint 时自行 new GraphQLClient({ endpoint, headers, requestInterceptor, responseInterceptor })。

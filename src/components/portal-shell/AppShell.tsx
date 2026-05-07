@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -79,14 +79,14 @@ export function AppShell({
         <button
           type="button"
           onClick={() => toggleSidebar()}
-          className="ami-ui inline-flex shrink-0 items-center gap-2 rounded text-lg font-medium tracking-[0.35em] text-sage-800 transition-all duration-100 hover:bg-sage-100 md:tracking-widest"
+          className="crm-font-display inline-flex shrink-0 items-center gap-2 rounded px-1 text-xl font-medium tracking-wider text-sage-800 transition-all duration-100 hover:bg-sage-100 md:text-2xl"
           aria-expanded={sidebarOpen}
           aria-controls="app-sidebar"
         >
-          <span className="flex h-9 w-9 items-center justify-center md:h-12 md:w-12" aria-hidden>
-            <Menu className="h-5 w-5 text-sage-800 md:h-6 md:w-6" strokeWidth={2} />
+          <span className="flex h-9 w-9 items-center justify-center md:h-10 md:w-10" aria-hidden>
+            <Image src="/images/left_icon.svg" alt="" width={40} height={40} className="h-8 w-8 md:h-10 md:w-10" />
           </span>
-          <span className="uppercase">{t("shell.menu")}</span>
+          <span>{t("shell.menu")}</span>
         </button>
 
         <div className="min-w-0 flex-1 text-center">{centerSlot}</div>
@@ -112,7 +112,7 @@ export function AppShell({
               <div className="crm-font-display shrink-0 px-4 pb-4 pt-4 text-lg font-semibold text-[#271f18] md:px-4 md:pt-5 md:text-xl">
                 {t(sidebarTitleKey)}
               </div>
-              <nav className="ami-ui flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overflow-x-hidden px-4 pb-2 md:px-4">
+              <nav className="crm-font-display flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overflow-x-hidden px-4 pb-2 md:px-4">
                 {navItems.map((item) => {
                   const active = isPortalNavActive(pathname, item.href);
                   return (

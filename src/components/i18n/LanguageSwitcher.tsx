@@ -42,11 +42,11 @@ export function LanguageSwitcher({
 
   if (variant === "header") {
     const btnBase =
-      "ami-ui px-2 py-0.5 focus:outline-none focus:ring-0 border-none bg-transparent m-0 transition-all duration-100 cursor-pointer rounded active:scale-95 hover:bg-sage-100 text-lg leading-none text-sage-800";
+      "crm-font-display px-2 py-0.5 focus:outline-none focus:ring-0 border-none bg-transparent m-0 transition-all duration-100 cursor-pointer rounded active:scale-95 hover:bg-sage-100 text-lg leading-none text-sage-800 md:text-xl";
     const isEn = current === "en" || current.toLowerCase().startsWith("en");
     const isZh = current === "zh-CN" || current.toLowerCase().startsWith("zh");
     return (
-      <div className="ami-ui flex items-center gap-1 text-lg text-sage-800" aria-label={t("language.label")}>
+      <div className="crm-font-display flex items-center gap-1 text-lg text-sage-800 md:text-xl" aria-label={t("language.label")}>
         <button
           type="button"
           className={`${btnBase} ${isEn ? "font-semibold" : "font-medium"}`}

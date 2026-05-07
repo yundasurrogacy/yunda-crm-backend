@@ -3,20 +3,21 @@
 @import "../styles/sage-colors.css";
 @import "../../public/assets/css/fonts.css";
 
-/* 与旧版后台 main-bg（cream）一致 — #FBF0DA；顶栏另行 #C3CCC2 */
+/* 内容区底色改回旧版浅奶白（降低偏黄感） */
 :root {
-  --background: #fbf0da;
-  --card-background: rgba(255, 255, 255, 0.88);
+  --background: rgba(250, 241, 224, 0.25);
+  --card-background: rgba(250, 241, 224, 0.2);
   --bg-background: var(--background);
   --foreground: #271f18;
   --font-serif: "Source Serif 4", serif;
+  --font-family: var(--font-primary);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-main-bg: #fbf0da;
-  --color-page-bg: #fbf0da;
+  --color-main-bg: rgba(250, 241, 224, 0.25);
+  --color-page-bg: rgba(250, 241, 224, 0.25);
   --color-brand-green: #a6a99f;
   --color-brand-yellow: #e8e2d5;
   --color-brand-brown: #8b6f47;
@@ -71,14 +72,12 @@ body {
 .ami-ui button,
 .ami-ui select {
   font-family:
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    Roboto,
-    "Helvetica Neue",
-    Arial,
-    sans-serif;
+    var(--font-family),
+    var(--font-secondary),
+    var(--font-serif),
+    ui-serif,
+    Georgia,
+    serif;
 }
 
 .card-surface {

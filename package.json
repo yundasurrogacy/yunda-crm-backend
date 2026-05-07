@@ -10,14 +10,15 @@
     "download:schema": "graphql-codegen --config graphql/codegen.ts"
   },
   "dependencies": {
-    "@alicloud/dysmsapi20170525": "^4.1.2",
-    "@alicloud/openapi-client": "^0.4.14",
+    "i18next": "25.5.2",
     "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.542.0",
     "next": "^16.1.1",
     "proxy-agent": "^6.5.0",
     "qiniu": "^7.14.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-i18next": "15.7.4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

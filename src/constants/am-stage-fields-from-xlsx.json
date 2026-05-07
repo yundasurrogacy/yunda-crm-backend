@@ -1,0 +1,1287 @@
+[
+  {
+    "stage": "Contracting & Escrow Pending",
+    "fields": [
+      {
+        "key": "ip_attorney",
+        "label": "IP Attorney",
+        "type": "Text"
+      },
+      {
+        "key": "ip_attorney_email",
+        "label": "IP Attorney Email",
+        "type": "Email"
+      },
+      {
+        "key": "gc_review_attorney",
+        "label": "GC Review Attorney",
+        "type": "Text"
+      },
+      {
+        "key": "gc_review_attorney_email",
+        "label": "GC Review Attorney Email",
+        "type": "Email"
+      },
+      {
+        "key": "escrow_platform",
+        "label": "Escrow Platform",
+        "type": "Text"
+      },
+      {
+        "key": "escrow_email",
+        "label": "Escrow Email",
+        "type": "Email"
+      },
+      {
+        "key": "notary_date",
+        "label": "Notary date",
+        "type": "Date"
+      },
+      {
+        "key": "escrow_details",
+        "label": "Escrow Details",
+        "type": "Long text"
+      },
+      {
+        "key": "legal_clearance_complete",
+        "label": "Legal Clearance Complete",
+        "type": "Date"
+      }
+    ]
+  },
+  {
+    "stage": "Delivery Completed",
+    "fields": [
+      {
+        "key": "delivery_hospital_name",
+        "label": "Delivery Hospital Name:",
+        "type": "Text"
+      },
+      {
+        "key": "hospital_social_worker_pbo",
+        "label": "Hospital Social Worker (PBO):",
+        "type": "Text"
+      },
+      {
+        "key": "social_worker_phone",
+        "label": "Social Worker Phone:",
+        "type": "Phone"
+      },
+      {
+        "key": "social_worker_email",
+        "label": "Social Worker Email:",
+        "type": "Email"
+      },
+      {
+        "key": "expected_delivery_date",
+        "label": "Expected Delivery date",
+        "type": "Date"
+      },
+      {
+        "key": "dedicated_delivery-completed_field",
+        "label": "Dedicated delivery-completed field",
+        "type": "Date"
+      },
+      {
+        "key": "postpartum_/_closeout_field",
+        "label": "Postpartum / closeout field",
+        "type": "Date"
+      }
+    ]
+  },
+  {
+    "stage": "GC Matching",
+    "fields": [
+      {
+        "key": "intended_mother",
+        "label": "Intended Mother",
+        "type": "Text"
+      },
+      {
+        "key": "intended_mother_dob",
+        "label": "Intended Mother DOB",
+        "type": "Date"
+      },
+      {
+        "key": "intended_father",
+        "label": "Intended Father",
+        "type": "Text"
+      },
+      {
+        "key": "intended_father_dob",
+        "label": "Intended Father DOB",
+        "type": "Date"
+      },
+      {
+        "key": "intended_parents_marital_status",
+        "label": "Intended Parents Marital Status",
+        "type": "Text / Select"
+      },
+      {
+        "key": "intended_parents_cell_phone",
+        "label": "Intended Parents Cell Phone",
+        "type": "Phone"
+      },
+      {
+        "key": "intended_parents_email",
+        "label": "Intended Parents Email",
+        "type": "Email"
+      },
+      {
+        "key": "intended_parents_address",
+        "label": "Intended Parents Address",
+        "type": "Address / Text"
+      },
+      {
+        "key": "embryos_will_be_created_by_check_all_that_apply",
+        "label": "Embryos will be created by (check all that apply)",
+        "type": "Multi-select text"
+      },
+      {
+        "key": "gc_name",
+        "label": "GC Name",
+        "type": "Text"
+      },
+      {
+        "key": "gc_owner",
+        "label": "GC Owner",
+        "type": "Text"
+      },
+      {
+        "key": "case_manager",
+        "label": "Case Manager",
+        "type": "Text"
+      },
+      {
+        "key": "gc_coordinator",
+        "label": "GC Coordinator",
+        "type": "Text"
+      },
+      {
+        "key": "matching_coordinator",
+        "label": "Matching Coordinator",
+        "type": "Text"
+      },
+      {
+        "key": "base_compensation",
+        "label": "Base Compensation",
+        "type": "Currency / Number"
+      },
+      {
+        "key": "experienced_surrogate",
+        "label": "Experienced Surrogate",
+        "type": "Yes/No"
+      },
+      {
+        "key": "phone",
+        "label": "Phone",
+        "type": "Phone"
+      },
+      {
+        "key": "age",
+        "label": "Age",
+        "type": "Number"
+      },
+      {
+        "key": "date_of_birth",
+        "label": "Date of Birth",
+        "type": "Date"
+      },
+      {
+        "key": "place_of_birth",
+        "label": "Place of Birth",
+        "type": "Text"
+      },
+      {
+        "key": "address",
+        "label": "Address",
+        "type": "Address / Text"
+      },
+      {
+        "key": "email_address",
+        "label": "Email Address",
+        "type": "Email"
+      },
+      {
+        "key": "marital_status",
+        "label": "Marital Status",
+        "type": "Text / Select"
+      },
+      {
+        "key": "are_you_a_u_s_citizen_or_legal_u_s_resident",
+        "label": "Are you a U.S. Citizen or legal U.S. Resident?",
+        "type": "Yes/No"
+      },
+      {
+        "key": "number_of_driver's_license",
+        "label": "Number of Driver's License",
+        "type": "Text"
+      },
+      {
+        "key": "driver's_license_issue_state",
+        "label": "Driver's License Issue State",
+        "type": "Text"
+      },
+      {
+        "key": "social_security_number",
+        "label": "Social Security Number",
+        "type": "Text"
+      },
+      {
+        "key": "ethnicity/_race",
+        "label": "Ethnicity/ Race",
+        "type": "Text"
+      },
+      {
+        "key": "what_languages_do_you_speak_fluently",
+        "label": "What Languages Do You Speak Fluently?",
+        "type": "Text"
+      },
+      {
+        "key": "occupation",
+        "label": "Occupation",
+        "type": "Text"
+      },
+      {
+        "key": "your_emergency_contact_name",
+        "label": "Your Emergency Contact Name",
+        "type": "Text"
+      },
+      {
+        "key": "your_emergency_contact_phone",
+        "label": "Your Emergency Contact Phone",
+        "type": "Phone"
+      },
+      {
+        "key": "your_emergency_contact_email",
+        "label": "Your Emergency Contact Email",
+        "type": "Email"
+      },
+      {
+        "key": "ivf_clinic_name",
+        "label": "IVF Clinic Name",
+        "type": "Text"
+      },
+      {
+        "key": "ivf_doctor",
+        "label": "IVF Doctor",
+        "type": "Text"
+      },
+      {
+        "key": "contact_nurse",
+        "label": "Contact Nurse",
+        "type": "Text"
+      },
+      {
+        "key": "ivf_clinic_email",
+        "label": "IVF Clinic Email",
+        "type": "Email"
+      },
+      {
+        "key": "ivf_clinic_location",
+        "label": "IVF Clinic Location",
+        "type": "Text"
+      },
+      {
+        "key": "ivf_clinic_phone",
+        "label": "IVF Clinic Phone",
+        "type": "Phone"
+      },
+      {
+        "key": "ivf_clinic_fax",
+        "label": "IVF Clinic Fax",
+        "type": "Fax / Text"
+      },
+      {
+        "key": "monitoring_clinic_name",
+        "label": "Monitoring Clinic Name",
+        "type": "Text"
+      },
+      {
+        "key": "monitoring_clinic_phone",
+        "label": "Monitoring Clinic Phone",
+        "type": "Phone"
+      },
+      {
+        "key": "monitoring_clinic_email",
+        "label": "Monitoring Clinic Email",
+        "type": "Email"
+      },
+      {
+        "key": "monitoring_clinic_location",
+        "label": "Monitoring Clinic Location",
+        "type": "Text"
+      }
+    ]
+  },
+  {
+    "stage": "GC Pre-Screening",
+    "fields": [
+      {
+        "key": "gc_name",
+        "label": "GC Name",
+        "type": "Text"
+      },
+      {
+        "key": "age",
+        "label": "Age",
+        "type": "Number"
+      },
+      {
+        "key": "date_of_birth",
+        "label": "Date of Birth",
+        "type": "Date"
+      },
+      {
+        "key": "place_of_birth",
+        "label": "Place of Birth",
+        "type": "Text"
+      },
+      {
+        "key": "address",
+        "label": "Address",
+        "type": "Address / Text"
+      },
+      {
+        "key": "email_address",
+        "label": "Email Address",
+        "type": "Email"
+      },
+      {
+        "key": "marital_status",
+        "label": "Marital Status",
+        "type": "Text / Select"
+      },
+      {
+        "key": "are_you_a_u_s_citizen_or_legal_u_s_resident",
+        "label": "Are you a U.S. Citizen or legal U.S. Resident?",
+        "type": "Yes/No"
+      },
+      {
+        "key": "number_of_driver's_license",
+        "label": "Number of Driver's License",
+        "type": "Text"
+      },
+      {
+        "key": "driver's_license_issue_state",
+        "label": "Driver's License Issue State",
+        "type": "Text"
+      },
+      {
+        "key": "social_security_number",
+        "label": "Social Security Number",
+        "type": "Text"
+      },
+      {
+        "key": "ethnicity/_race",
+        "label": "Ethnicity/ Race",
+        "type": "Text"
+      },
+      {
+        "key": "what_languages_do_you_speak_fluently",
+        "label": "What Languages Do You Speak Fluently?",
+        "type": "Text"
+      },
+      {
+        "key": "occupation",
+        "label": "Occupation",
+        "type": "Text"
+      },
+      {
+        "key": "your_emergency_contact_name",
+        "label": "Your Emergency Contact Name",
+        "type": "Text"
+      },
+      {
+        "key": "your_emergency_contact_phone",
+        "label": "Your Emergency Contact Phone",
+        "type": "Phone"
+      },
+      {
+        "key": "your_emergency_contact_email",
+        "label": "Your Emergency Contact Email",
+        "type": "Email"
+      },
+      {
+        "key": "height",
+        "label": "Height",
+        "type": "Number"
+      },
+      {
+        "key": "current_weight",
+        "label": "Current weight",
+        "type": "Number"
+      },
+      {
+        "key": "bmi",
+        "label": "BMI",
+        "type": "Number"
+      },
+      {
+        "key": "what_is_your_blood_type",
+        "label": "What is your blood type?",
+        "type": "Text"
+      },
+      {
+        "key": "do_you_have_regular_menstrual_cycles",
+        "label": "Do you have regular menstrual cycles?",
+        "type": "Yes/No"
+      },
+      {
+        "key": "are_you_currently_sexually_active",
+        "label": "Are you currently sexually active?",
+        "type": "Yes/No"
+      },
+      {
+        "key": "what_is_your_current_birth_control_method",
+        "label": "What is your current birth control method?",
+        "type": "Text"
+      },
+      {
+        "key": "are_you_currently_taking_any_medications",
+        "label": "Are you currently taking any medications?",
+        "type": "Text / Long text"
+      },
+      {
+        "key": "are_you_currently_receiving_any_treatment",
+        "label": "Are you currently receiving any treatment?",
+        "type": "Text / Long text"
+      },
+      {
+        "key": "do_you_have_any_medical_conditions",
+        "label": "Do you have any medical conditions?",
+        "type": "Text / Long text"
+      },
+      {
+        "key": "have_you_ever_taken_medication_for_depression_or_anxiety",
+        "label": "Have you ever taken medication for depression or anxiety?",
+        "type": "Yes/No / Long text"
+      },
+      {
+        "key": "have_you_ever_been_diagnosed_with_a_psychological_or_psychiatric_condition",
+        "label": "Have you ever been diagnosed with a psychological or psychiatric condition?",
+        "type": "Yes/No / Long text"
+      },
+      {
+        "key": "have_you_ever_received_psychological_therapy_or_counseling",
+        "label": "Have you ever received psychological therapy or counseling?",
+        "type": "Yes/No / Long text"
+      },
+      {
+        "key": "have_you_had_any_surgeries_or_operations_in_the_past_2_years",
+        "label": "Have you had any surgeries or operations in the past 2 years?",
+        "type": "Yes/No / Long text"
+      },
+      {
+        "key": "in_what_year_was_your_last_pap_smear_performed",
+        "label": "In what year was your last Pap smear performed?",
+        "type": "Date / Year"
+      },
+      {
+        "key": "have_you_had_an_abnormal_pap_smear_in_the_past_if_yes_when",
+        "label": "Have you had an abnormal Pap smear in the past? If yes, when?",
+        "type": "Yes/No / Long text"
+      },
+      {
+        "key": "what_were_the_results_of_your_most_recent_pap_smear",
+        "label": "What were the results of your most recent Pap smear?",
+        "type": "Text"
+      },
+      {
+        "key": "when_were_you_last_tested_for_sexually_transmitted_diseases_stds",
+        "label": "When were you last tested for sexually transmitted diseases (STDs)?",
+        "type": "Date / Text"
+      },
+      {
+        "key": "have_you_or_your_partner/spouse_ever_been_diagnosed_with_an_std",
+        "label": "Have you or your partner/spouse ever been diagnosed with an STD?",
+        "type": "Yes/No / Long text"
+      },
+      {
+        "key": "have_you_received_immunizations_for_hepatitis_b",
+        "label": "Have you received immunizations for Hepatitis B?",
+        "type": "Yes/No"
+      },
+      {
+        "key": "have_you_ever_tested_positive_for_any_infectious_diseases_if_needed_you_can_add_this",
+        "label": "Have you ever tested positive for any infectious diseases? (if needed, you can add this)",
+        "type": "Yes/No / Long text"
+      },
+      {
+        "key": "have_you_had_any_tattoos_or_piercings_in_the_past_12_months",
+        "label": "Have you had any tattoos or piercings in the past 12 months?",
+        "type": "Yes/No"
+      },
+      {
+        "key": "do_you_or_anyone_in_your_household_smoke",
+        "label": "Do you or anyone in your household smoke?",
+        "type": "Yes/No"
+      },
+      {
+        "key": "have_you_ever_received_treatment_for_drug_or_alcohol_use",
+        "label": "Have you ever received treatment for drug or alcohol use?",
+        "type": "Yes/No / Long text"
+      },
+      {
+        "key": "are_you_willing_to_abstain_from_alcohol_during_pregnancy",
+        "label": "Are you willing to abstain from alcohol during pregnancy?",
+        "type": "Yes/No"
+      },
+      {
+        "key": "how_many_times_have_you_been_pregnant",
+        "label": "How many times have you been pregnant?",
+        "type": "Number"
+      },
+      {
+        "key": "how_many_times_have_you_given_birth",
+        "label": "How many times have you given birth?",
+        "type": "Number"
+      },
+      {
+        "key": "how_many_abortions_have_you_had",
+        "label": "How many abortions have you had?",
+        "type": "Number"
+      },
+      {
+        "key": "please_list_the_dates_of_any_abortions",
+        "label": "Please list the dates of any abortions",
+        "type": "Long text"
+      },
+      {
+        "key": "how_many_miscarriages_have_you_had",
+        "label": "How many miscarriages have you had?",
+        "type": "Number"
+      },
+      {
+        "key": "please_list_the_dates_of_any_miscarriages_if_any_miscarriages_please_briefly_explain_the_reason",
+        "label": "Please list the dates of any miscarriages, If any miscarriages, please briefly explain the reason",
+        "type": "Long text"
+      },
+      {
+        "key": "have_you_ever_delivered_before_36_weeks",
+        "label": "Have you ever delivered before 36 weeks?",
+        "type": "Yes/No"
+      },
+      {
+        "key": "have_you_had_any_complications_during_pregnancy",
+        "label": "Have you had any complications during pregnancy?",
+        "type": "Yes/No / Long text"
+      },
+      {
+        "key": "g_number_of_pregnancies",
+        "label": "G (Number of pregnancies):",
+        "type": "Number"
+      },
+      {
+        "key": "p_number_of_births_of_viable_offspring",
+        "label": "P (Number of births of viable offspring):",
+        "type": "Number"
+      },
+      {
+        "key": "a_number_of_abortions",
+        "label": "A (Number of abortions):",
+        "type": "Number"
+      },
+      {
+        "key": "number_of_live_births",
+        "label": "Number of live births:",
+        "type": "Number"
+      },
+      {
+        "key": "number_of_c-sections",
+        "label": "Number of C-sections:",
+        "type": "Number"
+      },
+      {
+        "key": "date",
+        "label": "Date:",
+        "type": "Date"
+      },
+      {
+        "key": "date_2",
+        "label": "Date",
+        "type": "Date"
+      },
+      {
+        "key": "number_of_babies_delivered",
+        "label": "Number of babies delivered:",
+        "type": "Number"
+      },
+      {
+        "key": "weeks_of_pregnancy_at_delivery",
+        "label": "Weeks of pregnancy at delivery:",
+        "type": "Number"
+      },
+      {
+        "key": "baby_s_gender",
+        "label": "Baby’s gender:",
+        "type": "Text"
+      },
+      {
+        "key": "baby_s_weight",
+        "label": "Baby’s weight:",
+        "type": "Number / Text"
+      },
+      {
+        "key": "delivery_type_vaginal_/_c-section",
+        "label": "Delivery type: Vaginal / C-section",
+        "type": "Select"
+      },
+      {
+        "key": "notes",
+        "label": "Notes:",
+        "type": "Long text"
+      },
+      {
+        "key": "health_insurance_carrier",
+        "label": "Health Insurance Carrier:",
+        "type": "Text"
+      },
+      {
+        "key": "health_plan_type",
+        "label": "Health Plan Type:",
+        "type": "Text"
+      },
+      {
+        "key": "health_policy_number",
+        "label": "Health Policy Number:",
+        "type": "Text"
+      },
+      {
+        "key": "health_monthly_premium",
+        "label": "Health Monthly Premium:",
+        "type": "Currency / Number"
+      },
+      {
+        "key": "life_insurance_carrier",
+        "label": "Life Insurance Carrier:",
+        "type": "Text"
+      },
+      {
+        "key": "life_monthly_premium",
+        "label": "Life Monthly Premium:",
+        "type": "Currency / Number"
+      },
+      {
+        "key": "insurance_status",
+        "label": "Insurance Status:",
+        "type": "Status"
+      },
+      {
+        "key": "active",
+        "label": "☐ Active",
+        "type": "Checkbox / Status"
+      },
+      {
+        "key": "cancelled_all_plans_canceled",
+        "label": "☐ Cancelled (All plans canceled)",
+        "type": "Checkbox / Status"
+      }
+    ]
+  },
+  {
+    "stage": "Heartbeat Confirmed",
+    "fields": [
+      {
+        "key": "dedicated_heartbeat_field",
+        "label": "Dedicated heartbeat field",
+        "type": "Date"
+      },
+      {
+        "key": "anticipated_day_1",
+        "label": "Anticipated Day 1",
+        "type": "Date"
+      },
+      {
+        "key": "ivf_graduated_date",
+        "label": "IVF Graduated Date",
+        "type": "Date"
+      },
+      {
+        "key": "first_ob_date",
+        "label": "First OB Date",
+        "type": "Date"
+      }
+    ]
+  },
+  {
+    "stage": "IVF Cycle Active",
+    "fields": [
+      {
+        "key": "ivf_clinic_name",
+        "label": "IVF Clinic Name",
+        "type": "Text"
+      },
+      {
+        "key": "ivf_doctor",
+        "label": "IVF Doctor",
+        "type": "Text"
+      },
+      {
+        "key": "contact_nurse",
+        "label": "Contact Nurse",
+        "type": "Text"
+      },
+      {
+        "key": "ivf_clinic_email",
+        "label": "IVF Clinic Email",
+        "type": "Email"
+      },
+      {
+        "key": "ivf_clinic_location",
+        "label": "IVF Clinic Location",
+        "type": "Text"
+      },
+      {
+        "key": "ivf_clinic_phone",
+        "label": "IVF Clinic Phone",
+        "type": "Phone"
+      },
+      {
+        "key": "ivf_clinic_fax",
+        "label": "IVF Clinic Fax",
+        "type": "Fax / Text"
+      },
+      {
+        "key": "monitoring_clinic_name",
+        "label": "Monitoring Clinic Name",
+        "type": "Text"
+      },
+      {
+        "key": "monitoring_clinic_phone",
+        "label": "Monitoring Clinic Phone",
+        "type": "Phone"
+      },
+      {
+        "key": "monitoring_clinic_email",
+        "label": "Monitoring Clinic Email",
+        "type": "Email"
+      },
+      {
+        "key": "monitoring_clinic_location",
+        "label": "Monitoring Clinic Location",
+        "type": "Text"
+      },
+      {
+        "key": "anticipated_day_1",
+        "label": "Anticipated Day 1",
+        "type": "Date"
+      },
+      {
+        "key": "legal_clearance_complete",
+        "label": "Legal Clearance Complete",
+        "type": "Date"
+      },
+      {
+        "key": "ip_review_date",
+        "label": "IP review date",
+        "type": "Date"
+      },
+      {
+        "key": "gc_review_date",
+        "label": "GC review date",
+        "type": "Date"
+      }
+    ]
+  },
+  {
+    "stage": "IVF Graduation",
+    "fields": [
+      {
+        "key": "ivf_graduated_date",
+        "label": "IVF Graduated Date",
+        "type": "Date"
+      },
+      {
+        "key": "first_ob_date",
+        "label": "First OB Date",
+        "type": "Date"
+      },
+      {
+        "key": "ivf_clinic_name",
+        "label": "IVF Clinic Name",
+        "type": "Text"
+      },
+      {
+        "key": "ivf_doctor",
+        "label": "IVF Doctor",
+        "type": "Text"
+      },
+      {
+        "key": "contact_nurse",
+        "label": "Contact Nurse",
+        "type": "Text"
+      }
+    ]
+  },
+  {
+    "stage": "Legal Clearance",
+    "fields": [
+      {
+        "key": "ip_attorney",
+        "label": "IP Attorney",
+        "type": "Text"
+      },
+      {
+        "key": "ip_attorney_email",
+        "label": "IP Attorney Email",
+        "type": "Email"
+      },
+      {
+        "key": "gc_review_attorney",
+        "label": "GC Review Attorney",
+        "type": "Text"
+      },
+      {
+        "key": "gc_review_attorney_email",
+        "label": "GC Review Attorney Email",
+        "type": "Email"
+      },
+      {
+        "key": "notary_date",
+        "label": "Notary date",
+        "type": "Date"
+      },
+      {
+        "key": "legal_clearance_complete",
+        "label": "Legal Clearance Complete",
+        "type": "Date"
+      },
+      {
+        "key": "escrow_platform",
+        "label": "Escrow Platform",
+        "type": "Text"
+      },
+      {
+        "key": "escrow_email",
+        "label": "Escrow Email",
+        "type": "Email"
+      },
+      {
+        "key": "escrow_details",
+        "label": "Escrow Details",
+        "type": "Long text"
+      }
+    ]
+  },
+  {
+    "stage": "Match Call Scheduled",
+    "fields": [
+      {
+        "key": "intended_mother",
+        "label": "Intended Mother",
+        "type": "Text"
+      },
+      {
+        "key": "intended_mother_dob",
+        "label": "Intended Mother DOB",
+        "type": "Date"
+      },
+      {
+        "key": "intended_father",
+        "label": "Intended Father",
+        "type": "Text"
+      },
+      {
+        "key": "intended_father_dob",
+        "label": "Intended Father DOB",
+        "type": "Date"
+      },
+      {
+        "key": "intended_parents_marital_status",
+        "label": "Intended Parents Marital Status",
+        "type": "Text / Select"
+      },
+      {
+        "key": "intended_parents_cell_phone",
+        "label": "Intended Parents Cell Phone",
+        "type": "Phone"
+      },
+      {
+        "key": "intended_parents_email",
+        "label": "Intended Parents Email",
+        "type": "Email"
+      },
+      {
+        "key": "intended_parents_address",
+        "label": "Intended Parents Address",
+        "type": "Address / Text"
+      },
+      {
+        "key": "embryos_will_be_created_by_check_all_that_apply",
+        "label": "Embryos will be created by (check all that apply)",
+        "type": "Multi-select text"
+      },
+      {
+        "key": "gc_name",
+        "label": "GC Name",
+        "type": "Text"
+      },
+      {
+        "key": "phone",
+        "label": "Phone",
+        "type": "Phone"
+      },
+      {
+        "key": "email_address",
+        "label": "Email Address",
+        "type": "Email"
+      },
+      {
+        "key": "gc_owner",
+        "label": "GC Owner",
+        "type": "Text"
+      },
+      {
+        "key": "case_manager",
+        "label": "Case Manager",
+        "type": "Text"
+      },
+      {
+        "key": "gc_coordinator",
+        "label": "GC Coordinator",
+        "type": "Text"
+      },
+      {
+        "key": "matching_coordinator",
+        "label": "Matching Coordinator",
+        "type": "Text"
+      },
+      {
+        "key": "ip_review_date",
+        "label": "IP review date",
+        "type": "Date"
+      },
+      {
+        "key": "gc_review_date",
+        "label": "GC review date",
+        "type": "Date"
+      },
+      {
+        "key": "dedicated_match-call_field",
+        "label": "Dedicated match-call field",
+        "type": ""
+      }
+    ]
+  },
+  {
+    "stage": "Medical Screening",
+    "fields": [
+      {
+        "key": "psychological_clearance_complete",
+        "label": "Psychological Clearance Complete",
+        "type": "Date"
+      },
+      {
+        "key": "medical_clearance_complete",
+        "label": "Medical Clearance Complete",
+        "type": "Date"
+      },
+      {
+        "key": "psychologist",
+        "label": "Psychologist",
+        "type": "Text"
+      },
+      {
+        "key": "psychologist_email",
+        "label": "Psychologist Email",
+        "type": "Email"
+      },
+      {
+        "key": "ivf_clinic_name",
+        "label": "IVF Clinic Name",
+        "type": "Text"
+      },
+      {
+        "key": "ivf_doctor",
+        "label": "IVF Doctor",
+        "type": "Text"
+      },
+      {
+        "key": "contact_nurse",
+        "label": "Contact Nurse",
+        "type": "Text"
+      },
+      {
+        "key": "ivf_clinic_email",
+        "label": "IVF Clinic Email",
+        "type": "Email"
+      },
+      {
+        "key": "ivf_clinic_location",
+        "label": "IVF Clinic Location",
+        "type": "Text"
+      },
+      {
+        "key": "ivf_clinic_phone",
+        "label": "IVF Clinic Phone",
+        "type": "Phone"
+      },
+      {
+        "key": "ivf_clinic_fax",
+        "label": "IVF Clinic Fax",
+        "type": "Fax / Text"
+      },
+      {
+        "key": "monitoring_clinic_name",
+        "label": "Monitoring Clinic Name",
+        "type": "Text"
+      },
+      {
+        "key": "monitoring_clinic_phone",
+        "label": "Monitoring Clinic Phone",
+        "type": "Phone"
+      },
+      {
+        "key": "monitoring_clinic_email",
+        "label": "Monitoring Clinic Email",
+        "type": "Email"
+      },
+      {
+        "key": "monitoring_clinic_location",
+        "label": "Monitoring Clinic Location",
+        "type": "Text"
+      },
+      {
+        "key": "height",
+        "label": "Height",
+        "type": "Number"
+      },
+      {
+        "key": "current_weight",
+        "label": "Current weight",
+        "type": "Number"
+      },
+      {
+        "key": "bmi",
+        "label": "BMI",
+        "type": "Number"
+      },
+      {
+        "key": "what_is_your_blood_type",
+        "label": "What is your blood type?",
+        "type": "Text"
+      },
+      {
+        "key": "do_you_have_regular_menstrual_cycles",
+        "label": "Do you have regular menstrual cycles?",
+        "type": "Yes/No"
+      },
+      {
+        "key": "are_you_currently_sexually_active",
+        "label": "Are you currently sexually active?",
+        "type": "Yes/No"
+      },
+      {
+        "key": "what_is_your_current_birth_control_method",
+        "label": "What is your current birth control method?",
+        "type": "Text"
+      },
+      {
+        "key": "are_you_currently_taking_any_medications",
+        "label": "Are you currently taking any medications?",
+        "type": "Text / Long text"
+      },
+      {
+        "key": "are_you_currently_receiving_any_treatment",
+        "label": "Are you currently receiving any treatment?",
+        "type": "Text / Long text"
+      },
+      {
+        "key": "do_you_have_any_medical_conditions",
+        "label": "Do you have any medical conditions?",
+        "type": "Text / Long text"
+      },
+      {
+        "key": "have_you_ever_taken_medication_for_depression_or_anxiety",
+        "label": "Have you ever taken medication for depression or anxiety?",
+        "type": "Yes/No / Long text"
+      },
+      {
+        "key": "have_you_ever_been_diagnosed_with_a_psychological_or_psychiatric_condition",
+        "label": "Have you ever been diagnosed with a psychological or psychiatric condition?",
+        "type": "Yes/No / Long text"
+      },
+      {
+        "key": "have_you_ever_received_psychological_therapy_or_counseling",
+        "label": "Have you ever received psychological therapy or counseling?",
+        "type": "Yes/No / Long text"
+      },
+      {
+        "key": "have_you_had_any_surgeries_or_operations_in_the_past_2_years",
+        "label": "Have you had any surgeries or operations in the past 2 years?",
+        "type": "Yes/No / Long text"
+      },
+      {
+        "key": "in_what_year_was_your_last_pap_smear_performed",
+        "label": "In what year was your last Pap smear performed?",
+        "type": "Date / Year"
+      },
+      {
+        "key": "have_you_had_an_abnormal_pap_smear_in_the_past_if_yes_when",
+        "label": "Have you had an abnormal Pap smear in the past? If yes, when?",
+        "type": "Yes/No / Long text"
+      },
+      {
+        "key": "what_were_the_results_of_your_most_recent_pap_smear",
+        "label": "What were the results of your most recent Pap smear?",
+        "type": "Text"
+      },
+      {
+        "key": "when_were_you_last_tested_for_sexually_transmitted_diseases_stds",
+        "label": "When were you last tested for sexually transmitted diseases (STDs)?",
+        "type": "Date / Text"
+      },
+      {
+        "key": "have_you_or_your_partner/spouse_ever_been_diagnosed_with_an_std",
+        "label": "Have you or your partner/spouse ever been diagnosed with an STD?",
+        "type": "Yes/No / Long text"
+      },
+      {
+        "key": "have_you_received_immunizations_for_hepatitis_b",
+        "label": "Have you received immunizations for Hepatitis B?",
+        "type": "Yes/No"
+      },
+      {
+        "key": "have_you_ever_tested_positive_for_any_infectious_diseases_if_needed_you_can_add_this",
+        "label": "Have you ever tested positive for any infectious diseases? (if needed, you can add this)",
+        "type": "Yes/No / Long text"
+      },
+      {
+        "key": "have_you_had_any_tattoos_or_piercings_in_the_past_12_months",
+        "label": "Have you had any tattoos or piercings in the past 12 months?",
+        "type": "Yes/No"
+      },
+      {
+        "key": "do_you_or_anyone_in_your_household_smoke",
+        "label": "Do you or anyone in your household smoke?",
+        "type": "Yes/No"
+      },
+      {
+        "key": "have_you_ever_received_treatment_for_drug_or_alcohol_use",
+        "label": "Have you ever received treatment for drug or alcohol use?",
+        "type": "Yes/No / Long text"
+      },
+      {
+        "key": "are_you_willing_to_abstain_from_alcohol_during_pregnancy",
+        "label": "Are you willing to abstain from alcohol during pregnancy?",
+        "type": "Yes/No"
+      },
+      {
+        "key": "ob/gyn_physician_name",
+        "label": "OB/GYN Physician Name:",
+        "type": "Text"
+      },
+      {
+        "key": "ob/gyn_clinic",
+        "label": "OB/GYN Clinic:",
+        "type": "Text"
+      },
+      {
+        "key": "ob/gyn_phone",
+        "label": "OB/GYN Phone:",
+        "type": "Phone"
+      },
+      {
+        "key": "ob/gyn_email",
+        "label": "OB/GYN Email:",
+        "type": "Email"
+      },
+      {
+        "key": "delivery_hospital_name",
+        "label": "Delivery Hospital Name:",
+        "type": "Text"
+      },
+      {
+        "key": "hospital_social_worker_pbo",
+        "label": "Hospital Social Worker (PBO):",
+        "type": "Text"
+      },
+      {
+        "key": "social_worker_phone",
+        "label": "Social Worker Phone:",
+        "type": "Phone"
+      },
+      {
+        "key": "social_worker_email",
+        "label": "Social Worker Email:",
+        "type": "Email"
+      }
+    ]
+  },
+  {
+    "stage": "Third Trimester",
+    "fields": [
+      {
+        "key": "nt_date",
+        "label": "NT Date",
+        "type": "Date"
+      },
+      {
+        "key": "nipt_date",
+        "label": "NIPT Date",
+        "type": "Date"
+      },
+      {
+        "key": "anatomy_scan_date",
+        "label": "Anatomy Scan Date",
+        "type": "Date"
+      },
+      {
+        "key": "glucose_test_date",
+        "label": "Glucose Test Date",
+        "type": "Date"
+      },
+      {
+        "key": "group_b_strep",
+        "label": "Group B Strep",
+        "type": "Date / Text"
+      },
+      {
+        "key": "expected_delivery_date",
+        "label": "Expected Delivery date",
+        "type": "Date"
+      },
+      {
+        "key": "delivery_hospital_name",
+        "label": "Delivery Hospital Name:",
+        "type": "Text"
+      },
+      {
+        "key": "ob/gyn_physician_name",
+        "label": "OB/GYN Physician Name:",
+        "type": "Text"
+      },
+      {
+        "key": "ob/gyn_clinic",
+        "label": "OB/GYN Clinic:",
+        "type": "Text"
+      },
+      {
+        "key": "ob/gyn_phone",
+        "label": "OB/GYN Phone:",
+        "type": "Phone"
+      },
+      {
+        "key": "ob/gyn_email",
+        "label": "OB/GYN Email:",
+        "type": "Email"
+      },
+      {
+        "key": "hospital_social_worker_pbo",
+        "label": "Hospital Social Worker (PBO):",
+        "type": "Text"
+      },
+      {
+        "key": "social_worker_phone",
+        "label": "Social Worker Phone:",
+        "type": "Phone"
+      },
+      {
+        "key": "social_worker_email",
+        "label": "Social Worker Email:",
+        "type": "Email"
+      }
+    ]
+  }
+]

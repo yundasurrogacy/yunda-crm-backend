@@ -1,0 +1,123 @@
+@font-face {
+  font-family: 'Cormorant';
+  src: url('/fonts/Cormorant-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cormorant';
+  src: url('/fonts/Cormorant-Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cormorant';
+  src: url('/fonts/Cormorant-Italic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cormorant';
+  src: url('/fonts/Cormorant-BoldItalic.ttf') format('truetype');
+  font-weight: bold;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cormorant';
+  src: url('/fonts/Cormorant-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cormorant';
+  src: url('/fonts/Cormorant-LightItalic.ttf') format('truetype');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cormorant';
+  src: url('/fonts/Cormorant-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cormorant';
+  src: url('/fonts/Cormorant-MediumItalic.ttf') format('truetype');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cormorant';
+  src: url('/fonts/Cormorant-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cormorant';
+  src: url('/fonts/Cormorant-SemiBoldItalic.ttf') format('truetype');
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SourceSerif4';
+  src: url('/fonts/SourceSerif4[opsz,wght].ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SourceSerif4';
+  src: url('/fonts/SourceSerif4-Italic[opsz,wght].ttf') format('truetype');
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SourceHanSerifCN';
+  src: url('/fonts/SourceHanSerifCN-Regular-1.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SourceHanSerifCN';
+  src: url('/fonts/SourceHanSerifCN-Bold-2.otf') format('opentype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Language-based font variables */
+:root {
+  --font-primary: 'Cormorant', serif;
+  --font-secondary: 'SourceSerif4', serif;
+}
+
+/* Chinese language font overrides */
+:root.lang-zh {
+  --font-primary: 'SourceHanSerifCN', 'Cormorant', serif;
+  --font-secondary: 'SourceHanSerifCN', 'SourceSerif4', serif;
+}

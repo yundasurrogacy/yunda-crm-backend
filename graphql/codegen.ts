@@ -1,7 +1,18 @@
 import graphqlOrmfyClientConfig from "../goc.config";
 
-const endpoint = graphqlOrmfyClientConfig.endpoint;
-const headers = graphqlOrmfyClientConfig.headers || {};
+/** 与 `src/project-config.ts` 一致，便于本地用 `.env` 中的 Hasura 凭证拉取 schema */
+const endpoint =
+  process.env.HASURA_GRAPHQL_ENDPOINT ??
+  process.env.HASURA_ENDPOINT ??
+  graphqlOrmfyClientConfig.endpoint;
+
+const baseHeaders = (graphqlOrmfyClientConfig.headers || {}) as Record<string, string>;
+const headers = {
+  ...baseHeaders,
+  ...(process.env.HASURA_ADMIN_SECRET
+    ? { "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET }
+    : {}),
+};
 
 const defaultConfig = {
   schema: [

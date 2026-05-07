@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as qiniu from "qiniu";
 import { qiniuConfig } from "@/config-lib/qiniu/config";
+import { getServerSession } from "@/lib/auth/session-cookie";
 
 /**
  * 根据zone获取七牛云上传地址
@@ -26,8 +27,13 @@ function getUploadUrl(zone?: string): string {
  * 用于前端直接上传到七牛云，避免经过后端中转
  * 支持大文件上传、后台上传、断点续传
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
+    const session = await getServerSession();
+    if (!session) {
+      return NextResponse.json({ success: false, message: "请先登录后再获取上传凭证。" }, { status: 401 });
+    }
+
     // 验证配置
     if (!qiniuConfig.accessKey || !qiniuConfig.secretKey || !qiniuConfig.bucket) {
       return NextResponse.json(

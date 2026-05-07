@@ -1,0 +1,52 @@
+/*
+ * 与 yunda-admin-system/tailwind.config.js 中 sage 色板对齐（CRM 手写 utility）
+ */
+:root {
+  --sage-50: #f3f5f1;
+  --sage-100: #e7ebe3;
+  --sage-200: #d0d8c9;
+  --sage-300: #b8c4af;
+  --sage-400: #a1b196;
+  --sage-500: #899d7c;
+  --sage-600: #6e7e63;
+  --sage-700: #525e4a;
+  --sage-800: #373f31;
+  --sage-900: #1b1f19;
+  --sage-950: #172019;
+}
+
+.bg-sage-50 { background-color: var(--sage-50); }
+.bg-sage-100 { background-color: var(--sage-100); }
+.bg-sage-200 { background-color: var(--sage-200); }
+.bg-sage-300 { background-color: var(--sage-300); }
+.bg-sage-400 { background-color: var(--sage-400); }
+.bg-sage-500 { background-color: var(--sage-500); }
+.bg-sage-600 { background-color: var(--sage-600); }
+.bg-sage-700 { background-color: var(--sage-700); }
+.bg-sage-800 { background-color: var(--sage-800); }
+.bg-sage-900 { background-color: var(--sage-900); }
+.bg-sage-950 { background-color: var(--sage-950); }
+
+.text-sage-50 { color: var(--sage-50); }
+.text-sage-100 { color: var(--sage-100); }
+.text-sage-200 { color: var(--sage-200); }
+.text-sage-300 { color: var(--sage-300); }
+.text-sage-400 { color: var(--sage-400); }
+.text-sage-500 { color: var(--sage-500); }
+.text-sage-600 { color: var(--sage-600); }
+.text-sage-700 { color: var(--sage-700); }
+.text-sage-800 { color: var(--sage-800); }
+.text-sage-900 { color: var(--sage-900); }
+.text-sage-950 { color: var(--sage-950); }
+
+.border-sage-50 { border-color: var(--sage-50); }
+.border-sage-100 { border-color: var(--sage-100); }
+.border-sage-200 { border-color: var(--sage-200); }
+.border-sage-300 { border-color: var(--sage-300); }
+.border-sage-400 { border-color: var(--sage-400); }
+.border-sage-500 { border-color: var(--sage-500); }
+.border-sage-600 { border-color: var(--sage-600); }
+.border-sage-700 { border-color: var(--sage-700); }
+.border-sage-800 { border-color: var(--sage-800); }
+.border-sage-900 { border-color: var(--sage-900); }
+.border-sage-950 { border-color: var(--sage-950); }

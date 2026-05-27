@@ -225,7 +225,10 @@ function CaseManagerAmWorkspacePanelInner({ caseId, detail, onDetailUpdated }: P
   return (
     <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm backdrop-blur-[1px] md:p-6">
       <h2 className="crm-font-display mb-3 text-lg font-semibold text-brand-brown">{t("case_detail.am_workspace.section_title")}</h2>
-      <p className="mb-4 text-sm text-sage-700">{t("case_detail.am_workspace.section_intro")}</p>
+      <p className="mb-2 text-sm text-sage-700">{t("case_detail.am_workspace.section_intro")}</p>
+      <p className="mb-4 rounded-md border border-sage-200/90 bg-sage-50/80 px-3 py-2 text-xs text-sage-700">
+        {t("case_detail.am_workspace.profile_fields_hint")}
+      </p>
 
       <div className="mb-4">
         <div className="mb-1 flex justify-between text-xs font-medium text-sage-600">

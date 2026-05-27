@@ -93,56 +93,6 @@
     "stage": "GC Matching",
     "fields": [
       {
-        "key": "intended_mother",
-        "label": "Intended Mother",
-        "type": "Text"
-      },
-      {
-        "key": "intended_mother_dob",
-        "label": "Intended Mother DOB",
-        "type": "Date"
-      },
-      {
-        "key": "intended_father",
-        "label": "Intended Father",
-        "type": "Text"
-      },
-      {
-        "key": "intended_father_dob",
-        "label": "Intended Father DOB",
-        "type": "Date"
-      },
-      {
-        "key": "intended_parents_marital_status",
-        "label": "Intended Parents Marital Status",
-        "type": "Text / Select"
-      },
-      {
-        "key": "intended_parents_cell_phone",
-        "label": "Intended Parents Cell Phone",
-        "type": "Phone"
-      },
-      {
-        "key": "intended_parents_email",
-        "label": "Intended Parents Email",
-        "type": "Email"
-      },
-      {
-        "key": "intended_parents_address",
-        "label": "Intended Parents Address",
-        "type": "Address / Text"
-      },
-      {
-        "key": "embryos_will_be_created_by_check_all_that_apply",
-        "label": "Embryos will be created by (check all that apply)",
-        "type": "Multi-select text"
-      },
-      {
-        "key": "gc_name",
-        "label": "GC Name",
-        "type": "Text"
-      },
-      {
         "key": "gc_owner",
         "label": "GC Owner",
         "type": "Text"
@@ -163,54 +113,9 @@
         "type": "Text"
       },
       {
-        "key": "base_compensation",
-        "label": "Base Compensation",
-        "type": "Currency / Number"
-      },
-      {
-        "key": "experienced_surrogate",
-        "label": "Experienced Surrogate",
-        "type": "Yes/No"
-      },
-      {
-        "key": "phone",
-        "label": "Phone",
-        "type": "Phone"
-      },
-      {
-        "key": "age",
-        "label": "Age",
-        "type": "Number"
-      },
-      {
-        "key": "date_of_birth",
-        "label": "Date of Birth",
-        "type": "Date"
-      },
-      {
         "key": "place_of_birth",
         "label": "Place of Birth",
         "type": "Text"
-      },
-      {
-        "key": "address",
-        "label": "Address",
-        "type": "Address / Text"
-      },
-      {
-        "key": "email_address",
-        "label": "Email Address",
-        "type": "Email"
-      },
-      {
-        "key": "marital_status",
-        "label": "Marital Status",
-        "type": "Text / Select"
-      },
-      {
-        "key": "are_you_a_u_s_citizen_or_legal_u_s_resident",
-        "label": "Are you a U.S. Citizen or legal U.S. Resident?",
-        "type": "Yes/No"
       },
       {
         "key": "number_of_driver's_license",
@@ -228,18 +133,8 @@
         "type": "Text"
       },
       {
-        "key": "ethnicity/_race",
-        "label": "Ethnicity/ Race",
-        "type": "Text"
-      },
-      {
         "key": "what_languages_do_you_speak_fluently",
         "label": "What Languages Do You Speak Fluently?",
-        "type": "Text"
-      },
-      {
-        "key": "occupation",
-        "label": "Occupation",
         "type": "Text"
       },
       {
@@ -255,26 +150,6 @@
       {
         "key": "your_emergency_contact_email",
         "label": "Your Emergency Contact Email",
-        "type": "Email"
-      },
-      {
-        "key": "ivf_clinic_name",
-        "label": "IVF Clinic Name",
-        "type": "Text"
-      },
-      {
-        "key": "ivf_doctor",
-        "label": "IVF Doctor",
-        "type": "Text"
-      },
-      {
-        "key": "contact_nurse",
-        "label": "Contact Nurse",
-        "type": "Text"
-      },
-      {
-        "key": "ivf_clinic_email",
-        "label": "IVF Clinic Email",
         "type": "Email"
       },
       {
@@ -318,44 +193,9 @@
     "stage": "GC Pre-Screening",
     "fields": [
       {
-        "key": "gc_name",
-        "label": "GC Name",
-        "type": "Text"
-      },
-      {
-        "key": "age",
-        "label": "Age",
-        "type": "Number"
-      },
-      {
-        "key": "date_of_birth",
-        "label": "Date of Birth",
-        "type": "Date"
-      },
-      {
         "key": "place_of_birth",
         "label": "Place of Birth",
         "type": "Text"
-      },
-      {
-        "key": "address",
-        "label": "Address",
-        "type": "Address / Text"
-      },
-      {
-        "key": "email_address",
-        "label": "Email Address",
-        "type": "Email"
-      },
-      {
-        "key": "marital_status",
-        "label": "Marital Status",
-        "type": "Text / Select"
-      },
-      {
-        "key": "are_you_a_u_s_citizen_or_legal_u_s_resident",
-        "label": "Are you a U.S. Citizen or legal U.S. Resident?",
-        "type": "Yes/No"
       },
       {
         "key": "number_of_driver's_license",
@@ -373,18 +213,8 @@
         "type": "Text"
       },
       {
-        "key": "ethnicity/_race",
-        "label": "Ethnicity/ Race",
-        "type": "Text"
-      },
-      {
         "key": "what_languages_do_you_speak_fluently",
         "label": "What Languages Do You Speak Fluently?",
-        "type": "Text"
-      },
-      {
-        "key": "occupation",
-        "label": "Occupation",
         "type": "Text"
       },
       {
@@ -401,21 +231,6 @@
         "key": "your_emergency_contact_email",
         "label": "Your Emergency Contact Email",
         "type": "Email"
-      },
-      {
-        "key": "height",
-        "label": "Height",
-        "type": "Number"
-      },
-      {
-        "key": "current_weight",
-        "label": "Current weight",
-        "type": "Number"
-      },
-      {
-        "key": "bmi",
-        "label": "BMI",
-        "type": "Number"
       },
       {
         "key": "what_is_your_blood_type",
@@ -708,26 +523,6 @@
     "stage": "IVF Cycle Active",
     "fields": [
       {
-        "key": "ivf_clinic_name",
-        "label": "IVF Clinic Name",
-        "type": "Text"
-      },
-      {
-        "key": "ivf_doctor",
-        "label": "IVF Doctor",
-        "type": "Text"
-      },
-      {
-        "key": "contact_nurse",
-        "label": "Contact Nurse",
-        "type": "Text"
-      },
-      {
-        "key": "ivf_clinic_email",
-        "label": "IVF Clinic Email",
-        "type": "Email"
-      },
-      {
         "key": "ivf_clinic_location",
         "label": "IVF Clinic Location",
         "type": "Text"
@@ -796,21 +591,6 @@
         "key": "first_ob_date",
         "label": "First OB Date",
         "type": "Date"
-      },
-      {
-        "key": "ivf_clinic_name",
-        "label": "IVF Clinic Name",
-        "type": "Text"
-      },
-      {
-        "key": "ivf_doctor",
-        "label": "IVF Doctor",
-        "type": "Text"
-      },
-      {
-        "key": "contact_nurse",
-        "label": "Contact Nurse",
-        "type": "Text"
       }
     ]
   },
@@ -867,66 +647,6 @@
   {
     "stage": "Match Call Scheduled",
     "fields": [
-      {
-        "key": "intended_mother",
-        "label": "Intended Mother",
-        "type": "Text"
-      },
-      {
-        "key": "intended_mother_dob",
-        "label": "Intended Mother DOB",
-        "type": "Date"
-      },
-      {
-        "key": "intended_father",
-        "label": "Intended Father",
-        "type": "Text"
-      },
-      {
-        "key": "intended_father_dob",
-        "label": "Intended Father DOB",
-        "type": "Date"
-      },
-      {
-        "key": "intended_parents_marital_status",
-        "label": "Intended Parents Marital Status",
-        "type": "Text / Select"
-      },
-      {
-        "key": "intended_parents_cell_phone",
-        "label": "Intended Parents Cell Phone",
-        "type": "Phone"
-      },
-      {
-        "key": "intended_parents_email",
-        "label": "Intended Parents Email",
-        "type": "Email"
-      },
-      {
-        "key": "intended_parents_address",
-        "label": "Intended Parents Address",
-        "type": "Address / Text"
-      },
-      {
-        "key": "embryos_will_be_created_by_check_all_that_apply",
-        "label": "Embryos will be created by (check all that apply)",
-        "type": "Multi-select text"
-      },
-      {
-        "key": "gc_name",
-        "label": "GC Name",
-        "type": "Text"
-      },
-      {
-        "key": "phone",
-        "label": "Phone",
-        "type": "Phone"
-      },
-      {
-        "key": "email_address",
-        "label": "Email Address",
-        "type": "Email"
-      },
       {
         "key": "gc_owner",
         "label": "GC Owner",
@@ -988,26 +708,6 @@
         "type": "Email"
       },
       {
-        "key": "ivf_clinic_name",
-        "label": "IVF Clinic Name",
-        "type": "Text"
-      },
-      {
-        "key": "ivf_doctor",
-        "label": "IVF Doctor",
-        "type": "Text"
-      },
-      {
-        "key": "contact_nurse",
-        "label": "Contact Nurse",
-        "type": "Text"
-      },
-      {
-        "key": "ivf_clinic_email",
-        "label": "IVF Clinic Email",
-        "type": "Email"
-      },
-      {
         "key": "ivf_clinic_location",
         "label": "IVF Clinic Location",
         "type": "Text"
@@ -1041,21 +741,6 @@
         "key": "monitoring_clinic_location",
         "label": "Monitoring Clinic Location",
         "type": "Text"
-      },
-      {
-        "key": "height",
-        "label": "Height",
-        "type": "Number"
-      },
-      {
-        "key": "current_weight",
-        "label": "Current weight",
-        "type": "Number"
-      },
-      {
-        "key": "bmi",
-        "label": "BMI",
-        "type": "Number"
       },
       {
         "key": "what_is_your_blood_type",

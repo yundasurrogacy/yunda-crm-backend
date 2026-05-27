@@ -939,6 +939,9 @@ type case_managers {
     """JSON select path"""
     path: String
   ): json!
+
+  """角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理）"""
+  role: String!
   updated_at: timestamptz!
 
   """An object relationship"""
@@ -1035,6 +1038,7 @@ input case_managers_bool_exp {
   created_at: timestamptz_comparison_exp
   id: bigint_comparison_exp
   profile_data: json_comparison_exp
+  role: String_comparison_exp
   updated_at: timestamptz_comparison_exp
   user: users_bool_exp
   user_users: bigint_comparison_exp
@@ -1071,6 +1075,9 @@ input case_managers_insert_input {
   created_at: timestamptz
   id: bigint
   profile_data: json
+
+  """角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理）"""
+  role: String
   updated_at: timestamptz
   user: users_obj_rel_insert_input
   user_users: bigint
@@ -1080,6 +1087,9 @@ input case_managers_insert_input {
 type case_managers_max_fields {
   created_at: timestamptz
   id: bigint
+
+  """角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理）"""
+  role: String
   updated_at: timestamptz
   user_users: bigint
 }
@@ -1090,6 +1100,9 @@ order by max() on columns of table "case_managers"
 input case_managers_max_order_by {
   created_at: order_by
   id: order_by
+
+  """角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理）"""
+  role: order_by
   updated_at: order_by
   user_users: order_by
 }
@@ -1098,6 +1111,9 @@ input case_managers_max_order_by {
 type case_managers_min_fields {
   created_at: timestamptz
   id: bigint
+
+  """角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理）"""
+  role: String
   updated_at: timestamptz
   user_users: bigint
 }
@@ -1108,6 +1124,9 @@ order by min() on columns of table "case_managers"
 input case_managers_min_order_by {
   created_at: order_by
   id: order_by
+
+  """角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理）"""
+  role: order_by
   updated_at: order_by
   user_users: order_by
 }
@@ -1148,6 +1167,7 @@ input case_managers_order_by {
   created_at: order_by
   id: order_by
   profile_data: order_by
+  role: order_by
   updated_at: order_by
   user: users_order_by
   user_users: order_by
@@ -1172,6 +1192,9 @@ enum case_managers_select_column {
   profile_data
 
   """column name"""
+  role
+
+  """column name"""
   updated_at
 
   """column name"""
@@ -1185,6 +1208,9 @@ input case_managers_set_input {
   created_at: timestamptz
   id: bigint
   profile_data: json
+
+  """角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理）"""
+  role: String
   updated_at: timestamptz
   user_users: bigint
 }
@@ -1247,6 +1273,9 @@ input case_managers_stream_cursor_value_input {
   created_at: timestamptz
   id: bigint
   profile_data: json
+
+  """角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理）"""
+  role: String
   updated_at: timestamptz
   user_users: bigint
 }
@@ -1277,6 +1306,9 @@ enum case_managers_update_column {
 
   """column name"""
   profile_data
+
+  """column name"""
+  role
 
   """column name"""
   updated_at
@@ -1391,6 +1423,9 @@ type cases {
   client_manager_client_managers: bigint
   created_at: timestamptz!
 
+  """谁创建的案例，外键，关联users表"""
+  created_by: bigint
+
   """案例相关的数据"""
   data(
     """JSON select path"""
@@ -1399,10 +1434,10 @@ type cases {
   id: bigint!
 
   """An object relationship"""
-  intended_parent: intended_parents
+  intended_parent: intended_parents!
 
   """外键，准父母，一个准父母只有一个case"""
-  intended_parent_intended_parents: bigint
+  intended_parent_intended_parents: bigint!
 
   """An array relationship"""
   ivf_clinics(
@@ -1560,6 +1595,9 @@ type cases {
     where: trust_account_balance_changes_bool_exp
   ): trust_account_balance_changes_aggregate!
   updated_at: timestamptz!
+
+  """An object relationship"""
+  user: users
 }
 
 """
@@ -1632,6 +1670,9 @@ type cases_avg_fields {
 
   """弃用，外键，客户经理"""
   client_manager_client_managers: Float
+
+  """谁创建的案例，外键，关联users表"""
+  created_by: Float
   id: Float
 
   """外键，准父母，一个准父母只有一个case"""
@@ -1653,6 +1694,9 @@ input cases_avg_order_by {
 
   """弃用，外键，客户经理"""
   client_manager_client_managers: order_by
+
+  """谁创建的案例，外键，关联users表"""
+  created_by: order_by
   id: order_by
 
   """外键，准父母，一个准父母只有一个case"""
@@ -1679,6 +1723,7 @@ input cases_bool_exp {
   client_manager: client_managers_bool_exp
   client_manager_client_managers: bigint_comparison_exp
   created_at: timestamptz_comparison_exp
+  created_by: bigint_comparison_exp
   data: json_comparison_exp
   id: bigint_comparison_exp
   intended_parent: intended_parents_bool_exp
@@ -1696,6 +1741,7 @@ input cases_bool_exp {
   trust_account_balance_changes: trust_account_balance_changes_bool_exp
   trust_account_balance_changes_aggregate: trust_account_balance_changes_aggregate_bool_exp
   updated_at: timestamptz_comparison_exp
+  user: users_bool_exp
 }
 
 """
@@ -2358,6 +2404,9 @@ input cases_inc_input {
 
   """弃用，外键，客户经理"""
   client_manager_client_managers: bigint
+
+  """谁创建的案例，外键，关联users表"""
+  created_by: bigint
   id: bigint
 
   """外键，准父母，一个准父母只有一个case"""
@@ -2385,6 +2434,9 @@ input cases_insert_input {
   client_manager_client_managers: bigint
   created_at: timestamptz
 
+  """谁创建的案例，外键，关联users表"""
+  created_by: bigint
+
   """案例相关的数据"""
   data: json
   id: bigint
@@ -2407,6 +2459,7 @@ input cases_insert_input {
   trust_account_balance: numeric
   trust_account_balance_changes: trust_account_balance_changes_arr_rel_insert_input
   updated_at: timestamptz
+  user: users_obj_rel_insert_input
 }
 
 """aggregate max on columns"""
@@ -2417,6 +2470,9 @@ type cases_max_fields {
   """弃用，外键，客户经理"""
   client_manager_client_managers: bigint
   created_at: timestamptz
+
+  """谁创建的案例，外键，关联users表"""
+  created_by: bigint
   id: bigint
 
   """外键，准父母，一个准父母只有一个case"""
@@ -2443,6 +2499,9 @@ input cases_max_order_by {
   """弃用，外键，客户经理"""
   client_manager_client_managers: order_by
   created_at: order_by
+
+  """谁创建的案例，外键，关联users表"""
+  created_by: order_by
   id: order_by
 
   """外键，准父母，一个准父母只有一个case"""
@@ -2467,6 +2526,9 @@ type cases_min_fields {
   """弃用，外键，客户经理"""
   client_manager_client_managers: bigint
   created_at: timestamptz
+
+  """谁创建的案例，外键，关联users表"""
+  created_by: bigint
   id: bigint
 
   """外键，准父母，一个准父母只有一个case"""
@@ -2493,6 +2555,9 @@ input cases_min_order_by {
   """弃用，外键，客户经理"""
   client_manager_client_managers: order_by
   created_at: order_by
+
+  """谁创建的案例，外键，关联users表"""
+  created_by: order_by
   id: order_by
 
   """外键，准父母，一个准父母只有一个case"""
@@ -2547,6 +2612,7 @@ input cases_order_by {
   client_manager: client_managers_order_by
   client_manager_client_managers: order_by
   created_at: order_by
+  created_by: order_by
   data: order_by
   id: order_by
   intended_parent: intended_parents_order_by
@@ -2560,6 +2626,7 @@ input cases_order_by {
   trust_account_balance: order_by
   trust_account_balance_changes_aggregate: trust_account_balance_changes_aggregate_order_by
   updated_at: order_by
+  user: users_order_by
 }
 
 """primary key columns input for table: cases"""
@@ -2579,6 +2646,9 @@ enum cases_select_column {
 
   """column name"""
   created_at
+
+  """column name"""
+  created_by
 
   """column name"""
   data
@@ -2613,6 +2683,9 @@ input cases_set_input {
   client_manager_client_managers: bigint
   created_at: timestamptz
 
+  """谁创建的案例，外键，关联users表"""
+  created_by: bigint
+
   """案例相关的数据"""
   data: json
   id: bigint
@@ -2638,6 +2711,9 @@ type cases_stddev_fields {
 
   """弃用，外键，客户经理"""
   client_manager_client_managers: Float
+
+  """谁创建的案例，外键，关联users表"""
+  created_by: Float
   id: Float
 
   """外键，准父母，一个准父母只有一个case"""
@@ -2659,6 +2735,9 @@ input cases_stddev_order_by {
 
   """弃用，外键，客户经理"""
   client_manager_client_managers: order_by
+
+  """谁创建的案例，外键，关联users表"""
+  created_by: order_by
   id: order_by
 
   """外键，准父母，一个准父母只有一个case"""
@@ -2678,6 +2757,9 @@ type cases_stddev_pop_fields {
 
   """弃用，外键，客户经理"""
   client_manager_client_managers: Float
+
+  """谁创建的案例，外键，关联users表"""
+  created_by: Float
   id: Float
 
   """外键，准父母，一个准父母只有一个case"""
@@ -2699,6 +2781,9 @@ input cases_stddev_pop_order_by {
 
   """弃用，外键，客户经理"""
   client_manager_client_managers: order_by
+
+  """谁创建的案例，外键，关联users表"""
+  created_by: order_by
   id: order_by
 
   """外键，准父母，一个准父母只有一个case"""
@@ -2718,6 +2803,9 @@ type cases_stddev_samp_fields {
 
   """弃用，外键，客户经理"""
   client_manager_client_managers: Float
+
+  """谁创建的案例，外键，关联users表"""
+  created_by: Float
   id: Float
 
   """外键，准父母，一个准父母只有一个case"""
@@ -2739,6 +2827,9 @@ input cases_stddev_samp_order_by {
 
   """弃用，外键，客户经理"""
   client_manager_client_managers: order_by
+
+  """谁创建的案例，外键，关联users表"""
+  created_by: order_by
   id: order_by
 
   """外键，准父母，一个准父母只有一个case"""
@@ -2771,6 +2862,9 @@ input cases_stream_cursor_value_input {
   client_manager_client_managers: bigint
   created_at: timestamptz
 
+  """谁创建的案例，外键，关联users表"""
+  created_by: bigint
+
   """案例相关的数据"""
   data: json
   id: bigint
@@ -2796,6 +2890,9 @@ type cases_sum_fields {
 
   """弃用，外键，客户经理"""
   client_manager_client_managers: bigint
+
+  """谁创建的案例，外键，关联users表"""
+  created_by: bigint
   id: bigint
 
   """外键，准父母，一个准父母只有一个case"""
@@ -2817,6 +2914,9 @@ input cases_sum_order_by {
 
   """弃用，外键，客户经理"""
   client_manager_client_managers: order_by
+
+  """谁创建的案例，外键，关联users表"""
+  created_by: order_by
   id: order_by
 
   """外键，准父母，一个准父母只有一个case"""
@@ -2841,6 +2941,9 @@ enum cases_update_column {
 
   """column name"""
   created_at
+
+  """column name"""
+  created_by
 
   """column name"""
   data
@@ -2882,6 +2985,9 @@ type cases_var_pop_fields {
 
   """弃用，外键，客户经理"""
   client_manager_client_managers: Float
+
+  """谁创建的案例，外键，关联users表"""
+  created_by: Float
   id: Float
 
   """外键，准父母，一个准父母只有一个case"""
@@ -2903,6 +3009,9 @@ input cases_var_pop_order_by {
 
   """弃用，外键，客户经理"""
   client_manager_client_managers: order_by
+
+  """谁创建的案例，外键，关联users表"""
+  created_by: order_by
   id: order_by
 
   """外键，准父母，一个准父母只有一个case"""
@@ -2922,6 +3031,9 @@ type cases_var_samp_fields {
 
   """弃用，外键，客户经理"""
   client_manager_client_managers: Float
+
+  """谁创建的案例，外键，关联users表"""
+  created_by: Float
   id: Float
 
   """外键，准父母，一个准父母只有一个case"""
@@ -2943,6 +3055,9 @@ input cases_var_samp_order_by {
 
   """弃用，外键，客户经理"""
   client_manager_client_managers: order_by
+
+  """谁创建的案例，外键，关联users表"""
+  created_by: order_by
   id: order_by
 
   """外键，准父母，一个准父母只有一个case"""
@@ -2962,6 +3077,9 @@ type cases_variance_fields {
 
   """弃用，外键，客户经理"""
   client_manager_client_managers: Float
+
+  """谁创建的案例，外键，关联users表"""
+  created_by: Float
   id: Float
 
   """外键，准父母，一个准父母只有一个case"""
@@ -2983,6 +3101,9 @@ input cases_variance_order_by {
 
   """弃用，外键，客户经理"""
   client_manager_client_managers: order_by
+
+  """谁创建的案例，外键，关联users表"""
+  created_by: order_by
   id: order_by
 
   """外键，准父母，一个准父母只有一个case"""
@@ -11461,6 +11582,42 @@ type users {
   ): case_managers_aggregate!
 
   """An array relationship"""
+  cases(
+    """distinct select on columns"""
+    distinct_on: [cases_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [cases_order_by!]
+
+    """filter the rows returned"""
+    where: cases_bool_exp
+  ): [cases!]!
+
+  """An aggregate relationship"""
+  cases_aggregate(
+    """distinct select on columns"""
+    distinct_on: [cases_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [cases_order_by!]
+
+    """filter the rows returned"""
+    where: cases_bool_exp
+  ): cases_aggregate!
+
+  """An array relationship"""
   client_managers(
     """distinct select on columns"""
     distinct_on: [client_managers_select_column!]
@@ -11543,7 +11700,7 @@ type users {
   """小写 32位md5"""
   password: String!
 
-  """[user（系统使用者）、admin（系统管理员）、operator（系统运营人员）]"""
+  """[user（系统使用者）、admin（系统管理员）]"""
   role: String!
 
   """An object relationship"""
@@ -11627,6 +11784,8 @@ input users_bool_exp {
   case_manager: case_managers_bool_exp
   case_managers: case_managers_bool_exp
   case_managers_aggregate: case_managers_aggregate_bool_exp
+  cases: cases_bool_exp
+  cases_aggregate: cases_aggregate_bool_exp
   client_managers: client_managers_bool_exp
   client_managers_aggregate: client_managers_aggregate_bool_exp
   created_at: timestamptz_comparison_exp
@@ -11671,6 +11830,7 @@ input type for inserting data into table "users"
 input users_insert_input {
   case_manager: case_managers_obj_rel_insert_input
   case_managers: case_managers_arr_rel_insert_input
+  cases: cases_arr_rel_insert_input
   client_managers: client_managers_arr_rel_insert_input
   created_at: timestamptz
 
@@ -11683,7 +11843,7 @@ input users_insert_input {
   """小写 32位md5"""
   password: String
 
-  """[user（系统使用者）、admin（系统管理员）、operator（系统运营人员）]"""
+  """[user（系统使用者）、admin（系统管理员）]"""
   role: String
   surrogate_mother: surrogate_mothers_obj_rel_insert_input
   surrogate_mothers: surrogate_mothers_arr_rel_insert_input
@@ -11701,7 +11861,7 @@ type users_max_fields {
   """小写 32位md5"""
   password: String
 
-  """[user（系统使用者）、admin（系统管理员）、operator（系统运营人员）]"""
+  """[user（系统使用者）、admin（系统管理员）]"""
   role: String
   updated_at: timestamptz
 }
@@ -11717,7 +11877,7 @@ type users_min_fields {
   """小写 32位md5"""
   password: String
 
-  """[user（系统使用者）、admin（系统管理员）、operator（系统运营人员）]"""
+  """[user（系统使用者）、admin（系统管理员）]"""
   role: String
   updated_at: timestamptz
 }
@@ -11756,6 +11916,7 @@ input users_on_conflict {
 input users_order_by {
   case_manager: case_managers_order_by
   case_managers_aggregate: case_managers_aggregate_order_by
+  cases_aggregate: cases_aggregate_order_by
   client_managers_aggregate: client_managers_aggregate_order_by
   created_at: order_by
   email: order_by
@@ -11810,7 +11971,7 @@ input users_set_input {
   """小写 32位md5"""
   password: String
 
-  """[user（系统使用者）、admin（系统管理员）、operator（系统运营人员）]"""
+  """[user（系统使用者）、admin（系统管理员）]"""
   role: String
   updated_at: timestamptz
 }
@@ -11852,7 +12013,7 @@ input users_stream_cursor_value_input {
   """小写 32位md5"""
   password: String
 
-  """[user（系统使用者）、admin（系统管理员）、operator（系统运营人员）]"""
+  """[user（系统使用者）、admin（系统管理员）]"""
   role: String
   updated_at: timestamptz
 }

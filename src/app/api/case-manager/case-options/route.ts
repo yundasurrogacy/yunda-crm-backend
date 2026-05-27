@@ -16,7 +16,7 @@ const OPTIONS_QUERY = `
     ) {
       id
       email
-      contact_information
+      profile_data
     }
     surrogate_mothers(
       where: { cases: $partyWhere }
@@ -25,7 +25,7 @@ const OPTIONS_QUERY = `
     ) {
       id
       email
-      contact_information
+      profile_data
     }
   }
 `;
@@ -45,8 +45,8 @@ export async function GET() {
     const client = getClient();
     const data = await client.execute<{
       case_managers: { id: string | number; user: { email: string | null } | null }[];
-      intended_parents: { id: string | number; email: string | null; contact_information: unknown }[];
-      surrogate_mothers: { id: string | number; email: string | null; contact_information: unknown }[];
+      intended_parents: { id: string | number; email: string | null; profile_data: unknown }[];
+      surrogate_mothers: { id: string | number; email: string | null; profile_data: unknown }[];
     }>({
       query: OPTIONS_QUERY,
       variables: { cmWhere, partyWhere },
@@ -64,11 +64,11 @@ export async function GET() {
         : [],
       intendedParents: (data.intended_parents ?? []).map((r) => ({
         id: String(r.id),
-        label: `${intendedParentDisplay(r.contact_information, r.email ?? undefined) || "—"} (#${r.id})`,
+        label: `${intendedParentDisplay(r.profile_data, r.email ?? undefined) || "—"} (#${r.id})`,
       })),
       surrogates: (data.surrogate_mothers ?? []).map((r) => ({
         id: String(r.id),
-        label: `${surrogateDisplayName(r.contact_information) || r.email?.trim() || "—"} (#${r.id})`,
+        label: `${surrogateDisplayName(r.profile_data, r.email ?? undefined) || "—"} (#${r.id})`,
       })),
     });
   } catch {

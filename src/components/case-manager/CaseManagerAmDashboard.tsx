@@ -11,6 +11,14 @@ import type { AmCaseRow } from "@/lib/case-manager/fetch-dashboard-data";
 import { translateProcessStatus } from "@/lib/i18n/translate-process-status";
 
 type SelectOption = { id: string; label: string };
+type MyCaseScope = "all" | "created" | "assigned";
+
+function readMyCaseScope(sp: URLSearchParams | null): MyCaseScope {
+  const s = sp?.get("scope");
+  if (s === "created") return "created";
+  if (s === "assigned") return "assigned";
+  return "all";
+}
 
 const CARD_ACCENT = [
   "border border-sage-200/90 bg-[var(--card-background)] text-brand-brown shadow-sm hover:border-brand-brown/30 hover:shadow",
@@ -95,6 +103,10 @@ export function CaseManagerAmDashboard({
   const [caseManagerOptions, setCaseManagerOptions] = useState<SelectOption[]>([]);
   const [intendedParentOptions, setIntendedParentOptions] = useState<SelectOption[]>([]);
   const [surrogateOptions, setSurrogateOptions] = useState<SelectOption[]>([]);
+  const [myCaseScope, setMyCaseScope] = useState<MyCaseScope>(() => readMyCaseScope(searchParams));
+  const [gcOptions, setGcOptions] = useState<SelectOption[]>([]);
+  const [gcAssignTarget, setGcAssignTarget] = useState<string | null>(null);
+  const [gcAssignValue, setGcAssignValue] = useState("");
 
   const syncUrl = useCallback(
     (
@@ -127,6 +139,7 @@ export function CaseManagerAmDashboard({
   const syncMyCasesUrl = useCallback(
     (
       nextPage: number,
+      nextScope: MyCaseScope,
       nextQ: string,
       nextProcessStatus: string,
       nextCm: string,
@@ -135,6 +148,7 @@ export function CaseManagerAmDashboard({
     ) => {
       const q = new URLSearchParams(searchParams?.toString() ?? "");
       q.set("page", String(nextPage));
+      q.set("scope", nextScope);
       if (nextQ.trim()) q.set("q", nextQ.trim());
       else q.delete("q");
       if (nextProcessStatus.trim()) q.set("processStatus", nextProcessStatus.trim());
@@ -153,6 +167,7 @@ export function CaseManagerAmDashboard({
 
   useEffect(() => {
     const p = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
+    setMyCaseScope(readMyCaseScope(searchParams));
     setPage(p);
     const nextQ = readTextParam(searchParams, "q");
     const nextProcessStatus = readTextParam(searchParams, "processStatus");
@@ -209,6 +224,13 @@ export function CaseManagerAmDashboard({
           setIntendedParentOptions(json.intendedParents ?? []);
           setSurrogateOptions(json.surrogates ?? []);
         }
+        const gcUrl =
+          headingMode === "admin" ? "/api/admin/cases?options=gc" : "/api/case-manager/cases?options=gc";
+        const gcRes = await fetch(gcUrl);
+        if (gcRes.ok) {
+          const gcJson = (await gcRes.json()) as { surrogates: SelectOption[] };
+          if (!cancelled) setGcOptions(gcJson.surrogates ?? []);
+        }
       } catch {
         /* ignore */
       }
@@ -216,7 +238,7 @@ export function CaseManagerAmDashboard({
     return () => {
       cancelled = true;
     };
-  }, [apiPath, headingMode]);
+  }, [apiPath, headingMode, isMyCases]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -231,6 +253,7 @@ export function CaseManagerAmDashboard({
       if (countsParam) url.searchParams.set("counts", "0");
       if (q.trim()) url.searchParams.set("q", q.trim());
       if (isMyCases && processStatus.trim()) url.searchParams.set("processStatus", processStatus.trim());
+      if (isMyCases) url.searchParams.set("scope", myCaseScope);
       if (caseManagerId.trim()) url.searchParams.set("caseManagerId", caseManagerId.trim());
       if (intendedParentId.trim()) url.searchParams.set("intendedParentId", intendedParentId.trim());
       if (surrogateId.trim()) url.searchParams.set("surrogateId", surrogateId.trim());
@@ -260,6 +283,7 @@ export function CaseManagerAmDashboard({
     isMyCases,
     q,
     processStatus,
+    myCaseScope,
     caseManagerId,
     intendedParentId,
     surrogateId,
@@ -285,7 +309,8 @@ export function CaseManagerAmDashboard({
   function onPageChange(next: number) {
     const p = Math.min(Math.max(1, next), totalPages);
     setPage(p);
-    if (isMyCases) syncMyCasesUrl(p, q, processStatus, caseManagerId, intendedParentId, surrogateId);
+    if (isMyCases)
+      syncMyCasesUrl(p, myCaseScope, q, processStatus, caseManagerId, intendedParentId, surrogateId);
     else syncUrl(stage, p, q, "", caseManagerId, intendedParentId, surrogateId);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -294,7 +319,15 @@ export function CaseManagerAmDashboard({
     setPage(1);
     setQ(qInput.trim());
     if (isMyCases)
-      syncMyCasesUrl(1, qInput.trim(), processStatus, caseManagerId, intendedParentId, surrogateId);
+      syncMyCasesUrl(
+        1,
+        myCaseScope,
+        qInput.trim(),
+        processStatus,
+        caseManagerId,
+        intendedParentId,
+        surrogateId,
+      );
     else {
       setProcessStatus("");
       syncUrl(stage, 1, qInput.trim(), "", caseManagerId, intendedParentId, surrogateId);
@@ -309,8 +342,37 @@ export function CaseManagerAmDashboard({
     setCaseManagerId("");
     setIntendedParentId("");
     setSurrogateId("");
-    if (isMyCases) syncMyCasesUrl(1, "", "", "", "", "");
+    if (isMyCases) syncMyCasesUrl(1, myCaseScope, "", "", "", "", "");
     else syncUrl(stage, 1, "", "", "", "", "");
+  }
+
+  function onSwitchMyScope(next: MyCaseScope) {
+    setMyCaseScope(next);
+    setPage(1);
+    syncMyCasesUrl(1, next, q, processStatus, caseManagerId, intendedParentId, surrogateId);
+  }
+
+  async function assignCaseManagerToMe(caseId: string) {
+    await fetch(`/api/case-manager/cases/${caseId}/actions`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "assign_case_manager" }),
+    });
+    await load();
+  }
+
+  const casesApiBase = headingMode === "admin" ? "/api/admin/cases" : "/api/case-manager/cases";
+
+  async function assignGc(caseId: string) {
+    if (!gcAssignValue.trim()) return;
+    await fetch(`${casesApiBase}/${caseId}/actions`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "match_gc", surrogateId: gcAssignValue.trim() }),
+    });
+    setGcAssignTarget(null);
+    setGcAssignValue("");
+    await load();
   }
 
   return (
@@ -337,8 +399,34 @@ export function CaseManagerAmDashboard({
           ) : null}
           {variant === "myCases" ? (
             <>
-              <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">{t("pages.my_cases_heading")}</h1>
+              <div className="flex flex-wrap items-center gap-3">
+                <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">{t("pages.my_cases_heading")}</h1>
+                {headerExtra}
+              </div>
               <p className="mt-1 text-sm text-sage-700">{t("am_dash.my_cases_intro")}</p>
+              <div className="mt-3 inline-flex rounded-md border border-sage-300 bg-white p-1">
+                <button
+                  type="button"
+                  onClick={() => onSwitchMyScope("all")}
+                  className={`rounded px-3 py-1 text-xs font-semibold ${myCaseScope === "all" ? "bg-sage-700 text-white" : "text-sage-700"}`}
+                >
+                  {t("am_dash.scope_all")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onSwitchMyScope("created")}
+                  className={`rounded px-3 py-1 text-xs font-semibold ${myCaseScope === "created" ? "bg-sage-700 text-white" : "text-sage-700"}`}
+                >
+                  {t("am_dash.scope_created")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onSwitchMyScope("assigned")}
+                  className={`rounded px-3 py-1 text-xs font-semibold ${myCaseScope === "assigned" ? "bg-sage-700 text-white" : "text-sage-700"}`}
+                >
+                  {t("am_dash.scope_assigned")}
+                </button>
+              </div>
             </>
           ) : null}
         </div>
@@ -520,12 +608,59 @@ export function CaseManagerAmDashboard({
                             {formatDt(row.updated_at, i18n.language)}
                           </td>
                           <td className="px-4 py-3">
-                            <Link
-                              href={`${detailHrefBase}/${row.id}`}
-                              className="inline-flex rounded-md bg-sage-700 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-white hover:bg-sage-800"
-                            >
-                              {t("am_dash.view_case")}
-                            </Link>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <Link
+                                href={`${detailHrefBase}/${row.id}`}
+                                className="inline-flex rounded-md bg-sage-700 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-white hover:bg-sage-800"
+                              >
+                                {t("am_dash.view_case")}
+                              </Link>
+                              {isMyCases && myCaseScope === "created" && !row.caseManagerId ? (
+                                <button
+                                  type="button"
+                                  onClick={() => void assignCaseManagerToMe(row.id)}
+                                  className="inline-flex rounded-md border border-sage-400 bg-white px-3 py-1.5 text-xs font-semibold text-sage-800 hover:bg-sage-50"
+                                >
+                                  {t("am_dash.assign_case_manager_to_me")}
+                                </button>
+                              ) : null}
+                              {!row.surrogateId ? (
+                                gcAssignTarget === row.id ? (
+                                  <div className="inline-flex items-center gap-1">
+                                    <select
+                                      value={gcAssignValue}
+                                      onChange={(e) => setGcAssignValue(e.target.value)}
+                                      className="rounded border border-sage-300 bg-white px-2 py-1 text-xs text-sage-900"
+                                    >
+                                      <option value="">{t("am_dash.pick_gc")}</option>
+                                      {gcOptions.map((o) => (
+                                        <option key={o.id} value={o.id}>
+                                          {o.label}
+                                        </option>
+                                      ))}
+                                    </select>
+                                    <button
+                                      type="button"
+                                      onClick={() => void assignGc(row.id)}
+                                      className="rounded-md border border-sage-400 bg-white px-2 py-1 text-xs font-semibold text-sage-800 hover:bg-sage-50"
+                                    >
+                                      {t("am_dash.confirm_gc_match")}
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setGcAssignTarget(row.id);
+                                      setGcAssignValue("");
+                                    }}
+                                    className="inline-flex rounded-md border border-sage-400 bg-white px-3 py-1.5 text-xs font-semibold text-sage-800 hover:bg-sage-50"
+                                  >
+                                    {t("am_dash.gc_match")}
+                                  </button>
+                                )
+                              ) : null}
+                            </div>
                           </td>
                         </tr>
                       );

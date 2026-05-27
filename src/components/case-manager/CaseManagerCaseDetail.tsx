@@ -2,35 +2,15 @@
 
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { AmCaseDetail } from "@/lib/case-manager/fetch-case-detail";
 import { translateProcessStatus } from "@/lib/i18n/translate-process-status";
+import { BindSurrogateToCase } from "@/components/case-manager/BindSurrogateToCase";
+import { CaseEntityProfileCard } from "@/components/case-manager/CaseEntityProfileCard";
 import { CaseManagerAmWorkspacePanel } from "@/components/case-manager/CaseManagerAmWorkspacePanel";
-
-function JsonBlock({ label, value }: { label: string; value: unknown }) {
-  const [open, setOpen] = useState(false);
-  if (value == null) return null;
-  const txt = typeof value === "string" ? value : JSON.stringify(value, null, 2);
-  if (!txt || txt === "{}" || txt === "[]") return null;
-  return (
-    <div className="rounded-lg border border-sage-200/80 bg-white/60">
-      <button
-        type="button"
-        className="ami-ui flex w-full items-center justify-between px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-sage-700"
-        onClick={() => setOpen((v) => !v)}
-      >
-        {label}
-        <span className="tabular-nums text-sage-500">{open ? "−" : "+"}</span>
-      </button>
-      {open ? (
-        <pre className="crm-font-ui max-h-72 overflow-auto border-t border-sage-100 p-3 text-[11px] leading-relaxed text-sage-800">
-          {txt}
-        </pre>
-      ) : null}
-    </div>
-  );
-}
+import { GC_PROFILE_SECTIONS } from "@/constants/gc-profile-schema";
+import { IP_PROFILE_SECTIONS } from "@/constants/ip-profile-schema";
 
 function formatDt(iso: string, lng: string) {
   try {
@@ -44,14 +24,35 @@ function formatDt(iso: string, lng: string) {
   }
 }
 
+function partyManageHref(
+  mode: "case_manager" | "admin",
+  kind: "intended_parent" | "surrogate_mother",
+  entityId: string | null,
+  caseId: string,
+): string | null {
+  if (!entityId) return null;
+  const returnTo = encodeURIComponent(
+    mode === "admin" ? `/admin/cases/${caseId}` : `/case_manager/cases/${caseId}`,
+  );
+  if (mode === "admin") {
+    const segment = kind === "intended_parent" ? "intended-parents" : "surrogates";
+    return `/admin/accounts/${segment}/${entityId}?returnTo=${returnTo}`;
+  }
+  const segment = kind === "intended_parent" ? "intended-parents" : "surrogates";
+  return `/case_manager/parties/${segment}/${entityId}?returnTo=${returnTo}`;
+}
+
 export function CaseManagerCaseDetail({
   caseId,
   apiPathBase = "/api/case-manager/cases",
   backHref = "/case_manager/my-cases",
+  partyProfileMode = "case_manager",
 }: {
   caseId: string;
   apiPathBase?: string;
   backHref?: string;
+  /** 档案编辑页：案例经理仅可改其负责案例的 GC/IP；管理端走 admin 账号页 */
+  partyProfileMode?: "case_manager" | "admin";
 }) {
   const { t } = useTranslation("portal");
   const { t: tCommon } = useTranslation("common");
@@ -60,6 +61,17 @@ export function CaseManagerCaseDetail({
   const [data, setData] = useState<AmCaseDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [errorKey, setErrorKey] = useState<string | null>(null);
+
+  const reloadDetail = useCallback(async () => {
+    try {
+      const res = await fetch(`${apiPathBase}/${encodeURIComponent(caseId)}`);
+      if (!res.ok) return;
+      const json = (await res.json()) as AmCaseDetail;
+      setData(json);
+    } catch {
+      /* keep current */
+    }
+  }, [apiPathBase, caseId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -122,6 +134,48 @@ export function CaseManagerCaseDetail({
 
       {!loading && data ? (
         <>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <div className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
+              {data.surrogate.id ? (
+                <CaseEntityProfileCard
+                  embedded
+                  title={t("case_detail.section_surrogate")}
+                  subtitle={data.surrogate.displayName || data.surrogate.email || null}
+                  profileTitle={t("case_detail.section_gc_profile")}
+                  sections={GC_PROFILE_SECTIONS}
+                  profileData={data.surrogate.profile_data}
+                  lng={lng}
+                  emptyMessage={t("case_detail.profile_empty_gc")}
+                  manageHref={partyManageHref(partyProfileMode, "surrogate_mother", data.surrogate.id, caseId)}
+                  manageLabel={t("case_detail.manage_profile")}
+                />
+              ) : (
+                <>
+                  <h2 className="crm-font-display text-lg font-semibold text-brand-brown">
+                    {t("case_detail.section_surrogate")}
+                  </h2>
+                  <p className="mt-1 text-sm text-sage-700">{t("case_detail.no_gc_bound")}</p>
+                  <BindSurrogateToCase
+                    caseId={caseId}
+                    apiCasesBase={apiPathBase}
+                    onBound={() => void reloadDetail()}
+                  />
+                </>
+              )}
+            </div>
+            <CaseEntityProfileCard
+              title={t("case_detail.section_intended_parents")}
+              subtitle={data.intended_parent.displayName || data.intended_parent.email || null}
+              profileTitle={t("case_detail.section_ip_profile")}
+              sections={IP_PROFILE_SECTIONS}
+              profileData={data.intended_parent.profile_data}
+              lng={lng}
+              emptyMessage={t("case_detail.profile_empty_ip")}
+              manageHref={partyManageHref(partyProfileMode, "intended_parent", data.intended_parent.id, caseId)}
+              manageLabel={t("case_detail.manage_profile")}
+            />
+          </div>
+
           <CaseManagerAmWorkspacePanel caseId={caseId} detail={data} onDetailUpdated={setData} />
 
           <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm backdrop-blur-[1px] md:p-6">
@@ -153,43 +207,6 @@ export function CaseManagerCaseDetail({
               </div>
             </dl>
           </section>
-
-          <div className="grid gap-4 lg:grid-cols-2">
-            <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
-              <h2 className="crm-font-display mb-4 text-lg font-semibold text-brand-brown">{t("case_detail.section_surrogate")}</h2>
-              <dl className="space-y-3 text-sm">
-                <div>
-                  <dt className="text-xs font-semibold uppercase tracking-wide text-sage-600">{t("case_detail.field_display_name")}</dt>
-                  <dd className="mt-1 text-sage-900">{data.surrogate.displayName || "—"}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs font-semibold uppercase tracking-wide text-sage-600">{t("case_detail.field_email")}</dt>
-                  <dd className="mt-1 break-all text-sage-900">{data.surrogate.email || "—"}</dd>
-                </div>
-              </dl>
-              <div className="mt-4 space-y-2">
-                <JsonBlock label={t("case_detail.json_contact_information")} value={data.surrogate.contact_information} />
-              </div>
-            </section>
-
-            <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
-              <h2 className="crm-font-display mb-4 text-lg font-semibold text-brand-brown">{t("case_detail.section_intended_parents")}</h2>
-              <dl className="space-y-3 text-sm">
-                <div>
-                  <dt className="text-xs font-semibold uppercase tracking-wide text-sage-600">{t("case_detail.field_display_name")}</dt>
-                  <dd className="mt-1 text-sage-900">{data.intended_parent.displayName || "—"}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs font-semibold uppercase tracking-wide text-sage-600">{t("case_detail.field_email")}</dt>
-                  <dd className="mt-1 break-all text-sage-900">{data.intended_parent.email || "—"}</dd>
-                </div>
-              </dl>
-              <div className="mt-4 space-y-2">
-                <JsonBlock label={t("case_detail.json_basic_information")} value={data.intended_parent.basic_information} />
-                <JsonBlock label={t("case_detail.json_family_profile")} value={data.intended_parent.family_profile} />
-              </div>
-            </section>
-          </div>
 
           <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
             <h2 className="crm-font-display mb-4 text-lg font-semibold text-brand-brown">{t("case_detail.section_team")}</h2>

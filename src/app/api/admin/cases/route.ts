@@ -8,6 +8,7 @@ import {
 } from "@/lib/case-manager/fetch-dashboard-data";
 import { getServerSession } from "@/lib/auth/session-cookie";
 import { intendedParentDisplay, surrogateDisplayName } from "@/lib/case-manager/display-names";
+import { fetchSurrogatesAvailableForMatch } from "@/lib/case-manager/match-gc";
 
 const ADMIN_SCOPE = "admin_all" satisfies CasesListScope;
 
@@ -40,12 +41,12 @@ const OPTIONS_QUERY = `
     intended_parents(order_by: { id: asc }, limit: 500) {
       id
       email
-      contact_information
+      profile_data
     }
     surrogate_mothers(order_by: { id: asc }, limit: 500) {
       id
       email
-      contact_information
+      profile_data
     }
   }
 `;
@@ -88,13 +89,22 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   const { searchParams } = new URL(req.url);
+  if (searchParams.get("options") === "gc") {
+    try {
+      const surrogates = await fetchSurrogatesAvailableForMatch();
+      return NextResponse.json({ surrogates });
+    } catch {
+      return NextResponse.json({ error: "data_unavailable" }, { status: 503 });
+    }
+  }
+
   if (searchParams.get("options") === "1") {
     try {
       const client = getClient();
       const data = await client.execute<{
         case_managers: { id: string | number; user: { email: string | null } | null }[];
-        intended_parents: { id: string | number; email: string | null; contact_information: unknown }[];
-        surrogate_mothers: { id: string | number; email: string | null; contact_information: unknown }[];
+        intended_parents: { id: string | number; email: string | null; profile_data: unknown }[];
+        surrogate_mothers: { id: string | number; email: string | null; profile_data: unknown }[];
       }>({
         query: OPTIONS_QUERY,
       });
@@ -105,11 +115,11 @@ export async function GET(req: Request) {
         })),
         intendedParents: (data.intended_parents ?? []).map((r) => ({
           id: String(r.id),
-          label: `${intendedParentDisplay(r.contact_information, r.email ?? undefined) || "—"} (#${r.id})`,
+          label: `${intendedParentDisplay(r.profile_data, r.email ?? undefined) || "—"} (#${r.id})`,
         })),
         surrogates: (data.surrogate_mothers ?? []).map((r) => ({
           id: String(r.id),
-          label: `${surrogateDisplayName(r.contact_information) || r.email?.trim() || "—"} (#${r.id})`,
+          label: `${surrogateDisplayName(r.profile_data, r.email ?? undefined) || "—"} (#${r.id})`,
         })),
       });
     } catch {

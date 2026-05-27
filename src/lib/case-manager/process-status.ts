@@ -1,10 +1,12 @@
-import { CANONICAL_CASE_STAGES } from "@/constants/case-stages";
+import { CANONICAL_CASE_STAGES, normalizeCanonicalCaseStage } from "@/constants/case-stages";
 
 /** 返回数据库原始字符串（trim）；无非兼容映射。 */
 export function resolveProcessStatusForWorkflow(raw: string | null | undefined): string | null {
   if (raw == null) return null;
   const s = raw.trim();
-  return s === "" ? null : s;
+  if (s === "") return null;
+  const normalized = normalizeCanonicalCaseStage(s);
+  return normalized ?? s;
 }
 
 /** Hasura Console → Data → cases → process_status → 字段描述可粘贴（简体中文） */

@@ -11,6 +11,7 @@ export default function AdminCaseDetailPage() {
       caseId={id}
       apiPathBase="/api/admin/cases"
       backHref="/admin/cases"
+      partyProfileMode="admin"
     />
   );
 }

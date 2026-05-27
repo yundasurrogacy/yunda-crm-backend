@@ -1,6 +1,11 @@
 import { getClient } from "@/config-lib/graphql-client";
 import type { CrmSession } from "@/types/portal";
-import { CANONICAL_CASE_STAGES, type CanonicalCaseStage } from "@/constants/case-stages";
+import {
+  CANONICAL_CASE_STAGES,
+  canonicalStageQueryValues,
+  normalizeCanonicalCaseStage,
+  type CanonicalCaseStage,
+} from "@/constants/case-stages";
 import { intendedParentDisplay, surrogateDisplayName } from "@/lib/case-manager/display-names";
 import { resolveProcessStatusForWorkflow } from "@/lib/case-manager/process-status";
 
@@ -24,6 +29,7 @@ const CASES_LIST_QUERY = `
       id
       process_status
       updated_at
+      created_by
       case_manager_case_managers
       intended_parent_intended_parents
       surrogate_mother_surrogate_mothers
@@ -33,11 +39,11 @@ const CASES_LIST_QUERY = `
         }
       }
       surrogate_mother {
-        contact_information
+        profile_data
         email
       }
       intended_parent {
-        contact_information
+        profile_data
         email
       }
     }
@@ -58,6 +64,7 @@ export type AmCaseRow = {
   id: string;
   process_status: string | null;
   updated_at: string | null;
+  createdByUserId: string | null;
   caseManagerId: string | null;
   caseManagerEmail: string | null;
   intendedParentId: string | null;
@@ -75,8 +82,12 @@ export type CasesQueryFilters = {
   surrogateId?: string;
 };
 
-/** 案例经理端 API 固定用 `case_manager_assigned`；管理端列表用 `admin_all`。 */
-export type CasesListScope = "case_manager_assigned" | "admin_all";
+/** 案例经理端 API：全部（创建∪负责）/ 我负责 / 我创建；管理端列表用 `admin_all`。 */
+export type CasesListScope =
+  | "case_manager_all"
+  | "case_manager_assigned"
+  | "case_manager_created"
+  | "admin_all";
 
 const RESOLVE_CM_FOR_USER = `
   query ResolveCaseManagerEntityForUser($uid: bigint!) {
@@ -100,15 +111,29 @@ export async function resolveCaseManagerEntityId(session: CrmSession): Promise<s
 function scopeClauseForList(
   scope: CasesListScope,
   resolvedCaseManagerEntityId: string | null | undefined,
+  sessionUserId?: string,
 ): Record<string, unknown> {
   if (scope === "admin_all") {
     return {};
   }
-  const cmId = resolvedCaseManagerEntityId?.trim();
-  if (!cmId) {
-    return { id: { _eq: "0" } };
+  if (scope === "case_manager_created") {
+    const uid = sessionUserId?.trim();
+    if (!uid) return { id: { _eq: "0" } };
+    return { created_by: { _eq: uid } };
   }
-  return { case_manager_case_managers: { _eq: cmId } };
+  if (scope === "case_manager_assigned") {
+    const cmId = resolvedCaseManagerEntityId?.trim();
+    if (!cmId) return { id: { _eq: "0" } };
+    return { case_manager_case_managers: { _eq: cmId } };
+  }
+  /** case_manager_all：我创建的 ∪ 我负责的 */
+  const or: Record<string, unknown>[] = [];
+  const uid = sessionUserId?.trim();
+  const cmId = resolvedCaseManagerEntityId?.trim();
+  if (uid) or.push({ created_by: { _eq: uid } });
+  if (cmId) or.push({ case_manager_case_managers: { _eq: cmId } });
+  if (or.length === 0) return { id: { _eq: "0" } };
+  return { _or: or };
 }
 
 function cleanId(input?: string): string | null {
@@ -121,9 +146,14 @@ function buildQueryClauses(filters: CasesQueryFilters): Record<string, unknown>[
   const clauses: Record<string, unknown>[] = [];
   /** 管道阶段唯一来源：`cases.process_status`（canonical stage key）。卡片筛选传 `stage`，「我的案例」可额外传 `processStatus`，二者勿叠加以免 AND 出矛盾条件。 */
   if (filters.stage && filters.stage !== "all") {
-    clauses.push({ process_status: { _eq: filters.stage } });
+    clauses.push({ process_status: { _in: canonicalStageQueryValues(filters.stage) } });
   } else if (filters.processStatus?.trim()) {
-    clauses.push({ process_status: { _eq: filters.processStatus.trim() } });
+    const normalized = normalizeCanonicalCaseStage(filters.processStatus.trim());
+    if (normalized) {
+      clauses.push({ process_status: { _in: canonicalStageQueryValues(normalized) } });
+    } else {
+      clauses.push({ process_status: { _eq: filters.processStatus.trim() } });
+    }
   }
   const caseManagerId = cleanId(filters.caseManagerId);
   if (caseManagerId) {
@@ -160,9 +190,10 @@ export function buildCasesWhere(
   filters: CasesQueryFilters,
   listScope: CasesListScope,
   resolvedCaseManagerEntityId?: string | null,
+  sessionUserId?: string,
 ): Record<string, unknown> {
   const clauses: Record<string, unknown>[] = [];
-  const scope = scopeClauseForList(listScope, resolvedCaseManagerEntityId);
+  const scope = scopeClauseForList(listScope, resolvedCaseManagerEntityId, sessionUserId);
   if (Object.keys(scope).length > 0) {
     clauses.push(scope);
   }
@@ -180,7 +211,7 @@ export async function fetchStageCounts(
   const client = getClient();
   const entries = await Promise.all(
     CANONICAL_CASE_STAGES.map(async (stage) => {
-      const where = buildCasesWhere({ stage }, listScope, resolvedCaseManagerEntityId);
+      const where = buildCasesWhere({ stage }, listScope, resolvedCaseManagerEntityId, session.userId);
       const data = await client.execute<{
         cases_aggregate: { aggregate: { count: number } | null };
       }>({
@@ -205,7 +236,12 @@ export async function fetchCasesPage(
   resolvedCaseManagerEntityId?: string | null,
 ): Promise<{ rows: AmCaseRow[]; total: number }> {
   const client = getClient();
-  const where = buildCasesWhere({ stage, ...filters }, listScope, resolvedCaseManagerEntityId);
+  const where = buildCasesWhere(
+    { stage, ...filters },
+    listScope,
+    resolvedCaseManagerEntityId,
+    session.userId,
+  );
   const limit = Math.min(Math.max(pageSize, 1), 100);
   const offset = Math.max(page - 1, 0) * limit;
 
@@ -215,6 +251,7 @@ export async function fetchCasesPage(
       id: string | number;
       process_status: string | null;
       updated_at: string | null;
+      created_by: string | number | null;
       case_manager_case_managers: string | number | null;
       intended_parent_intended_parents: string | number | null;
       surrogate_mother_surrogate_mothers: string | number | null;
@@ -224,11 +261,11 @@ export async function fetchCasesPage(
         } | null;
       } | null;
       surrogate_mother: {
-        contact_information: unknown;
+        profile_data: unknown;
         email: string | null;
       } | null;
       intended_parent: {
-        contact_information: unknown;
+        profile_data: unknown;
         email: string | null;
       } | null;
     }[];
@@ -243,6 +280,7 @@ export async function fetchCasesPage(
     id: String(c.id),
     process_status: resolveProcessStatusForWorkflow(c.process_status),
     updated_at: c.updated_at ?? null,
+    createdByUserId: c.created_by == null ? null : String(c.created_by),
     caseManagerId: c.case_manager_case_managers == null ? null : String(c.case_manager_case_managers),
     caseManagerEmail: c.case_manager?.user?.email?.trim() || null,
     intendedParentId:
@@ -250,11 +288,9 @@ export async function fetchCasesPage(
     surrogateId:
       c.surrogate_mother_surrogate_mothers == null ? null : String(c.surrogate_mother_surrogate_mothers),
     surrogateName:
-      surrogateDisplayName(c.surrogate_mother?.contact_information) ||
-      c.surrogate_mother?.email?.trim() ||
-      "—",
+      surrogateDisplayName(c.surrogate_mother?.profile_data, c.surrogate_mother?.email ?? undefined) || "—",
     intendedParentName:
-      intendedParentDisplay(c.intended_parent?.contact_information, c.intended_parent?.email ?? undefined) || "—",
+      intendedParentDisplay(c.intended_parent?.profile_data, c.intended_parent?.email ?? undefined) || "—",
   }));
 
   return { rows, total };

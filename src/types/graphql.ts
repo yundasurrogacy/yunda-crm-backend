@@ -764,6 +764,8 @@ export type Case_Managers = {
   created_at: Scalars['timestamptz']['output'];
   id: Scalars['bigint']['output'];
   profile_data: Scalars['json']['output'];
+  /** 角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理） */
+  role: Scalars['String']['output'];
   updated_at: Scalars['timestamptz']['output'];
   /** An object relationship */
   user: Users;
@@ -882,6 +884,7 @@ export type Case_Managers_Bool_Exp = {
   created_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   id?: InputMaybe<Bigint_Comparison_Exp>;
   profile_data?: InputMaybe<Json_Comparison_Exp>;
+  role?: InputMaybe<String_Comparison_Exp>;
   updated_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   user?: InputMaybe<Users_Bool_Exp>;
   user_users?: InputMaybe<Bigint_Comparison_Exp>;
@@ -907,6 +910,8 @@ export type Case_Managers_Insert_Input = {
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
   profile_data?: InputMaybe<Scalars['json']['input']>;
+  /** 角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理） */
+  role?: InputMaybe<Scalars['String']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
   user?: InputMaybe<Users_Obj_Rel_Insert_Input>;
   user_users?: InputMaybe<Scalars['bigint']['input']>;
@@ -917,6 +922,8 @@ export type Case_Managers_Max_Fields = {
   __typename?: 'case_managers_max_fields';
   created_at?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['bigint']['output']>;
+  /** 角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理） */
+  role?: Maybe<Scalars['String']['output']>;
   updated_at?: Maybe<Scalars['timestamptz']['output']>;
   user_users?: Maybe<Scalars['bigint']['output']>;
 };
@@ -925,6 +932,8 @@ export type Case_Managers_Max_Fields = {
 export type Case_Managers_Max_Order_By = {
   created_at?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  /** 角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理） */
+  role?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
   user_users?: InputMaybe<Order_By>;
 };
@@ -934,6 +943,8 @@ export type Case_Managers_Min_Fields = {
   __typename?: 'case_managers_min_fields';
   created_at?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['bigint']['output']>;
+  /** 角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理） */
+  role?: Maybe<Scalars['String']['output']>;
   updated_at?: Maybe<Scalars['timestamptz']['output']>;
   user_users?: Maybe<Scalars['bigint']['output']>;
 };
@@ -942,6 +953,8 @@ export type Case_Managers_Min_Fields = {
 export type Case_Managers_Min_Order_By = {
   created_at?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  /** 角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理） */
+  role?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
   user_users?: InputMaybe<Order_By>;
 };
@@ -975,6 +988,7 @@ export type Case_Managers_Order_By = {
   created_at?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   profile_data?: InputMaybe<Order_By>;
+  role?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
   user?: InputMaybe<Users_Order_By>;
   user_users?: InputMaybe<Order_By>;
@@ -994,6 +1008,8 @@ export enum Case_Managers_Select_Column {
   /** column name */
   ProfileData = 'profile_data',
   /** column name */
+  Role = 'role',
+  /** column name */
   UpdatedAt = 'updated_at',
   /** column name */
   UserUsers = 'user_users'
@@ -1004,6 +1020,8 @@ export type Case_Managers_Set_Input = {
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
   profile_data?: InputMaybe<Scalars['json']['input']>;
+  /** 角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理） */
+  role?: InputMaybe<Scalars['String']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
   user_users?: InputMaybe<Scalars['bigint']['input']>;
 };
@@ -1060,6 +1078,8 @@ export type Case_Managers_Stream_Cursor_Value_Input = {
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
   profile_data?: InputMaybe<Scalars['json']['input']>;
+  /** 角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理） */
+  role?: InputMaybe<Scalars['String']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
   user_users?: InputMaybe<Scalars['bigint']['input']>;
 };
@@ -1085,6 +1105,8 @@ export enum Case_Managers_Update_Column {
   Id = 'id',
   /** column name */
   ProfileData = 'profile_data',
+  /** column name */
+  Role = 'role',
   /** column name */
   UpdatedAt = 'updated_at',
   /** column name */
@@ -1155,13 +1177,15 @@ export type Cases = {
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: Maybe<Scalars['bigint']['output']>;
   created_at: Scalars['timestamptz']['output'];
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: Maybe<Scalars['bigint']['output']>;
   /** 案例相关的数据 */
   data: Scalars['json']['output'];
   id: Scalars['bigint']['output'];
   /** An object relationship */
-  intended_parent?: Maybe<Intended_Parents>;
+  intended_parent: Intended_Parents;
   /** 外键，准父母，一个准父母只有一个case */
-  intended_parent_intended_parents?: Maybe<Scalars['bigint']['output']>;
+  intended_parent_intended_parents: Scalars['bigint']['output'];
   /** An array relationship */
   ivf_clinics: Array<Ivf_Clinics>;
   /** An aggregate relationship */
@@ -1187,6 +1211,8 @@ export type Cases = {
   /** An aggregate relationship */
   trust_account_balance_changes_aggregate: Trust_Account_Balance_Changes_Aggregate;
   updated_at: Scalars['timestamptz']['output'];
+  /** An object relationship */
+  user?: Maybe<Users>;
 };
 
 
@@ -1365,6 +1391,8 @@ export type Cases_Avg_Fields = {
   case_manager_case_managers?: Maybe<Scalars['Float']['output']>;
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: Maybe<Scalars['Float']['output']>;
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: Maybe<Scalars['Float']['output']>;
   id?: Maybe<Scalars['Float']['output']>;
   /** 外键，准父母，一个准父母只有一个case */
   intended_parent_intended_parents?: Maybe<Scalars['Float']['output']>;
@@ -1380,6 +1408,8 @@ export type Cases_Avg_Order_By = {
   case_manager_case_managers?: InputMaybe<Order_By>;
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: InputMaybe<Order_By>;
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   /** 外键，准父母，一个准父母只有一个case */
   intended_parent_intended_parents?: InputMaybe<Order_By>;
@@ -1401,6 +1431,7 @@ export type Cases_Bool_Exp = {
   client_manager?: InputMaybe<Client_Managers_Bool_Exp>;
   client_manager_client_managers?: InputMaybe<Bigint_Comparison_Exp>;
   created_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  created_by?: InputMaybe<Bigint_Comparison_Exp>;
   data?: InputMaybe<Json_Comparison_Exp>;
   id?: InputMaybe<Bigint_Comparison_Exp>;
   intended_parent?: InputMaybe<Intended_Parents_Bool_Exp>;
@@ -1418,6 +1449,7 @@ export type Cases_Bool_Exp = {
   trust_account_balance_changes?: InputMaybe<Trust_Account_Balance_Changes_Bool_Exp>;
   trust_account_balance_changes_aggregate?: InputMaybe<Trust_Account_Balance_Changes_Aggregate_Bool_Exp>;
   updated_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  user?: InputMaybe<Users_Bool_Exp>;
 };
 
 /** unique or primary key constraints on table "cases" */
@@ -1956,6 +1988,8 @@ export type Cases_Inc_Input = {
   case_manager_case_managers?: InputMaybe<Scalars['bigint']['input']>;
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: InputMaybe<Scalars['bigint']['input']>;
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: InputMaybe<Scalars['bigint']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
   /** 外键，准父母，一个准父母只有一个case */
   intended_parent_intended_parents?: InputMaybe<Scalars['bigint']['input']>;
@@ -1975,6 +2009,8 @@ export type Cases_Insert_Input = {
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: InputMaybe<Scalars['bigint']['input']>;
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: InputMaybe<Scalars['bigint']['input']>;
   /** 案例相关的数据 */
   data?: InputMaybe<Scalars['json']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
@@ -1993,6 +2029,7 @@ export type Cases_Insert_Input = {
   trust_account_balance?: InputMaybe<Scalars['numeric']['input']>;
   trust_account_balance_changes?: InputMaybe<Trust_Account_Balance_Changes_Arr_Rel_Insert_Input>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  user?: InputMaybe<Users_Obj_Rel_Insert_Input>;
 };
 
 /** aggregate max on columns */
@@ -2003,6 +2040,8 @@ export type Cases_Max_Fields = {
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: Maybe<Scalars['bigint']['output']>;
   created_at?: Maybe<Scalars['timestamptz']['output']>;
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: Maybe<Scalars['bigint']['output']>;
   id?: Maybe<Scalars['bigint']['output']>;
   /** 外键，准父母，一个准父母只有一个case */
   intended_parent_intended_parents?: Maybe<Scalars['bigint']['output']>;
@@ -2022,6 +2061,8 @@ export type Cases_Max_Order_By = {
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: InputMaybe<Order_By>;
   created_at?: InputMaybe<Order_By>;
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   /** 外键，准父母，一个准父母只有一个case */
   intended_parent_intended_parents?: InputMaybe<Order_By>;
@@ -2042,6 +2083,8 @@ export type Cases_Min_Fields = {
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: Maybe<Scalars['bigint']['output']>;
   created_at?: Maybe<Scalars['timestamptz']['output']>;
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: Maybe<Scalars['bigint']['output']>;
   id?: Maybe<Scalars['bigint']['output']>;
   /** 外键，准父母，一个准父母只有一个case */
   intended_parent_intended_parents?: Maybe<Scalars['bigint']['output']>;
@@ -2061,6 +2104,8 @@ export type Cases_Min_Order_By = {
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: InputMaybe<Order_By>;
   created_at?: InputMaybe<Order_By>;
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   /** 外键，准父母，一个准父母只有一个case */
   intended_parent_intended_parents?: InputMaybe<Order_By>;
@@ -2104,6 +2149,7 @@ export type Cases_Order_By = {
   client_manager?: InputMaybe<Client_Managers_Order_By>;
   client_manager_client_managers?: InputMaybe<Order_By>;
   created_at?: InputMaybe<Order_By>;
+  created_by?: InputMaybe<Order_By>;
   data?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   intended_parent?: InputMaybe<Intended_Parents_Order_By>;
@@ -2117,6 +2163,7 @@ export type Cases_Order_By = {
   trust_account_balance?: InputMaybe<Order_By>;
   trust_account_balance_changes_aggregate?: InputMaybe<Trust_Account_Balance_Changes_Aggregate_Order_By>;
   updated_at?: InputMaybe<Order_By>;
+  user?: InputMaybe<Users_Order_By>;
 };
 
 /** primary key columns input for table: cases */
@@ -2132,6 +2179,8 @@ export enum Cases_Select_Column {
   ClientManagerClientManagers = 'client_manager_client_managers',
   /** column name */
   CreatedAt = 'created_at',
+  /** column name */
+  CreatedBy = 'created_by',
   /** column name */
   Data = 'data',
   /** column name */
@@ -2155,6 +2204,8 @@ export type Cases_Set_Input = {
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: InputMaybe<Scalars['bigint']['input']>;
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: InputMaybe<Scalars['bigint']['input']>;
   /** 案例相关的数据 */
   data?: InputMaybe<Scalars['json']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
@@ -2176,6 +2227,8 @@ export type Cases_Stddev_Fields = {
   case_manager_case_managers?: Maybe<Scalars['Float']['output']>;
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: Maybe<Scalars['Float']['output']>;
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: Maybe<Scalars['Float']['output']>;
   id?: Maybe<Scalars['Float']['output']>;
   /** 外键，准父母，一个准父母只有一个case */
   intended_parent_intended_parents?: Maybe<Scalars['Float']['output']>;
@@ -2191,6 +2244,8 @@ export type Cases_Stddev_Order_By = {
   case_manager_case_managers?: InputMaybe<Order_By>;
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: InputMaybe<Order_By>;
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   /** 外键，准父母，一个准父母只有一个case */
   intended_parent_intended_parents?: InputMaybe<Order_By>;
@@ -2207,6 +2262,8 @@ export type Cases_Stddev_Pop_Fields = {
   case_manager_case_managers?: Maybe<Scalars['Float']['output']>;
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: Maybe<Scalars['Float']['output']>;
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: Maybe<Scalars['Float']['output']>;
   id?: Maybe<Scalars['Float']['output']>;
   /** 外键，准父母，一个准父母只有一个case */
   intended_parent_intended_parents?: Maybe<Scalars['Float']['output']>;
@@ -2222,6 +2279,8 @@ export type Cases_Stddev_Pop_Order_By = {
   case_manager_case_managers?: InputMaybe<Order_By>;
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: InputMaybe<Order_By>;
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   /** 外键，准父母，一个准父母只有一个case */
   intended_parent_intended_parents?: InputMaybe<Order_By>;
@@ -2238,6 +2297,8 @@ export type Cases_Stddev_Samp_Fields = {
   case_manager_case_managers?: Maybe<Scalars['Float']['output']>;
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: Maybe<Scalars['Float']['output']>;
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: Maybe<Scalars['Float']['output']>;
   id?: Maybe<Scalars['Float']['output']>;
   /** 外键，准父母，一个准父母只有一个case */
   intended_parent_intended_parents?: Maybe<Scalars['Float']['output']>;
@@ -2253,6 +2314,8 @@ export type Cases_Stddev_Samp_Order_By = {
   case_manager_case_managers?: InputMaybe<Order_By>;
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: InputMaybe<Order_By>;
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   /** 外键，准父母，一个准父母只有一个case */
   intended_parent_intended_parents?: InputMaybe<Order_By>;
@@ -2277,6 +2340,8 @@ export type Cases_Stream_Cursor_Value_Input = {
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: InputMaybe<Scalars['bigint']['input']>;
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: InputMaybe<Scalars['bigint']['input']>;
   /** 案例相关的数据 */
   data?: InputMaybe<Scalars['json']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
@@ -2298,6 +2363,8 @@ export type Cases_Sum_Fields = {
   case_manager_case_managers?: Maybe<Scalars['bigint']['output']>;
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: Maybe<Scalars['bigint']['output']>;
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: Maybe<Scalars['bigint']['output']>;
   id?: Maybe<Scalars['bigint']['output']>;
   /** 外键，准父母，一个准父母只有一个case */
   intended_parent_intended_parents?: Maybe<Scalars['bigint']['output']>;
@@ -2313,6 +2380,8 @@ export type Cases_Sum_Order_By = {
   case_manager_case_managers?: InputMaybe<Order_By>;
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: InputMaybe<Order_By>;
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   /** 外键，准父母，一个准父母只有一个case */
   intended_parent_intended_parents?: InputMaybe<Order_By>;
@@ -2330,6 +2399,8 @@ export enum Cases_Update_Column {
   ClientManagerClientManagers = 'client_manager_client_managers',
   /** column name */
   CreatedAt = 'created_at',
+  /** column name */
+  CreatedBy = 'created_by',
   /** column name */
   Data = 'data',
   /** column name */
@@ -2362,6 +2433,8 @@ export type Cases_Var_Pop_Fields = {
   case_manager_case_managers?: Maybe<Scalars['Float']['output']>;
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: Maybe<Scalars['Float']['output']>;
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: Maybe<Scalars['Float']['output']>;
   id?: Maybe<Scalars['Float']['output']>;
   /** 外键，准父母，一个准父母只有一个case */
   intended_parent_intended_parents?: Maybe<Scalars['Float']['output']>;
@@ -2377,6 +2450,8 @@ export type Cases_Var_Pop_Order_By = {
   case_manager_case_managers?: InputMaybe<Order_By>;
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: InputMaybe<Order_By>;
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   /** 外键，准父母，一个准父母只有一个case */
   intended_parent_intended_parents?: InputMaybe<Order_By>;
@@ -2393,6 +2468,8 @@ export type Cases_Var_Samp_Fields = {
   case_manager_case_managers?: Maybe<Scalars['Float']['output']>;
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: Maybe<Scalars['Float']['output']>;
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: Maybe<Scalars['Float']['output']>;
   id?: Maybe<Scalars['Float']['output']>;
   /** 外键，准父母，一个准父母只有一个case */
   intended_parent_intended_parents?: Maybe<Scalars['Float']['output']>;
@@ -2408,6 +2485,8 @@ export type Cases_Var_Samp_Order_By = {
   case_manager_case_managers?: InputMaybe<Order_By>;
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: InputMaybe<Order_By>;
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   /** 外键，准父母，一个准父母只有一个case */
   intended_parent_intended_parents?: InputMaybe<Order_By>;
@@ -2424,6 +2503,8 @@ export type Cases_Variance_Fields = {
   case_manager_case_managers?: Maybe<Scalars['Float']['output']>;
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: Maybe<Scalars['Float']['output']>;
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: Maybe<Scalars['Float']['output']>;
   id?: Maybe<Scalars['Float']['output']>;
   /** 外键，准父母，一个准父母只有一个case */
   intended_parent_intended_parents?: Maybe<Scalars['Float']['output']>;
@@ -2439,6 +2520,8 @@ export type Cases_Variance_Order_By = {
   case_manager_case_managers?: InputMaybe<Order_By>;
   /** 弃用，外键，客户经理 */
   client_manager_client_managers?: InputMaybe<Order_By>;
+  /** 谁创建的案例，外键，关联users表 */
+  created_by?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   /** 外键，准父母，一个准父母只有一个case */
   intended_parent_intended_parents?: InputMaybe<Order_By>;
@@ -9143,6 +9226,10 @@ export type Users = {
   /** An aggregate relationship */
   case_managers_aggregate: Case_Managers_Aggregate;
   /** An array relationship */
+  cases: Array<Cases>;
+  /** An aggregate relationship */
+  cases_aggregate: Cases_Aggregate;
+  /** An array relationship */
   client_managers: Array<Client_Managers>;
   /** An aggregate relationship */
   client_managers_aggregate: Client_Managers_Aggregate;
@@ -9158,7 +9245,7 @@ export type Users = {
   intended_parents_aggregate: Intended_Parents_Aggregate;
   /** 小写 32位md5 */
   password: Scalars['String']['output'];
-  /** [user（系统使用者）、admin（系统管理员）、operator（系统运营人员）] */
+  /** [user（系统使用者）、admin（系统管理员）] */
   role: Scalars['String']['output'];
   /** An object relationship */
   surrogate_mother?: Maybe<Surrogate_Mothers>;
@@ -9187,6 +9274,26 @@ export type UsersCase_Managers_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Case_Managers_Order_By>>;
   where?: InputMaybe<Case_Managers_Bool_Exp>;
+};
+
+
+/** 用户表 */
+export type UsersCasesArgs = {
+  distinct_on?: InputMaybe<Array<Cases_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Cases_Order_By>>;
+  where?: InputMaybe<Cases_Bool_Exp>;
+};
+
+
+/** 用户表 */
+export type UsersCases_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Cases_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Cases_Order_By>>;
+  where?: InputMaybe<Cases_Bool_Exp>;
 };
 
 
@@ -9293,6 +9400,8 @@ export type Users_Bool_Exp = {
   case_manager?: InputMaybe<Case_Managers_Bool_Exp>;
   case_managers?: InputMaybe<Case_Managers_Bool_Exp>;
   case_managers_aggregate?: InputMaybe<Case_Managers_Aggregate_Bool_Exp>;
+  cases?: InputMaybe<Cases_Bool_Exp>;
+  cases_aggregate?: InputMaybe<Cases_Aggregate_Bool_Exp>;
   client_managers?: InputMaybe<Client_Managers_Bool_Exp>;
   client_managers_aggregate?: InputMaybe<Client_Managers_Aggregate_Bool_Exp>;
   created_at?: InputMaybe<Timestamptz_Comparison_Exp>;
@@ -9326,6 +9435,7 @@ export type Users_Inc_Input = {
 export type Users_Insert_Input = {
   case_manager?: InputMaybe<Case_Managers_Obj_Rel_Insert_Input>;
   case_managers?: InputMaybe<Case_Managers_Arr_Rel_Insert_Input>;
+  cases?: InputMaybe<Cases_Arr_Rel_Insert_Input>;
   client_managers?: InputMaybe<Client_Managers_Arr_Rel_Insert_Input>;
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
   /** 邮箱，登录账号 */
@@ -9335,7 +9445,7 @@ export type Users_Insert_Input = {
   intended_parents?: InputMaybe<Intended_Parents_Arr_Rel_Insert_Input>;
   /** 小写 32位md5 */
   password?: InputMaybe<Scalars['String']['input']>;
-  /** [user（系统使用者）、admin（系统管理员）、operator（系统运营人员）] */
+  /** [user（系统使用者）、admin（系统管理员）] */
   role?: InputMaybe<Scalars['String']['input']>;
   surrogate_mother?: InputMaybe<Surrogate_Mothers_Obj_Rel_Insert_Input>;
   surrogate_mothers?: InputMaybe<Surrogate_Mothers_Arr_Rel_Insert_Input>;
@@ -9351,7 +9461,7 @@ export type Users_Max_Fields = {
   id?: Maybe<Scalars['bigint']['output']>;
   /** 小写 32位md5 */
   password?: Maybe<Scalars['String']['output']>;
-  /** [user（系统使用者）、admin（系统管理员）、operator（系统运营人员）] */
+  /** [user（系统使用者）、admin（系统管理员）] */
   role?: Maybe<Scalars['String']['output']>;
   updated_at?: Maybe<Scalars['timestamptz']['output']>;
 };
@@ -9365,7 +9475,7 @@ export type Users_Min_Fields = {
   id?: Maybe<Scalars['bigint']['output']>;
   /** 小写 32位md5 */
   password?: Maybe<Scalars['String']['output']>;
-  /** [user（系统使用者）、admin（系统管理员）、operator（系统运营人员）] */
+  /** [user（系统使用者）、admin（系统管理员）] */
   role?: Maybe<Scalars['String']['output']>;
   updated_at?: Maybe<Scalars['timestamptz']['output']>;
 };
@@ -9397,6 +9507,7 @@ export type Users_On_Conflict = {
 export type Users_Order_By = {
   case_manager?: InputMaybe<Case_Managers_Order_By>;
   case_managers_aggregate?: InputMaybe<Case_Managers_Aggregate_Order_By>;
+  cases_aggregate?: InputMaybe<Cases_Aggregate_Order_By>;
   client_managers_aggregate?: InputMaybe<Client_Managers_Aggregate_Order_By>;
   created_at?: InputMaybe<Order_By>;
   email?: InputMaybe<Order_By>;
@@ -9439,7 +9550,7 @@ export type Users_Set_Input = {
   id?: InputMaybe<Scalars['bigint']['input']>;
   /** 小写 32位md5 */
   password?: InputMaybe<Scalars['String']['input']>;
-  /** [user（系统使用者）、admin（系统管理员）、operator（系统运营人员）] */
+  /** [user（系统使用者）、admin（系统管理员）] */
   role?: InputMaybe<Scalars['String']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
 };
@@ -9478,7 +9589,7 @@ export type Users_Stream_Cursor_Value_Input = {
   id?: InputMaybe<Scalars['bigint']['input']>;
   /** 小写 32位md5 */
   password?: InputMaybe<Scalars['String']['input']>;
-  /** [user（系统使用者）、admin（系统管理员）、operator（系统运营人员）] */
+  /** [user（系统使用者）、admin（系统管理员）] */
   role?: InputMaybe<Scalars['String']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
 };

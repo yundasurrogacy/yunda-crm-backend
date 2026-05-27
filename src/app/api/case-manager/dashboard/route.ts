@@ -7,7 +7,6 @@ import {
   type CasesListScope,
 } from "@/lib/case-manager/fetch-dashboard-data";
 
-const CM_SCOPE = "case_manager_assigned" satisfies CasesListScope;
 import { getServerSession } from "@/lib/auth/session-cookie";
 
 export async function GET(req: Request) {
@@ -31,6 +30,13 @@ export async function GET(req: Request) {
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
   const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get("pageSize") ?? "10", 10) || 10));
   const skipCounts = searchParams.get("counts") === "0";
+  const scopeRaw = searchParams.get("scope");
+  const listScope: CasesListScope = (() => {
+    if (scopeRaw === "created") return "case_manager_created";
+    if (scopeRaw === "assigned") return "case_manager_assigned";
+    if (scopeRaw === "all" || allStagesScope) return "case_manager_all";
+    return "case_manager_assigned";
+  })();
   const filters = {
     q: searchParams.get("q") ?? undefined,
     processStatus: searchParams.get("processStatus") ?? undefined,
@@ -49,7 +55,7 @@ export async function GET(req: Request) {
         page,
         pageSize,
         filters,
-        CM_SCOPE,
+        listScope,
         resolvedCmId,
       );
       return NextResponse.json({
@@ -61,7 +67,7 @@ export async function GET(req: Request) {
       });
     }
     if (allStagesScope) {
-      const list = await fetchCasesPage(session, "all", page, pageSize, filters, CM_SCOPE, resolvedCmId);
+      const list = await fetchCasesPage(session, "all", page, pageSize, filters, listScope, resolvedCmId);
       return NextResponse.json({
         stage: "all",
         counts: null,
@@ -71,8 +77,8 @@ export async function GET(req: Request) {
       });
     }
     const [counts, list] = await Promise.all([
-      fetchStageCounts(session, CM_SCOPE, resolvedCmId),
-      fetchCasesPage(session, stage as CanonicalCaseStage, page, pageSize, filters, CM_SCOPE, resolvedCmId),
+      fetchStageCounts(session, listScope, resolvedCmId),
+      fetchCasesPage(session, stage as CanonicalCaseStage, page, pageSize, filters, listScope, resolvedCmId),
     ]);
     return NextResponse.json({
       stage,

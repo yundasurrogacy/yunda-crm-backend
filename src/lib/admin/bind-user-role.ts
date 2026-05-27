@@ -28,13 +28,13 @@ const INSERT_CM = `
 
 const INSERT_IP = `
   mutation BindInsertIp($userId: bigint!, $email: String!) {
-    insert_intended_parents_one(object: { user_users: $userId, email: $email, contact_information: {} }) { id }
+    insert_intended_parents_one(object: { user_users: $userId, email: $email, profile_data: {} }) { id }
   }
 `;
 
 const INSERT_SM = `
   mutation BindInsertSm($userId: bigint!, $email: String!) {
-    insert_surrogate_mothers_one(object: { user_users: $userId, email: $email, contact_information: {} }) { id }
+    insert_surrogate_mothers_one(object: { user_users: $userId, email: $email, profile_data: {} }) { id }
   }
 `;
 

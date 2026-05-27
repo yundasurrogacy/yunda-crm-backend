@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -48,11 +49,17 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
+  const showProfileActions = kind === "intended_parent" || kind === "surrogate_mother";
+  const detailBase =
+    kind === "intended_parent" ? "/admin/accounts/intended-parents" : "/admin/accounts/surrogates";
+
   return (
     <div className="space-y-6">
       <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
         <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">{t(`admin_accounts.title_${kind}`)}</h1>
-        <p className="mt-2 max-w-3xl text-sm leading-relaxed text-sage-700">{t("admin_accounts.intro_bind_entity")}</p>
+        <p className="mt-2 max-w-3xl text-sm leading-relaxed text-sage-700">
+          {showProfileActions ? t("admin_accounts.intro_with_profile") : t("admin_accounts.intro_bind_entity")}
+        </p>
         <div className="mt-3 flex gap-2">
           <input
             value={q}
@@ -79,18 +86,21 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
                 <th className="px-4 py-3">{t("admin_accounts.col_user_id")}</th>
                 <th className="px-4 py-3">{t("admin_accounts.col_email")}</th>
                 <th className="px-4 py-3">{t("admin_accounts.col_bind_login")}</th>
+                {showProfileActions ? (
+                  <th className="px-4 py-3">{t("admin_accounts.col_actions")}</th>
+                ) : null}
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td className="px-4 py-6 text-sage-600" colSpan={4}>
+                  <td className="px-4 py-6 text-sage-600" colSpan={showProfileActions ? 5 : 4}>
                     {t("admin_accounts.loading")}
                   </td>
                 </tr>
               ) : rows.length === 0 ? (
                 <tr>
-                  <td className="px-4 py-6 text-sage-600" colSpan={4}>
+                  <td className="px-4 py-6 text-sage-600" colSpan={showProfileActions ? 5 : 4}>
                     {t("admin_accounts.empty")}
                   </td>
                 </tr>
@@ -125,6 +135,16 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
                         </button>
                       )}
                     </td>
+                    {showProfileActions ? (
+                      <td className="px-4 py-3">
+                        <Link
+                          href={`${detailBase}/${r.entityId}`}
+                          className="rounded-md border border-sage-500 bg-sage-50 px-3 py-1.5 text-xs font-semibold text-sage-900 hover:bg-sage-100"
+                        >
+                          {t("admin_accounts.btn_view_profile")}
+                        </Link>
+                      </td>
+                    ) : null}
                   </tr>
                 ))
               )}

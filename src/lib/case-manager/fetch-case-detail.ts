@@ -15,15 +15,17 @@ const CASE_DETAIL_QUERY = `
       created_at
       updated_at
       data
+      surrogate_mother_surrogate_mothers
+      intended_parent_intended_parents
       surrogate_mother {
+        id
         email
-        contact_information
+        profile_data
       }
       intended_parent {
+        id
         email
-        contact_information
-        basic_information
-        family_profile
+        profile_data
       }
       case_manager {
         user {
@@ -42,17 +44,22 @@ export function caseDetailWhere(
   caseIdNumeric: bigint,
   mode: CaseDetailAccessMode,
   resolvedCaseManagerEntityId: string | null | undefined,
+  sessionUserId?: string,
 ): Record<string, unknown> {
   const idClause = { id: { _eq: String(caseIdNumeric) } };
   if (mode === "admin_api") {
     return idClause;
   }
   const cmId = resolvedCaseManagerEntityId?.trim();
-  if (!cmId) {
+  const uid = sessionUserId?.trim();
+  if (!cmId && !uid) {
     return { _and: [idClause, { id: { _eq: "0" } }] };
   }
+  const accessOr: Record<string, unknown>[] = [];
+  if (cmId) accessOr.push({ case_manager_case_managers: { _eq: cmId } });
+  if (uid) accessOr.push({ created_by: { _eq: uid } });
   return {
-    _and: [idClause, { case_manager_case_managers: { _eq: cmId } }],
+    _and: [idClause, { _or: accessOr }],
   };
 }
 
@@ -62,12 +69,17 @@ export type AmCaseDetail = {
   trust_account_balance: string;
   created_at: string;
   updated_at: string;
-  surrogate: { displayName: string; email: string | null; contact_information: unknown | null };
-  intended_parent: {
+  surrogate: {
+    id: string | null;
     displayName: string;
     email: string | null;
-    basic_information: unknown | null;
-    family_profile: unknown | null;
+    profile_data: unknown | null;
+  };
+  intended_parent: {
+    id: string | null;
+    displayName: string;
+    email: string | null;
+    profile_data: unknown | null;
   };
   case_manager: { email: string; user_id: string } | null;
   /** 各阶段表单；与 DB `cases.data` 根级的 `v`、`byStage` 一致 */
@@ -89,7 +101,7 @@ export async function fetchCaseDetail(
   }
 
   const client = getClient();
-  const where = caseDetailWhere(idNum, options.mode, resolvedCmId);
+  const where = caseDetailWhere(idNum, options.mode, resolvedCmId, session.userId);
 
   const data = await client.execute<{
     cases: {
@@ -99,15 +111,17 @@ export async function fetchCaseDetail(
       created_at: string;
       updated_at: string;
       data: unknown;
+      surrogate_mother_surrogate_mothers: string | number | null;
+      intended_parent_intended_parents: string | number | null;
       surrogate_mother: {
+        id: string | number;
         email: string;
-        contact_information: unknown;
+        profile_data: unknown;
       } | null;
       intended_parent: {
+        id: string | number;
         email: string;
-        contact_information: unknown;
-        basic_information: unknown;
-        family_profile: unknown;
+        profile_data: unknown;
       } | null;
       case_manager: { user: { id: string | number; email: string } } | null;
     }[];
@@ -128,6 +142,8 @@ export async function fetchCaseDetail(
       : (row.trust_account_balance ?? "0").toString();
 
   const cm = row.case_manager?.user;
+  const smEmail = sm?.email?.trim() || null;
+  const ipEmail = ip?.email?.trim() || null;
 
   const stageData = workspaceFromCaseData(row.data);
   const process_status = resolveProcessStatusForWorkflow(row.process_status);
@@ -139,15 +155,26 @@ export async function fetchCaseDetail(
     created_at: row.created_at,
     updated_at: row.updated_at,
     surrogate: {
-      displayName: surrogateDisplayName(sm?.contact_information) || sm?.email?.trim() || "",
-      email: sm?.email?.trim() || null,
-      contact_information: sm?.contact_information ?? null,
+      id:
+        sm?.id != null
+          ? String(sm.id)
+          : row.surrogate_mother_surrogate_mothers != null
+            ? String(row.surrogate_mother_surrogate_mothers)
+            : null,
+      displayName: surrogateDisplayName(sm?.profile_data, smEmail ?? undefined),
+      email: smEmail,
+      profile_data: sm?.profile_data ?? null,
     },
     intended_parent: {
-      displayName: intendedParentDisplay(ip?.contact_information, ip?.email) || "",
-      email: ip?.email?.trim() || null,
-      basic_information: ip?.basic_information ?? null,
-      family_profile: ip?.family_profile ?? null,
+      id:
+        ip?.id != null
+          ? String(ip.id)
+          : row.intended_parent_intended_parents != null
+            ? String(row.intended_parent_intended_parents)
+            : null,
+      displayName: intendedParentDisplay(ip?.profile_data, ipEmail ?? undefined),
+      email: ipEmail,
+      profile_data: ip?.profile_data ?? null,
     },
     case_manager: cm?.email ? { email: cm.email, user_id: String(cm.id) } : null,
     stage_data: stageData,

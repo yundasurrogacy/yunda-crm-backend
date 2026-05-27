@@ -14,10 +14,12 @@
       "my_cases": "Case list"
     },
     "ip": {
-      "home": "Home"
+      "home": "Home",
+      "my_cases": "My cases"
     },
     "sm": {
-      "home": "Home"
+      "home": "Home",
+      "my_cases": "My cases"
     },
     "admin": {
       "home": "Admin home",
@@ -176,6 +178,26 @@
     "error_link_entity_not_found": "That business record was not found.",
     "error_link_user_conflict": "That login is already linked to another record of this type.",
     "error_link": "Link failed. Try again later."
+  },
+  "party_cases": {
+    "page_title": "My cases",
+    "page_intro": "Cases linked to your account are listed here.",
+    "detail_title": "Case detail",
+    "detail_intro": "Read-only view of progress and profile summaries.",
+    "back_list": "Back to my cases",
+    "section_summary": "Summary",
+    "col_case_id": "Case ID",
+    "col_surrogate": "Gestational carrier",
+    "col_intended_parent": "Intended parent",
+    "col_stage": "Stage",
+    "col_case_manager": "Case manager",
+    "col_updated": "Updated",
+    "col_action": "Action",
+    "view_detail": "View detail",
+    "empty": "No cases are linked to your account yet. Contact your case manager if you need help.",
+    "error_unauthorized": "Please sign in first.",
+    "error_load": "Could not load data. Try again later.",
+    "error_not_found": "Case not found or you cannot access it."
   },
   "admin_entity": {
     "title_intended_parent": "Intended parent profile",

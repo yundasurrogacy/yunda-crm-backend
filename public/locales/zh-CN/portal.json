@@ -14,10 +14,12 @@
       "my_cases": "案例列表"
     },
     "ip": {
-      "home": "首页"
+      "home": "首页",
+      "my_cases": "我的案例"
     },
     "sm": {
-      "home": "首页"
+      "home": "首页",
+      "my_cases": "我的案例"
     },
     "admin": {
       "home": "管理首页",
@@ -177,6 +179,26 @@
     "error_link_entity_not_found": "未找到该业务记录，可能已被删除。",
     "error_link_user_conflict": "该登录账号已绑定另一条同类业务记录，请先解绑或换用其他邮箱。",
     "error_link": "绑定失败，请稍后重试。"
+  },
+  "party_cases": {
+    "page_title": "我的案例",
+    "page_intro": "此处展示与您账号关联的代孕案例。",
+    "detail_title": "案例详情",
+    "detail_intro": "只读查看案例进度与双方档案摘要。",
+    "back_list": "返回我的案例",
+    "section_summary": "案例概要",
+    "col_case_id": "案件号",
+    "col_surrogate": "代孕母亲",
+    "col_intended_parent": "准父母",
+    "col_stage": "当前阶段",
+    "col_case_manager": "案例经理",
+    "col_updated": "最后更新",
+    "col_action": "操作",
+    "view_detail": "查看详情",
+    "empty": "暂无关联案例。如有疑问请联系案例经理。",
+    "error_unauthorized": "请先登录。",
+    "error_load": "加载失败，请稍后重试。",
+    "error_not_found": "未找到该案例或您无权查看。"
   },
   "admin_entity": {
     "title_intended_parent": "准父母资料",

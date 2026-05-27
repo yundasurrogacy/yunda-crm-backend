@@ -14,7 +14,7 @@ type Props = {
   lng: string;
   emptyMessage: string;
   manageHref?: string | null;
-  manageLabel: string;
+  manageLabel?: string;
   /** 已在外层 section 包裹时设为 true */
   embedded?: boolean;
 };
@@ -39,7 +39,7 @@ export function CaseEntityProfileCard({
           <h2 className="crm-font-display text-lg font-semibold text-brand-brown">{title}</h2>
           {subtitle ? <p className="mt-1 text-sm text-sage-800">{subtitle}</p> : null}
         </div>
-        {manageHref ? (
+        {manageHref && manageLabel ? (
           <Link
             href={manageHref}
             className="ami-ui inline-flex shrink-0 items-center gap-1 rounded-md border border-brand-brown/40 bg-white px-3 py-1.5 text-xs font-semibold text-brand-brown shadow-sm hover:bg-sage-50"

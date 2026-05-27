@@ -1,5 +1,7 @@
 import { getClient } from "@/config-lib/graphql-client";
 import { resolveCaseManagerEntityId } from "@/lib/case-manager/fetch-dashboard-data";
+import { partyCasesWhere } from "@/lib/party/fetch-party-cases";
+import { resolvePartyEntityId, type PartyKind } from "@/lib/party/resolve-party-entity";
 import type { CrmSession } from "@/types/portal";
 import type { AmWorkspacePayload } from "@/lib/case-manager/am-workspace-model";
 import { workspaceFromCaseData } from "@/lib/case-manager/am-workspace-model";
@@ -37,18 +39,29 @@ const CASE_DETAIL_QUERY = `
   }
 `;
 
-export type CaseDetailAccessMode = "case_manager_api" | "admin_api";
+export type CaseDetailAccessMode =
+  | "case_manager_api"
+  | "admin_api"
+  | "intended_parent_api"
+  | "surrogate_mother_api";
 
-/** 详情查询：管理端用 admin_api（仅按 id）；案例经理端用 case_manager_api（id + 当前用户在业务表上的案例经理行）。 */
+/** 详情查询：管理端 / 案例经理 / 准父母 / 代孕母 各自权限范围。 */
 export function caseDetailWhere(
   caseIdNumeric: bigint,
   mode: CaseDetailAccessMode,
   resolvedCaseManagerEntityId: string | null | undefined,
   sessionUserId?: string,
+  partyEntityId?: string | null,
 ): Record<string, unknown> {
   const idClause = { id: { _eq: String(caseIdNumeric) } };
   if (mode === "admin_api") {
     return idClause;
+  }
+  if (mode === "intended_parent_api" || mode === "surrogate_mother_api") {
+    const entityId = partyEntityId?.trim();
+    if (!entityId) return { _and: [idClause, { id: { _eq: "0" } }] };
+    const kind: PartyKind = mode === "intended_parent_api" ? "intended_parent" : "surrogate_mother";
+    return { _and: [idClause, partyCasesWhere(kind, entityId)] };
   }
   const cmId = resolvedCaseManagerEntityId?.trim();
   const uid = sessionUserId?.trim();
@@ -96,12 +109,24 @@ export async function fetchCaseDetail(
 
   const resolvedCmId =
     options.mode === "case_manager_api" ? await resolveCaseManagerEntityId(session) : null;
-  if (options.mode === "case_manager_api" && !resolvedCmId) {
-    return null;
+
+  let partyEntityId: string | null = null;
+  if (options.mode === "intended_parent_api") {
+    partyEntityId = await resolvePartyEntityId("intended_parent", session.userId);
+    if (!partyEntityId) return null;
+  } else if (options.mode === "surrogate_mother_api") {
+    partyEntityId = await resolvePartyEntityId("surrogate_mother", session.userId);
+    if (!partyEntityId) return null;
   }
 
   const client = getClient();
-  const where = caseDetailWhere(idNum, options.mode, resolvedCmId, session.userId);
+  const where = caseDetailWhere(
+    idNum,
+    options.mode,
+    resolvedCmId,
+    session.userId,
+    partyEntityId,
+  );
 
   const data = await client.execute<{
     cases: {

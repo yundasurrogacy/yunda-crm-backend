@@ -16,8 +16,18 @@ export function isPortalNavActive(pathname: string, href: string): boolean {
     return p.startsWith("/case_manager/my-cases");
   }
 
-  if (h === "/intended_parent") return p === "/intended_parent" || p.startsWith("/intended_parent/");
-  if (h === "/surrogate_mother") return p === "/surrogate_mother" || p.startsWith("/surrogate_mother/");
+  if (h === "/intended_parent") {
+    return p === "/intended_parent" || (p.startsWith("/intended_parent/") && !p.startsWith("/intended_parent/my-cases") && !p.startsWith("/intended_parent/cases"));
+  }
+  if (h === "/intended_parent/my-cases") {
+    return p.startsWith("/intended_parent/my-cases") || p.startsWith("/intended_parent/cases");
+  }
+  if (h === "/surrogate_mother") {
+    return p === "/surrogate_mother" || (p.startsWith("/surrogate_mother/") && !p.startsWith("/surrogate_mother/my-cases") && !p.startsWith("/surrogate_mother/cases"));
+  }
+  if (h === "/surrogate_mother/my-cases") {
+    return p.startsWith("/surrogate_mother/my-cases") || p.startsWith("/surrogate_mother/cases");
+  }
 
   return p === h || p.startsWith(`${h}/`);
 }

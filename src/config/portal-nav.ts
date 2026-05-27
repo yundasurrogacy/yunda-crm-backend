@@ -6,9 +6,15 @@ export const caseManagerNav = [
   { href: "/case_manager/my-cases", labelKey: "nav.cm.my_cases" },
 ] as const satisfies readonly PortalNavItem[];
 
-export const intendedParentNav = [{ href: "/intended_parent", labelKey: "nav.ip.home" }] as const satisfies readonly PortalNavItem[];
+export const intendedParentNav = [
+  { href: "/intended_parent", labelKey: "nav.ip.home" },
+  { href: "/intended_parent/my-cases", labelKey: "nav.ip.my_cases" },
+] as const satisfies readonly PortalNavItem[];
 
-export const surrogateMotherNav = [{ href: "/surrogate_mother", labelKey: "nav.sm.home" }] as const satisfies readonly PortalNavItem[];
+export const surrogateMotherNav = [
+  { href: "/surrogate_mother", labelKey: "nav.sm.home" },
+  { href: "/surrogate_mother/my-cases", labelKey: "nav.sm.my_cases" },
+] as const satisfies readonly PortalNavItem[];
 
 /** 管理端：三类业务列表（在各自行绑定登录用户）；新建登录账号见「账号管理」 */
 export const adminNav = [

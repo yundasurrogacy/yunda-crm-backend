@@ -1,4 +1,4 @@
-import type { CanonicalCaseStage } from "@/constants/case-stages";
+import { STAGE_DATA_LEGACY_KEYS, STAGE_FIELD_LEGACY_KEYS, type CanonicalCaseStage } from "@/constants/case-stages";
 import type { AmStageFieldDef } from "@/constants/am-stage-fields-types";
 
 /** 各阶段表单；与 `cases.data` 根级字段一致：`v` + `byStage` */
@@ -31,7 +31,48 @@ export function parseWorkspaceUrl(raw: unknown): AmWorkspacePayload {
       row[k] = v == null ? "" : String(v).trim();
     out[stage] = row;
   }
-  return { v: 1, byStage: out as AmWorkspacePayload["byStage"] };
+  return migrateWorkspaceStageKeys({ v: 1, byStage: out as AmWorkspacePayload["byStage"] });
+}
+
+/** 合并旧阶段键下的字段到现行 canonical 阶段 */
+export function migrateWorkspaceStageKeys(payload: AmWorkspacePayload): AmWorkspacePayload {
+  const byStage = { ...payload.byStage };
+  for (const [canonical, legacyKeys] of Object.entries(STAGE_DATA_LEGACY_KEYS) as Array<
+    [CanonicalCaseStage, readonly string[]]
+  >) {
+    const merged = migrateStageFieldKeys({ ...(byStage[canonical] ?? {}) });
+    let changed = Boolean(byStage[canonical]);
+    for (const legacy of legacyKeys) {
+      const row = byStage[legacy as CanonicalCaseStage];
+      if (!row) continue;
+      const migrated = migrateStageFieldKeys(row);
+      for (const [k, v] of Object.entries(migrated)) {
+        if (String(merged[k] ?? "").trim() === "" && String(v ?? "").trim() !== "") {
+          merged[k] = v;
+          changed = true;
+        }
+      }
+      delete byStage[legacy as CanonicalCaseStage];
+      changed = true;
+    }
+    if (changed) byStage[canonical] = merged;
+  }
+  for (const [stage, row] of Object.entries(byStage) as Array<[CanonicalCaseStage, Record<string, string>]>) {
+    byStage[stage] = migrateStageFieldKeys(row);
+  }
+  return { v: payload.v, byStage };
+}
+
+function migrateStageFieldKeys(row: Record<string, string>): Record<string, string> {
+  const out = { ...row };
+  for (const [legacyKey, canonicalKey] of Object.entries(STAGE_FIELD_LEGACY_KEYS)) {
+    if (String(out[canonicalKey] ?? "").trim() !== "") continue;
+    const legacyVal = out[legacyKey];
+    if (String(legacyVal ?? "").trim() === "") continue;
+    out[canonicalKey] = legacyVal;
+    delete out[legacyKey];
+  }
+  return out;
 }
 
 export function mergeStageFields(

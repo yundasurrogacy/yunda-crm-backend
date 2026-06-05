@@ -56,6 +56,8 @@ export const GC_PROFILE_SECTIONS: ProfileSectionDef[] = [
       { key: "occupation", labelEn: "Occupation", labelZh: "职业" },
       { key: "base_compensation", labelEn: "Base Compensation", labelZh: "基础薪资" },
       { key: "availability_to_proceed", labelEn: "Availability to Proceed", labelZh: "开始时间" },
+      { key: "menstrual_cycle_day_1", labelEn: "Menstrual Cycle Day 1", labelZh: "生理期第一天" },
+      { key: "gc_emergency_contact", labelEn: "GC Emergency Contact", labelZh: "GC 紧急联系人" },
     ],
   },
   {

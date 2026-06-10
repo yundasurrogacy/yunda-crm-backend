@@ -18,9 +18,19 @@
         "type": "Currency / Number"
       },
       {
+        "key": "initial_trust_funding_received_date",
+        "label": "Initial Trust Funding Received Date",
+        "type": "Date"
+      },
+      {
         "key": "second_trust_funding",
         "label": "Second Trust Funding",
         "type": "Currency / Number"
+      },
+      {
+        "key": "second_trust_funding_received_date",
+        "label": "Second Trust Funding Received Date",
+        "type": "Date"
       },
       {
         "key": "third_trust_funding",
@@ -28,14 +38,14 @@
         "type": "Currency / Number"
       },
       {
+        "key": "third_trust_funding_received_date",
+        "label": "Third Trust Funding Received Date",
+        "type": "Date"
+      },
+      {
         "key": "additional_custom_payment",
         "label": "Additional/Custom Payment",
         "type": "Currency / Number"
-      },
-      {
-        "key": "funds_received_date",
-        "label": "Funds Received Date",
-        "type": "Date"
       }
     ]
   },
@@ -215,22 +225,42 @@
       {
         "key": "hcg_1",
         "label": "HCG 1",
-        "type": "Date / Text"
+        "type": "Text"
+      },
+      {
+        "key": "hcg_1_date",
+        "label": "HCG 1 Date",
+        "type": "Date"
       },
       {
         "key": "hcg_2",
         "label": "HCG 2",
-        "type": "Date / Text"
+        "type": "Text"
+      },
+      {
+        "key": "hcg_2_date",
+        "label": "HCG 2 Date",
+        "type": "Date"
       },
       {
         "key": "ultrasound_1",
         "label": "Ultrasound 1",
-        "type": "Date / Text"
+        "type": "Text"
+      },
+      {
+        "key": "ultrasound_1_date",
+        "label": "Ultrasound 1 Date",
+        "type": "Date"
       },
       {
         "key": "ultrasound_2",
         "label": "Ultrasound 2",
-        "type": "Date / Text"
+        "type": "Text"
+      },
+      {
+        "key": "ultrasound_2_date",
+        "label": "Ultrasound 2 Date",
+        "type": "Date"
       }
     ]
   },

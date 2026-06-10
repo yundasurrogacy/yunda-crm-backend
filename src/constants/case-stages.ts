@@ -37,6 +37,7 @@ export const STAGE_FIELD_LEGACY_KEYS: Record<string, string> = {
   health_policy_number: "health_insurance_id_number",
   health_monthly_premium: "health_insurance_premium",
   life_monthly_premium: "life_insurance_premium",
+  funds_received_date: "initial_trust_funding_received_date",
 };
 
 const CANONICAL_TO_QUERY_VALUES: Record<CanonicalCaseStage, readonly string[]> = {

@@ -107,7 +107,7 @@ export function EntityProfilePage({
   const zh = lng.toLowerCase().startsWith("zh");
 
   return (
-    <div className="ami-ui crm-font-ui space-y-6 text-sage-900">
+    <div className="ami-ui crm-font-ui crm-page">
       <div className="flex flex-wrap items-start gap-4">
         <Link
           href={backHref}
@@ -133,8 +133,8 @@ export function EntityProfilePage({
       ) : null}
 
       {!loading && detail ? (
-        <form onSubmit={(e) => void handleSave(e)} className="space-y-6">
-          <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
+        <form onSubmit={(e) => void handleSave(e)} className="crm-page">
+          <section className="crm-card">
             <h2 className="crm-font-display mb-4 text-lg font-semibold text-brand-brown">
               {t(`${i18nPrefix}.section_account`)}
             </h2>
@@ -168,7 +168,7 @@ export function EntityProfilePage({
           {detail.sections.map((section) => (
             <section
               key={section.id}
-              className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6"
+              className="crm-card"
             >
               <h2 className="crm-font-display mb-4 text-lg font-semibold text-brand-brown">
                 {zh ? section.titleZh : section.titleEn}
@@ -193,7 +193,7 @@ export function EntityProfilePage({
           ))}
 
           {kind === "surrogate_mother" ? (
-            <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
+            <section className="crm-card">
               <ProfilePhotosView
                 profileData={detail.profile_data}
                 className=""

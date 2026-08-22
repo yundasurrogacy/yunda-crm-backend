@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AmQiniuFileInput } from "@/components/case-manager/AmQiniuFileInput";
+import { CollapsibleCard } from "@/components/ui/CollapsibleCard";
+import { SelectMenu } from "@/components/ui/SelectMenu";
 import { getFieldsForStage } from "@/constants/am-stage-field-groups";
 import {
   CANONICAL_CASE_STAGES,
@@ -70,14 +72,15 @@ function FieldControl({
   const t = def.type.trim();
   if (t === "Select" && def.options && def.options.length > 0) {
     return (
-      <select {...common} value={value} onChange={(e) => onChange(e.target.value)}>
-        <option value="">—</option>
-        {def.options.map((opt) => (
-          <option key={opt} value={opt}>
-            {opt}
-          </option>
-        ))}
-      </select>
+      <SelectMenu
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        options={[
+          { value: "", label: "—" },
+          ...def.options.map((opt) => ({ value: opt, label: opt })),
+        ]}
+      />
     );
   }
   if (t === "Long text") {
@@ -288,8 +291,16 @@ function CaseManagerAmWorkspacePanelInner({
     curIdx >= 0 ? Math.round(((curIdx + 1) / CANONICAL_CASE_STAGES.length) * 100) : 0;
 
   return (
-    <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm backdrop-blur-[1px] md:p-6">
-      <h2 className="crm-font-display mb-3 text-lg font-semibold text-brand-brown">{t("case_detail.am_workspace.section_title")}</h2>
+    <CollapsibleCard
+      title={t("case_detail.am_workspace.section_title")}
+      summary={
+        curIdx >= 0
+          ? `${translateProcessStatus(detail.process_status ?? "", tStage) || detail.process_status} · ${curIdx + 1}/${CANONICAL_CASE_STAGES.length}`
+          : translateProcessStatus(detail.process_status ?? "", tStage) || detail.process_status || "—"
+      }
+      storageKey={`crm-case-detail-workspace-${caseId}`}
+      defaultOpen
+    >
       <p className="mb-2 text-sm text-sage-700">{t("case_detail.am_workspace.section_intro")}</p>
       <p className="mb-4 rounded-md border border-sage-200/90 bg-sage-50/80 px-3 py-2 text-xs text-sage-700">
         {t("case_detail.am_workspace.profile_fields_hint")}
@@ -460,14 +471,14 @@ function CaseManagerAmWorkspacePanelInner({
           ) : null}
         </div>
       </div>
-    </section>
+    </CollapsibleCard>
   );
 }
 
 function AmWorkspaceFallback() {
   const { t } = useTranslation("portal");
   return (
-    <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
+    <section className="crm-card">
       <p className="text-sm text-sage-600">{t("case_detail.am_workspace.loading_panel")}</p>
     </section>
   );

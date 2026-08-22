@@ -86,13 +86,13 @@ export function EntitySearchSelect({
         onFocus={() => {
           if (!disabled) setOpen(true);
         }}
-        className="crm-font-ui block w-full rounded-md border border-sage-300 bg-white px-3 py-2 text-sm text-sage-900 shadow-sm placeholder:text-sage-400 focus:border-brand-brown focus:outline-none focus:ring-1 focus:ring-brand-brown disabled:cursor-not-allowed disabled:bg-sage-100/80"
+        className="crm-font-ui block w-full rounded-md border border-sage-300 bg-white px-3 py-2 text-sm text-sage-900 shadow-sm placeholder:text-sage-400 transition focus:border-brand-brown focus:outline-none focus:ring-[3px] focus:ring-brand-brown/30 disabled:cursor-not-allowed disabled:bg-sage-100/80"
       />
       {open && !disabled ? (
         <ul
           id={listId}
           role="listbox"
-          className="absolute z-40 mt-1 max-h-56 w-full overflow-auto rounded-md border border-sage-200 bg-white py-1 text-sm shadow-md"
+          className="absolute z-40 mt-1 max-h-56 w-full overflow-auto rounded-md border border-sage-200 bg-white py-1 text-sm shadow-lg ring-1 ring-sage-900/5"
         >
           {canEmpty ? (
             <li>

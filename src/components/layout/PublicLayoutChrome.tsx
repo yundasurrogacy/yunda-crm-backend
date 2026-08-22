@@ -5,11 +5,14 @@ import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 
 export function PublicLayoutChrome({ children }: { children: ReactNode }) {
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center bg-main-bg p-6">
+    <div className="crm-auth-shell relative">
       <div className="fixed end-4 top-4 z-50 md:end-6 md:top-5">
         <LanguageSwitcher variant="header" />
       </div>
-      <div className="card-surface w-full max-w-md rounded-lg border border-sage-300 p-8 shadow-sm">
+      <div className="crm-auth-card">
+        <p className="crm-font-display mb-5 text-center text-2xl font-semibold tracking-[0.14em] text-brand-brown">
+          YUNDA
+        </p>
         {children}
       </div>
     </div>

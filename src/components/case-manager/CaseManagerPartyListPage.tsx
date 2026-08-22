@@ -119,7 +119,7 @@ export function CaseManagerPartyListPage({ kind }: { kind: EntityKind }) {
   }
 
   return (
-    <div className="ami-ui crm-font-ui space-y-6 text-sage-900">
+    <div className="ami-ui crm-font-ui crm-page">
       <div>
         <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">
           {t(`cm_parties.title_${kind}`)}
@@ -127,7 +127,7 @@ export function CaseManagerPartyListPage({ kind }: { kind: EntityKind }) {
         <p className="mt-1 text-sm text-sage-700">{t("cm_parties.intro")}</p>
       </div>
 
-      <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
+      <section className="crm-card">
         <h2 className="crm-font-display mb-3 text-lg font-semibold text-brand-brown">
           {t("cm_parties.create_title")}
         </h2>
@@ -166,7 +166,7 @@ export function CaseManagerPartyListPage({ kind }: { kind: EntityKind }) {
         </form>
       </section>
 
-      <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
+      <section className="crm-card">
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <input
             value={q}

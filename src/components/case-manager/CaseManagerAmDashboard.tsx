@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { EntitySearchSelect } from "@/components/ui/EntitySearchSelect";
+import { SelectMenu } from "@/components/ui/SelectMenu";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { AM_STAGE_ICON_COMPONENTS } from "@/constants/am-stage-icons";
 import { CANONICAL_CASE_STAGES, isCanonicalCaseStage, type CanonicalCaseStage } from "@/constants/case-stages";
@@ -452,8 +453,8 @@ export function CaseManagerAmDashboard({
   }
 
   return (
-    <div className="ami-ui crm-font-ui text-sage-900">
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+    <div className="ami-ui crm-font-ui crm-page">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           {variant === "full" ? (
             <>
@@ -518,7 +519,7 @@ export function CaseManagerAmDashboard({
       </div>
 
       {variant === "full" ? (
-        <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
           {(() => {
             const totalAll =
               data?.counts &&
@@ -567,29 +568,28 @@ export function CaseManagerAmDashboard({
       ) : null}
 
       {variant === "stageList" ? (
-        <div className="mb-4">
+        <div>
           <label className="flex max-w-sm flex-col gap-1 text-xs font-medium text-sage-700">
             <span>{t("am_dash.filter_stage")}</span>
-            <select
+            <SelectMenu
+              searchable
               value={stage}
-              onChange={(e) => {
-                const v = e.target.value;
+              onChange={(v) => {
                 onSelectStage(v === "all" || isCanonicalCaseStage(v) ? v : "all");
               }}
-              className="rounded-md border border-sage-300 bg-white px-2 py-2 text-sm text-sage-900"
-            >
-              <option value="all">{t("am_dash.stage_all")}</option>
-              {CANONICAL_CASE_STAGES.map((s) => (
-                <option key={s} value={s}>
-                  {translateProcessStatus(s, tStage)}
-                </option>
-              ))}
-            </select>
+              options={[
+                { value: "all", label: t("am_dash.stage_all") },
+                ...CANONICAL_CASE_STAGES.map((s) => ({
+                  value: s,
+                  label: translateProcessStatus(s, tStage),
+                })),
+              ]}
+            />
           </label>
         </div>
       ) : null}
 
-      <section className="rounded-xl border border-sage-200/80 bg-white/40 p-4 shadow-sm backdrop-blur-[1px] md:p-6">
+      <section className="crm-card crm-card-soft">
         <div className="mb-4 space-y-3">
           {variant !== "myCases" ? (
             <p className="crm-font-display text-sm font-medium text-brand-brown md:text-base">
@@ -644,18 +644,18 @@ export function CaseManagerAmDashboard({
             {isMyCases ? (
               <label className="flex flex-col gap-1 text-xs font-medium text-sage-700">
                 <span>{t("am_dash.filter_status")}</span>
-                <select
+                <SelectMenu
+                  searchable
                   value={processStatus}
-                  onChange={(e) => setProcessStatus(e.target.value)}
-                  className="rounded-md border border-sage-300 bg-white px-2 py-2 text-sm text-sage-900"
-                >
-                  <option value="">{t("am_dash.all_status")}</option>
-                  {CANONICAL_CASE_STAGES.map((s) => (
-                    <option key={s} value={s}>
-                      {translateProcessStatus(s, tStage)}
-                    </option>
-                  ))}
-                </select>
+                  onChange={setProcessStatus}
+                  options={[
+                    { value: "", label: t("am_dash.all_status") },
+                    ...CANONICAL_CASE_STAGES.map((s) => ({
+                      value: s,
+                      label: translateProcessStatus(s, tStage),
+                    })),
+                  ]}
+                />
               </label>
             ) : null}
           </div>

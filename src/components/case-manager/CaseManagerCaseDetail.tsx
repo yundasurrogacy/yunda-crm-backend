@@ -13,6 +13,7 @@ import { CaseManagerAmWorkspacePanel } from "@/components/case-manager/CaseManag
 import { CaseFilesPanel } from "@/components/case-manager/CaseFilesPanel";
 import { CaseP1OpsPanel } from "@/components/case-manager/CaseP1OpsPanel";
 import { CaseTrustLedgerPanel } from "@/components/case-manager/CaseTrustLedgerPanel";
+import { CollapsibleCard } from "@/components/ui/CollapsibleCard";
 import { GC_PROFILE_SECTIONS } from "@/constants/gc-profile-schema";
 import { IP_PROFILE_SECTIONS } from "@/constants/ip-profile-schema";
 
@@ -134,7 +135,7 @@ export function CaseManagerCaseDetail({
   const lng = i18n.language;
 
   return (
-    <div className="ami-ui crm-font-ui space-y-6 text-sage-900">
+    <div className="ami-ui crm-font-ui crm-page">
       <div className="flex flex-wrap items-start gap-4">
         <Link
           href={backHref}
@@ -159,44 +160,45 @@ export function CaseManagerCaseDetail({
           ) : null}
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <div className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
-              {data.surrogate.id ? (
-                <CaseEntityProfileCard
-                  embedded
-                  title={t("case_detail.section_surrogate")}
-                  subtitle={data.surrogate.displayName || data.surrogate.email || null}
-                  profileTitle={t("case_detail.section_gc_profile")}
-                  sections={GC_PROFILE_SECTIONS}
-                  profileData={data.surrogate.profile_data}
-                  lng={lng}
-                  emptyMessage={t("case_detail.profile_empty_gc")}
-                  manageHref={partyManageHref(partyProfileMode, "surrogate_mother", data.surrogate.id, caseId)}
-                  manageLabel={t("case_detail.manage_profile")}
-                  showPhotos
-                />
-              ) : (
-                <>
-                  <h2 className="crm-font-display text-lg font-semibold text-brand-brown">
-                    {t("case_detail.section_surrogate")}
-                  </h2>
-                  <p className="mt-1 text-sm text-sage-700">{t("case_detail.no_gc_bound")}</p>
+            {data.surrogate.id ? (
+              <CaseEntityProfileCard
+                title={t("case_detail.section_surrogate")}
+                subtitle={data.surrogate.displayName || data.surrogate.email || null}
+                profileTitle={t("case_detail.section_gc_profile")}
+                sections={GC_PROFILE_SECTIONS}
+                profileData={data.surrogate.profile_data}
+                lng={lng}
+                emptyMessage={t("case_detail.profile_empty_gc")}
+                manageHref={partyManageHref(partyProfileMode, "surrogate_mother", data.surrogate.id, caseId)}
+                manageLabel={t("case_detail.manage_profile")}
+                showPhotos
+                storageKey={`crm-case-detail-gc-${caseId}`}
+                defaultOpen={false}
+                footer={
                   <BindSurrogateToCase
                     caseId={caseId}
                     apiCasesBase={apiPathBase}
+                    mode="replace"
+                    excludeSurrogateId={data.surrogate.id}
                     onBound={onGcBound}
                   />
-                </>
-              )}
-              {data.surrogate.id ? (
+                }
+              />
+            ) : (
+              <CollapsibleCard
+                title={t("case_detail.section_surrogate")}
+                summary={t("case_detail.no_gc_bound")}
+                storageKey={`crm-case-detail-gc-${caseId}`}
+                defaultOpen
+              >
+                <p className="mb-3 text-sm text-sage-700">{t("case_detail.no_gc_bound")}</p>
                 <BindSurrogateToCase
                   caseId={caseId}
                   apiCasesBase={apiPathBase}
-                  mode="replace"
-                  excludeSurrogateId={data.surrogate.id}
                   onBound={onGcBound}
                 />
-              ) : null}
-            </div>
+              </CollapsibleCard>
+            )}
             <CaseEntityProfileCard
               title={t("case_detail.section_intended_parents")}
               subtitle={data.intended_parent.displayName || data.intended_parent.email || null}
@@ -207,6 +209,8 @@ export function CaseManagerCaseDetail({
               emptyMessage={t("case_detail.profile_empty_ip")}
               manageHref={partyManageHref(partyProfileMode, "intended_parent", data.intended_parent.id, caseId)}
               manageLabel={t("case_detail.manage_profile")}
+              storageKey={`crm-case-detail-ip-${caseId}`}
+              defaultOpen={false}
             />
           </div>
 
@@ -235,8 +239,12 @@ export function CaseManagerCaseDetail({
             refreshTick={gcOpsTick}
           />
 
-          <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm backdrop-blur-[1px] md:p-6">
-            <h2 className="crm-font-display mb-4 text-lg font-semibold text-brand-brown">{t("case_detail.section_summary")}</h2>
+          <CollapsibleCard
+            title={t("case_detail.section_summary")}
+            summary={`${translateProcessStatus(data.process_status ?? "", tStage) || data.process_status || "—"} · $${data.trust_account_balance}`}
+            storageKey={`crm-case-detail-summary-${caseId}`}
+            defaultOpen={false}
+          >
             <dl className="crm-font-ui grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div>
                 <dt className="text-xs font-semibold uppercase tracking-wide text-sage-600">{t("case_detail.field_case_id")}</dt>
@@ -263,11 +271,15 @@ export function CaseManagerCaseDetail({
                 <dd className="mt-1 text-sm text-sage-800">{formatDt(data.updated_at, lng)}</dd>
               </div>
             </dl>
-          </section>
+          </CollapsibleCard>
 
           {partyProfileMode !== "admin" ? (
-            <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
-              <h2 className="crm-font-display mb-4 text-lg font-semibold text-brand-brown">{t("case_detail.section_team")}</h2>
+            <CollapsibleCard
+              title={t("case_detail.section_team")}
+              summary={data.case_manager?.email ?? "—"}
+              storageKey={`crm-case-detail-team-${caseId}`}
+              defaultOpen={false}
+            >
               <dl className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <dt className="text-xs font-semibold uppercase tracking-wide text-sage-600">{t("case_detail.field_case_manager")}</dt>
@@ -279,7 +291,7 @@ export function CaseManagerCaseDetail({
                   </dd>
                 </div>
               </dl>
-            </section>
+            </CollapsibleCard>
           ) : null}
         </>
       ) : null}

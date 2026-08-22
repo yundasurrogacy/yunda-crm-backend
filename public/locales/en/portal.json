@@ -648,10 +648,13 @@
       "category_EscrowLegalContract": "Escrow / Legal contract",
       "category_PrenatalReport": "Prenatal report",
       "category_Photo": "Photos (medical / transfer / OB)",
-      "category_Other": "Other"
+      "category_Other": "Other",
+      "summary_count": "{{count}} files"
     },
     "p1": {
       "section_title": "Archive / cycles / GC history / messages",
+      "summary_active": "Active case",
+      "summary_archived": "Soft-deleted",
       "archive": "Soft-delete case",
       "unarchive": "Restore case",
       "archive_confirm": "Soft-delete this case? It will hide from default lists; data is kept forever.",

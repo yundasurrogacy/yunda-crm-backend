@@ -93,14 +93,14 @@ export function PartyMyCasesPage({
   const colSpan = showTrust ? 7 : 6;
 
   return (
-    <div className="ami-ui crm-font-ui space-y-6 text-sage-900">
+    <div className="ami-ui crm-font-ui crm-page">
       <div>
         <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">{t("party_cases.page_title")}</h1>
         <p className="mt-1 text-sm text-sage-700">{t("party_cases.page_intro")}</p>
       </div>
 
       {showTrust && !loading && !errorKey && rows.length > 0 ? (
-        <div className="rounded-xl border border-sage-200/80 bg-white/50 px-4 py-3 shadow-sm">
+        <div className="crm-card">
           <p className="text-xs font-semibold uppercase tracking-wide text-sage-600">
             {t("party_cases.trust_total_label")}
           </p>
@@ -115,7 +115,7 @@ export function PartyMyCasesPage({
       {errorKey ? <p className="text-sm text-red-700">{t(errorKey)}</p> : null}
 
       {!loading && !errorKey ? (
-        <div className="overflow-hidden rounded-xl border border-sage-200/80 bg-white/50 shadow-sm">
+        <div className="crm-card !p-0 overflow-hidden">
           <table className="crm-font-ui w-full min-w-[32rem] text-left text-sm">
             <thead className="border-b border-sage-200/80 bg-sage-50/80 text-xs font-semibold uppercase tracking-wide text-sage-600">
               <tr>

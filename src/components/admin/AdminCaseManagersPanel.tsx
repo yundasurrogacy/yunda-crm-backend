@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { CollapsibleCard } from "@/components/ui/CollapsibleCard";
 import { EntitySearchSelect, type EntitySearchOption } from "@/components/ui/EntitySearchSelect";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 
@@ -144,20 +145,29 @@ export function AdminCaseManagersPanel({ caseId }: { caseId: string }) {
     }
   }
 
-  return (
-    <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
-      <h2 className="crm-font-display mb-1 text-lg font-semibold text-brand-brown">
-        {t("case_detail.section_case_managers")}
-      </h2>
-      <p className="mb-4 text-sm text-sage-700">{t("case_detail.cm_intro")}</p>
+  const summary = loading
+    ? t("case_detail.cm_loading")
+    : primary
+      ? `${primary.email || "—"} · ${t("case_detail.cm_primary_heading")}${
+          auxiliaries.length > 0 ? ` · +${auxiliaries.length}` : ""
+        }`
+      : t("case_detail.cm_primary_empty");
 
+  return (
+    <CollapsibleCard
+      title={t("case_detail.section_case_managers")}
+      summary={summary}
+      defaultOpen={false}
+      storageKey={`crm-case-detail-cm-${caseId}`}
+    >
+      <p className="mb-4 text-sm text-sage-700">{t("case_detail.cm_intro")}</p>
       {loading ? <p className="text-sm text-sage-600">{t("case_detail.cm_loading")}</p> : null}
       {error ? <p className="text-sm text-red-700">{t("case_detail.cm_error_load")}</p> : null}
 
       {!loading && !error ? (
         <div className="space-y-6">
           {/* 主负责：设置 / 更改 */}
-          <div className="rounded-lg border border-sage-200/80 bg-white p-4">
+          <div className="rounded-lg border border-sage-200/80 bg-white p-5">
             <h3 className="text-sm font-semibold text-sage-900">{t("case_detail.cm_primary_heading")}</h3>
             <p className="mt-1 text-sm text-sage-800">
               {primary ? (
@@ -206,7 +216,7 @@ export function AdminCaseManagersPanel({ caseId }: { caseId: string }) {
           </div>
 
           {/* 辅助：添加 / 移除 */}
-          <div className="rounded-lg border border-sage-200/80 bg-white p-4">
+          <div className="rounded-lg border border-sage-200/80 bg-white p-5">
             <h3 className="mb-3 text-sm font-semibold text-sage-900">
               {t("case_detail.cm_aux_heading")}
             </h3>
@@ -287,6 +297,6 @@ export function AdminCaseManagersPanel({ caseId }: { caseId: string }) {
           {message ? <p className="text-xs text-sage-800">{message}</p> : null}
         </div>
       ) : null}
-    </section>
+    </CollapsibleCard>
   );
 }

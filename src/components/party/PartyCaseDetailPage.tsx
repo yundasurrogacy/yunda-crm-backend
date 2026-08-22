@@ -82,7 +82,7 @@ export function PartyCaseDetailPage({
   const lng = i18n.language;
 
   return (
-    <div className="ami-ui crm-font-ui space-y-6 text-sage-900">
+    <div className="ami-ui crm-font-ui crm-page">
       <div className="flex flex-wrap items-start gap-4">
         <Link
           href={listHref}
@@ -104,7 +104,7 @@ export function PartyCaseDetailPage({
 
       {!loading && data ? (
         <>
-          <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
+          <section className="crm-card">
             <h2 className="crm-font-display mb-4 text-lg font-semibold text-brand-brown">
               {t("party_cases.section_summary")}
             </h2>

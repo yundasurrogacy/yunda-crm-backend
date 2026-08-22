@@ -2,10 +2,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { CollapsibleCard } from "@/components/ui/CollapsibleCard";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import type { AmCaseDetail } from "@/lib/case-manager/fetch-case-detail";
 import type { CaseGcHistoryRow } from "@/lib/case-manager/case-gc-history";
 import type { CaseMessageRow } from "@/lib/case-manager/case-messages";
-import { useConfirm } from "@/components/ui/ConfirmDialog";
 
 type Props = {
   caseId: string;
@@ -137,8 +138,17 @@ export function CaseP1OpsPanel({
   };
 
   return (
-    <section className="space-y-6 rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
-      <h2 className="crm-font-display text-lg font-semibold text-brand-brown">{t("case_detail.p1.section_title")}</h2>
+    <CollapsibleCard
+      title={t("case_detail.p1.section_title")}
+      summary={
+        detail.archived_at
+          ? t("case_detail.p1.summary_archived")
+          : t("case_detail.p1.summary_active")
+      }
+      storageKey={`crm-case-detail-p1-${caseId}`}
+      defaultOpen={false}
+      bodyClassName="space-y-6"
+    >
       {msg ? <p className="text-sm text-sage-800">{msg}</p> : null}
 
       <div className="flex flex-wrap gap-2">
@@ -275,6 +285,6 @@ export function CaseP1OpsPanel({
           {t("case_detail.p1.send_message")}
         </button>
       </div>
-    </section>
+    </CollapsibleCard>
   );
 }

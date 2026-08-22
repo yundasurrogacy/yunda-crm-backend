@@ -15,6 +15,7 @@
   --sage-950: #172019;
 }
 
+/* 无透明度后缀的兼容类；带 /80 等透明度请用 Tailwind theme（globals @theme） */
 .bg-sage-50 { background-color: var(--sage-50); }
 .bg-sage-100 { background-color: var(--sage-100); }
 .bg-sage-200 { background-color: var(--sage-200); }

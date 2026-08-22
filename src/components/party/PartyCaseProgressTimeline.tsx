@@ -18,7 +18,7 @@ export function PartyCaseProgressTimeline({ processStatus }: { processStatus: st
     curIdx >= 0 ? Math.round(((curIdx + 1) / CANONICAL_CASE_STAGES.length) * 100) : 0;
 
   return (
-    <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
+    <section className="crm-card">
       <h2 className="crm-font-display mb-2 text-lg font-semibold text-brand-brown">
         {t("party_cases.section_progress")}
       </h2>

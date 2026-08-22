@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AmQiniuFileInput } from "@/components/case-manager/AmQiniuFileInput";
+import { CollapsibleCard } from "@/components/ui/CollapsibleCard";
+import { SelectMenu } from "@/components/ui/SelectMenu";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import type { TrustLedgerEntry } from "@/lib/case-manager/trust-ledger";
 
@@ -176,10 +178,12 @@ export function CaseTrustLedgerPanel({
   const isNegative = Number.isFinite(balNum) && balNum < 0;
 
   return (
-    <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
-      <h2 className="crm-font-display mb-2 text-lg font-semibold text-brand-brown">
-        {t("case_detail.trust.section_title")}
-      </h2>
+    <CollapsibleCard
+      title={t("case_detail.trust.section_title")}
+      summary={formatMoney(balance, lng)}
+      storageKey={`crm-case-detail-trust-${caseId}`}
+      defaultOpen={false}
+    >
       <p className="mb-4 text-sm text-sage-700">{t("case_detail.trust.section_intro")}</p>
 
       <div className="mb-4 flex flex-wrap items-baseline gap-3">
@@ -206,18 +210,20 @@ export function CaseTrustLedgerPanel({
       <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <label className="block text-xs font-semibold uppercase tracking-wide text-sage-600">
           {t("case_detail.trust.field_type")}
-          <select
-            className="mt-1 block w-full rounded-md border border-sage-300 bg-white px-3 py-2 text-sm text-sage-900"
-            value={changeType}
-            onChange={(e) => setChangeType(e.target.value)}
-            disabled={saving}
-          >
-            <option value="SEED">{t("case_detail.trust.type_seed")}</option>
-            <option value="CREDIT">{t("case_detail.trust.type_credit")}</option>
-            <option value="DEBIT">{t("case_detail.trust.type_debit")}</option>
-            <option value="ADJUSTMENT">{t("case_detail.trust.type_adjustment")}</option>
-            <option value="OTHER">{t("case_detail.trust.type_other")}</option>
-          </select>
+          <div className="mt-1">
+            <SelectMenu
+              value={changeType}
+              onChange={setChangeType}
+              disabled={saving}
+              options={[
+                { value: "SEED", label: t("case_detail.trust.type_seed") },
+                { value: "CREDIT", label: t("case_detail.trust.type_credit") },
+                { value: "DEBIT", label: t("case_detail.trust.type_debit") },
+                { value: "ADJUSTMENT", label: t("case_detail.trust.type_adjustment") },
+                { value: "OTHER", label: t("case_detail.trust.type_other") },
+              ]}
+            />
+          </div>
         </label>
         <label className="block text-xs font-semibold uppercase tracking-wide text-sage-600">
           {t("case_detail.trust.field_amount")}
@@ -238,15 +244,17 @@ export function CaseTrustLedgerPanel({
         </label>
         <label className="block text-xs font-semibold uppercase tracking-wide text-sage-600">
           {t("case_detail.trust.field_visibility")}
-          <select
-            className="mt-1 block w-full rounded-md border border-sage-300 bg-white px-3 py-2 text-sm text-sage-900"
-            value={visibility}
-            onChange={(e) => setVisibility(e.target.value as "all" | "manager")}
-            disabled={saving}
-          >
-            <option value="manager">{t("case_detail.trust.visibility_manager")}</option>
-            <option value="all">{t("case_detail.trust.visibility_all")}</option>
-          </select>
+          <div className="mt-1">
+            <SelectMenu
+              value={visibility}
+              onChange={(v) => setVisibility(v as "all" | "manager")}
+              disabled={saving}
+              options={[
+                { value: "manager", label: t("case_detail.trust.visibility_manager") },
+                { value: "all", label: t("case_detail.trust.visibility_all") },
+              ]}
+            />
+          </div>
         </label>
         <label className="block text-xs font-semibold uppercase tracking-wide text-sage-600 sm:col-span-2">
           {t("case_detail.trust.field_receiver")}
@@ -394,6 +402,6 @@ export function CaseTrustLedgerPanel({
           </div>
         </>
       )}
-    </section>
+    </CollapsibleCard>
   );
 }

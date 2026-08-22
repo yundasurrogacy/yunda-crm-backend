@@ -48,37 +48,37 @@ function LoginForm() {
 
   return (
     <div>
-      <h1 className="mb-2 text-xl font-semibold text-brand-brown">{t("auth:title")}</h1>
-      <p className="mb-6 text-sm leading-relaxed text-sage-800">{t("auth:subtitle")}</p>
+      <h1 className="crm-font-display mb-2 text-2xl font-semibold text-brand-brown">{t("auth:title")}</h1>
+      <p className="mb-6 text-sm leading-relaxed text-sage-700">{t("auth:subtitle")}</p>
       <form className="space-y-4" onSubmit={(e) => void onSubmit(e)}>
         <label className="block text-sm">
-          <span className="text-sage-800">{t("auth:email")}</span>
+          <span className="font-medium text-sage-800">{t("auth:email")}</span>
           <input
             required
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 w-full rounded border border-sage-300 bg-white/70 px-3 py-2 text-sm"
+            className="mt-1.5 w-full rounded-md border border-sage-300 bg-white/90 px-3 py-2.5 text-sm shadow-sm transition focus:border-brand-brown focus:outline-none focus:ring-[3px] focus:ring-brand-brown/30"
             autoComplete="username"
           />
         </label>
         <label className="block text-sm">
-          <span className="text-sage-800">{t("auth:password")}</span>
+          <span className="font-medium text-sage-800">{t("auth:password")}</span>
           <input
             required
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 w-full rounded border border-sage-300 bg-white/70 px-3 py-2 text-sm"
+            className="mt-1.5 w-full rounded-md border border-sage-300 bg-white/90 px-3 py-2.5 text-sm shadow-sm transition focus:border-brand-brown focus:outline-none focus:ring-[3px] focus:ring-brand-brown/30"
             autoComplete="current-password"
           />
         </label>
-        {error ? <p className="text-sm text-red-700">{error}</p> : null}
-        <button
-          type="submit"
-          disabled={pending}
-          className="w-full rounded-md bg-brand-brown px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
-        >
+        {error ? (
+          <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
+            {error}
+          </p>
+        ) : null}
+        <button type="submit" disabled={pending} className="crm-btn crm-btn-primary w-full py-2.5">
           {pending ? t("auth:submitPending") : t("auth:submit")}
         </button>
       </form>

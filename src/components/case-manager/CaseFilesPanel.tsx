@@ -4,6 +4,8 @@ import { ExternalLink } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AmQiniuFileInput } from "@/components/case-manager/AmQiniuFileInput";
+import { CollapsibleCard } from "@/components/ui/CollapsibleCard";
+import { SelectMenu } from "@/components/ui/SelectMenu";
 import {
   CASE_FILE_CATEGORIES,
   type CaseFileRow,
@@ -118,54 +120,62 @@ export function CaseFilesPanel({ caseId, apiPathBase }: Props) {
   };
 
   return (
-    <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
-      <h2 className="crm-font-display mb-2 text-lg font-semibold text-brand-brown">
-        {t("case_detail.files.section_title")}
-      </h2>
+    <CollapsibleCard
+      title={t("case_detail.files.section_title")}
+      summary={
+        loading
+          ? t("case_detail.files.loading")
+          : t("case_detail.files.summary_count", { count: files.length })
+      }
+      storageKey={`crm-case-detail-files-${caseId}`}
+      defaultOpen={false}
+    >
       <p className="mb-4 text-sm text-sage-700">{t("case_detail.files.section_intro")}</p>
-
       {errorKey ? <p className="mb-3 text-sm text-red-700">{t(errorKey)}</p> : null}
 
       <div className="mb-4 grid gap-3 sm:grid-cols-2">
         <label className="block text-xs font-semibold uppercase tracking-wide text-sage-600">
           {t("case_detail.files.field_category")}
-          <select
-            className="mt-1 block w-full rounded-md border border-sage-300 bg-white px-3 py-2 text-sm"
-            value={category}
-            onChange={(e) => onCategoryChange(e.target.value)}
-            disabled={saving}
-          >
-            {CASE_FILE_CATEGORIES.map((c) => (
-              <option key={c} value={c}>
-                {categoryLabel(c)}
-              </option>
-            ))}
-          </select>
+          <div className="mt-1">
+            <SelectMenu
+              value={category}
+              onChange={onCategoryChange}
+              disabled={saving}
+              options={CASE_FILE_CATEGORIES.map((c) => ({
+                value: c,
+                label: categoryLabel(c),
+              }))}
+            />
+          </div>
         </label>
         <label className="block text-xs font-semibold uppercase tracking-wide text-sage-600">
           {t("case_detail.files.field_visibility")}
-          <select
-            className="mt-1 block w-full rounded-md border border-sage-300 bg-white px-3 py-2 text-sm"
-            value={visibility}
-            onChange={(e) => setVisibility(e.target.value as "all" | "manager")}
-            disabled={saving}
-          >
-            <option value="manager">{t("case_detail.files.visibility_manager")}</option>
-            <option value="all">{t("case_detail.files.visibility_all")}</option>
-          </select>
+          <div className="mt-1">
+            <SelectMenu
+              value={visibility}
+              onChange={(v) => setVisibility(v as "all" | "manager")}
+              disabled={saving}
+              options={[
+                { value: "manager", label: t("case_detail.files.visibility_manager") },
+                { value: "all", label: t("case_detail.files.visibility_all") },
+              ]}
+            />
+          </div>
         </label>
         <label className="block text-xs font-semibold uppercase tracking-wide text-sage-600">
           {t("case_detail.files.field_about")}
-          <select
-            className="mt-1 block w-full rounded-md border border-sage-300 bg-white px-3 py-2 text-sm"
-            value={aboutRole}
-            onChange={(e) => setAboutRole(e.target.value)}
-            disabled={saving}
-          >
-            <option value="">{t("case_detail.files.about_none")}</option>
-            <option value="intended_parent">{t("case_detail.role_intended_parent")}</option>
-            <option value="surrogate_mother">{t("case_detail.role_surrogate")}</option>
-          </select>
+          <div className="mt-1">
+            <SelectMenu
+              value={aboutRole}
+              onChange={setAboutRole}
+              disabled={saving}
+              options={[
+                { value: "", label: t("case_detail.files.about_none") },
+                { value: "intended_parent", label: t("case_detail.role_intended_parent") },
+                { value: "surrogate_mother", label: t("case_detail.role_surrogate") },
+              ]}
+            />
+          </div>
         </label>
         <div className="sm:col-span-2">
           <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-sage-600">
@@ -272,6 +282,6 @@ export function CaseFilesPanel({ caseId, apiPathBase }: Props) {
           </table>
         </div>
       )}
-    </section>
+    </CollapsibleCard>
   );
 }

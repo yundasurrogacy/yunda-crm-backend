@@ -648,10 +648,13 @@
       "category_EscrowLegalContract": "信托 / 法律合同",
       "category_PrenatalReport": "产检报告",
       "category_Photo": "照片（体检/移植/OB）",
-      "category_Other": "其他"
+      "category_Other": "其他",
+      "summary_count": "{{count}} 个附件"
     },
     "p1": {
       "section_title": "归档 / 周期 / GC 历史 / 留言",
+      "summary_active": "活跃案例",
+      "summary_archived": "已软删除",
       "archive": "软删除案例",
       "unarchive": "恢复案例",
       "archive_confirm": "确认软删除？案例将从默认列表隐藏，数据永久保留。",

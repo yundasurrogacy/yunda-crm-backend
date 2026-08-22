@@ -83,8 +83,8 @@ export function PartyCaseExtras({
     /\.(jpe?g|png|gif|webp|bmp|heic)(\?|#|$)/i.test(url);
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
+    <div className="crm-page">
+      <section className="crm-card">
         <h2 className="crm-font-display mb-2 text-lg font-semibold text-brand-brown">
           {t("party_cases.section_files")}
         </h2>
@@ -132,7 +132,7 @@ export function PartyCaseExtras({
       </section>
 
       {canPostMessages ? (
-        <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
+        <section className="crm-card">
           <h2 className="crm-font-display mb-2 text-lg font-semibold text-brand-brown">
             {t("party_cases.section_messages")}
           </h2>

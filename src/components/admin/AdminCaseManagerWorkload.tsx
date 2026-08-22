@@ -50,7 +50,7 @@ export function AdminCaseManagerWorkload() {
   }, []);
 
   return (
-    <section className="mb-8 rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
+    <section className="crm-card">
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
         <div>
           <h2 className="crm-font-display text-lg font-semibold text-brand-brown">

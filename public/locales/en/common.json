@@ -1,5 +1,10 @@
 {
   "loading": "Loading…",
+  "expand_section": "Expand section",
+  "collapse_section": "Collapse section",
+  "select_placeholder": "Select…",
+  "select_search": "Search…",
+  "select_no_matches": "No matches",
   "language": {
     "label": "Language",
     "zhCN": "中文",

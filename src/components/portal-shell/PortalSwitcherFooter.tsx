@@ -56,9 +56,9 @@ export function PortalSwitcherFooter({ shell }: { shell: Shell }) {
           : null;
 
   return (
-    <div className="flex flex-col gap-2 border-t border-sage-300 pt-4 text-xs text-sage-800">
+    <div className="flex flex-col gap-2 border-t border-sage-400/40 pt-4 text-xs text-sage-800">
       {identity ? (
-        <div className="space-y-1.5 rounded-md bg-white/40 px-2 py-2 text-[11px] leading-snug text-sage-800">
+        <div className="space-y-2 rounded-lg border border-white/50 bg-white/45 px-2.5 py-2.5 text-[11px] leading-snug text-sage-800 shadow-sm">
           <p className="font-semibold uppercase tracking-wide text-sage-600">
             {t("account_bar.title")}
           </p>
@@ -76,7 +76,7 @@ export function PortalSwitcherFooter({ shell }: { shell: Shell }) {
           </p>
           {shell !== "admin" ? (
             identity.entity && entityLabelKey ? (
-              <p>
+              <p className="border-t border-sage-200/80 pt-2">
                 <span className="text-sage-600">{t(entityLabelKey)}</span>
                 <span className="mt-0.5 block break-all font-medium text-sage-900">
                   {identity.entity.email || t("account_bar.no_entity_email")}
@@ -86,15 +86,19 @@ export function PortalSwitcherFooter({ shell }: { shell: Shell }) {
                 </span>
               </p>
             ) : (
-              <p className="text-amber-900/90">{t("account_bar.entity_unbound")}</p>
+              <p className="border-t border-amber-200/80 pt-2 text-amber-950/90">
+                {t("account_bar.entity_unbound")}
+              </p>
             )
           ) : null}
         </div>
-      ) : null}
-      <button type="button" onClick={() => void switchPortal()} className="text-left underline">
+      ) : (
+        <div className="h-16 animate-pulse rounded-lg bg-white/30" aria-hidden />
+      )}
+      <button type="button" onClick={() => void switchPortal()} className="crm-btn crm-btn-ghost w-full justify-start px-2 py-1.5 text-left text-xs">
         {t("switch_portal")}
       </button>
-      <button type="button" onClick={() => void logout()} className="text-left underline">
+      <button type="button" onClick={() => void logout()} className="crm-btn crm-btn-ghost w-full justify-start px-2 py-1.5 text-left text-xs">
         {t("logout")}
       </button>
     </div>

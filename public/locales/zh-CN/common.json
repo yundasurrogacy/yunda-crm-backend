@@ -1,5 +1,10 @@
 {
   "loading": "加载中…",
+  "expand_section": "展开此区块",
+  "collapse_section": "收起此区块",
+  "select_placeholder": "请选择",
+  "select_search": "搜索…",
+  "select_no_matches": "无匹配项",
   "language": {
     "label": "语言",
     "zhCN": "中文",

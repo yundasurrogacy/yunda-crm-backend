@@ -73,7 +73,7 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
       {children}
       {pending ? (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-sage-950/40 p-4"
+          className="crm-dialog-backdrop fixed inset-0 z-[100] flex items-center justify-center bg-sage-950/45 p-4 backdrop-blur-[2px]"
           role="presentation"
           onMouseDown={(e) => {
             if (e.target === e.currentTarget) close(false);
@@ -83,7 +83,7 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
             role="alertdialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            className="ami-ui w-full max-w-md rounded-xl border border-sage-200 bg-[#faf8f4] p-5 shadow-lg"
+            className="crm-dialog-panel ami-ui w-full max-w-md rounded-xl border border-sage-200/90 bg-[var(--crm-surface-solid)] p-5 shadow-[0_24px_48px_rgba(39,31,24,0.18)]"
           >
             <h2 id={titleId} className="crm-font-display text-lg font-semibold text-brand-brown">
               {pending.title ?? t("confirm_dialog.title")}
@@ -96,18 +96,14 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
                 ref={cancelRef}
                 type="button"
                 onClick={() => close(false)}
-                className="rounded-md border border-sage-400 bg-white px-4 py-2 text-sm font-semibold text-sage-800 hover:bg-sage-50"
+                className="crm-btn crm-btn-secondary"
               >
                 {pending.cancelLabel ?? t("confirm_dialog.cancel")}
               </button>
               <button
                 type="button"
                 onClick={() => close(true)}
-                className={
-                  pending.danger
-                    ? "rounded-md border border-red-800 bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800"
-                    : "rounded-md bg-brand-brown px-4 py-2 text-sm font-semibold text-white hover:opacity-95"
-                }
+                className={pending.danger ? "crm-btn crm-btn-danger" : "crm-btn crm-btn-primary"}
               >
                 {pending.confirmLabel ?? t("confirm_dialog.confirm")}
               </button>

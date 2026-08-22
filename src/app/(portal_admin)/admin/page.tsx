@@ -5,7 +5,7 @@ import { CaseManagerAmDashboard } from "@/components/case-manager/CaseManagerAmD
 
 export default function AdminHomePage() {
   return (
-    <>
+    <div className="crm-page">
       <AdminCaseManagerWorkload />
       <CaseManagerAmDashboard
         variant="full"
@@ -13,6 +13,6 @@ export default function AdminHomePage() {
         detailHrefBase="/admin/cases"
         headingMode="admin"
       />
-    </>
+    </div>
   );
 }

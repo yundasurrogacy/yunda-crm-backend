@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CANONICAL_CASE_STAGES } from "@/constants/case-stages";
 import { EntitySearchSelect } from "@/components/ui/EntitySearchSelect";
+import { SelectMenu } from "@/components/ui/SelectMenu";
 import { translateProcessStatus } from "@/lib/i18n/translate-process-status";
 
 type Option = { id: string; label: string };
@@ -96,7 +97,7 @@ export function CaseManagerCreateCaseForm() {
   }
 
   return (
-    <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
+    <section className="crm-card">
       <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">{t("cm_case.create_title")}</h1>
       <p className="mt-1 text-sm text-sage-700">{t("cm_case.create_intro")}</p>
       {loading ? <p className="mt-4 text-sm text-sage-600">{t("cm_case.loading_options")}</p> : null}
@@ -118,17 +119,15 @@ export function CaseManagerCreateCaseForm() {
           <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-sage-600">
             {t("cm_case.initial_stage")}
           </span>
-          <select
-            className="w-full rounded-md border border-sage-300 bg-white px-3 py-2 text-sm"
+          <SelectMenu
+            searchable
             value={form.processStatus}
-            onChange={(e) => setForm((p) => ({ ...p, processStatus: e.target.value }))}
-          >
-            {CANONICAL_CASE_STAGES.map((s) => (
-              <option key={s} value={s}>
-                {translateProcessStatus(s, tStage)}
-              </option>
-            ))}
-          </select>
+            onChange={(processStatus) => setForm((p) => ({ ...p, processStatus }))}
+            options={CANONICAL_CASE_STAGES.map((s) => ({
+              value: s,
+              label: translateProcessStatus(s, tStage),
+            }))}
+          />
         </label>
         <button
           type="submit"

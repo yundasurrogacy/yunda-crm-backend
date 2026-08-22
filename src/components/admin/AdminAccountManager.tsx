@@ -144,19 +144,23 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
   }
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
+    <div className="crm-page ami-ui crm-font-ui">
+      <div>
         <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">{t(`admin_accounts.title_${kind}`)}</h1>
-        <p className="mt-2 max-w-3xl text-sm leading-relaxed text-sage-700">
+        <p className="mt-1 text-sm leading-relaxed text-sage-700">
           {showProfileActions
             ? t("admin_accounts.intro_with_profile")
             : t("admin_accounts.intro_case_manager")}
         </p>
-        <p className="mt-1 max-w-3xl text-xs text-sage-600">{t("admin_accounts.soft_delete_hint")}</p>
+        <p className="mt-1 text-xs text-sage-600">{t("admin_accounts.soft_delete_hint")}</p>
+      </div>
 
-        {canCreateEntity ? (
+      {message ? <p className="text-sm text-sage-800">{message}</p> : null}
+
+      {canCreateEntity ? (
+        <section className="crm-card">
           <form
-            className="mt-4 grid gap-3 rounded-lg border border-dashed border-sage-300 bg-sage-50/50 p-3 sm:grid-cols-2 lg:grid-cols-4"
+            className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
             onSubmit={(e) => void onCreateEntity(e)}
           >
             <p className="sm:col-span-2 lg:col-span-4 text-xs font-semibold uppercase tracking-wide text-sage-600">
@@ -187,7 +191,7 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
                 />
               </label>
             ) : (
-              <p className="text-sm text-sage-700 self-end pb-2">{t("admin_accounts.create_cm_hint")}</p>
+              <p className="self-end pb-2 text-sm text-sage-700">{t("admin_accounts.create_cm_hint")}</p>
             )}
             <div className="flex items-end">
               <button
@@ -203,9 +207,11 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
               </button>
             </div>
           </form>
-        ) : null}
+        </section>
+      ) : null}
 
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+      <section className="crm-card">
+        <div className="flex flex-wrap items-center gap-2">
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
@@ -387,8 +393,6 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
           </button>
         </div>
       </section>
-
-      {message ? <p className="text-sm text-sage-800">{message}</p> : null}
 
       {modal ? (
         <BindLoginUserModal

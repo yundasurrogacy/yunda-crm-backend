@@ -106,7 +106,7 @@ export function SurrogateSelfProfilePage() {
   const zh = i18n.language.toLowerCase().startsWith("zh");
 
   return (
-    <div className="ami-ui crm-font-ui space-y-6 text-sage-900">
+    <div className="ami-ui crm-font-ui crm-page">
       <div>
         <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">{t("sm_profile.title")}</h1>
         <p className="mt-1 text-sm text-sage-700">{t("sm_profile.intro")}</p>
@@ -116,11 +116,11 @@ export function SurrogateSelfProfilePage() {
       {message ? <p className="text-sm text-emerald-800">{message}</p> : null}
 
       {!loading && detail ? (
-        <form onSubmit={onSave} className="space-y-6">
+        <form onSubmit={onSave} className="crm-page">
           {detail.sections.map((section) => (
             <section
               key={section.id}
-              className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6"
+              className="crm-card"
             >
               <h2 className="crm-font-display mb-3 text-lg font-semibold text-brand-brown">
                 {zh ? section.titleZh : section.titleEn}
@@ -142,7 +142,7 @@ export function SurrogateSelfProfilePage() {
             </section>
           ))}
 
-          <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
+          <section className="crm-card">
             <h2 className="crm-font-display mb-3 text-lg font-semibold text-brand-brown">
               {t("sm_profile.photos")}
             </h2>

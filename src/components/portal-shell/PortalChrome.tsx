@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslation } from "react-i18next";
 import {
   caseManagerNav,
   intendedParentNav,
@@ -30,19 +29,11 @@ export function PortalChrome({
   role: PortalRole;
   children: React.ReactNode;
 }) {
-  const { t } = useTranslation("portal");
   const nav = navByRole[role];
   const headingKey = headingKeyByRole[role];
 
-  const centerSlot =
-    role === "case_manager" ? (
-      <span className="crm-font-display text-base font-semibold tracking-wide text-brand-brown md:text-lg">
-        {t("am_dash.brand")}
-      </span>
-    ) : null;
-
   return (
-    <AppShell sidebarTitleKey={headingKey} navItems={nav} shell={role} centerSlot={centerSlot}>
+    <AppShell sidebarTitleKey={headingKey} navItems={nav} shell={role}>
       {children}
     </AppShell>
   );

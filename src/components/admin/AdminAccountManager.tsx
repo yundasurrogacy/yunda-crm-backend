@@ -371,26 +371,35 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
             </tbody>
           </table>
         </div>
-        <div className="mt-3 flex items-center justify-end gap-2 text-xs">
-          <button
-            type="button"
-            className="rounded border border-sage-300 bg-white px-2 py-1 disabled:opacity-40"
-            disabled={page <= 1}
-            onClick={() => setPage((p) => p - 1)}
-          >
-            {t("admin_accounts.prev")}
-          </button>
-          <span>
-            {page} / {totalPages}
-          </span>
-          <button
-            type="button"
-            className="rounded border border-sage-300 bg-white px-2 py-1 disabled:opacity-40"
-            disabled={page >= totalPages}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            {t("admin_accounts.next")}
-          </button>
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-sage-700">
+          <p className="min-w-0">
+            {t("admin_accounts.list_stats", {
+              total,
+              from: total === 0 ? 0 : (page - 1) * pageSize + 1,
+              to: Math.min(page * pageSize, total),
+            })}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              className="rounded border border-sage-300 bg-white px-2 py-1 disabled:opacity-40"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              {t("admin_accounts.prev")}
+            </button>
+            <span>
+              {page} / {totalPages}
+            </span>
+            <button
+              type="button"
+              className="rounded border border-sage-300 bg-white px-2 py-1 disabled:opacity-40"
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              {t("admin_accounts.next")}
+            </button>
+          </div>
         </div>
       </section>
 

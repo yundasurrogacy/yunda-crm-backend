@@ -891,26 +891,35 @@ export function CaseManagerAmDashboard({
               </table>
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center justify-end gap-2 text-xs text-sage-700">
-              <button
-                type="button"
-                disabled={page <= 1 || loading}
-                onClick={() => onPageChange(page - 1)}
-                className="rounded border border-sage-300 bg-white px-3 py-1 disabled:opacity-40"
-              >
-                {t("am_dash.prev")}
-              </button>
-              <span className="px-2">
-                {page} / {totalPages}
-              </span>
-              <button
-                type="button"
-                disabled={page >= totalPages || loading}
-                onClick={() => onPageChange(page + 1)}
-                className="rounded border border-sage-300 bg-white px-3 py-1 disabled:opacity-40"
-              >
-                {t("am_dash.next")}
-              </button>
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-sage-700">
+              <p className="min-w-0">
+                {t("am_dash.list_stats", {
+                  total: data.total,
+                  from: data.total === 0 ? 0 : (page - 1) * data.pageSize + 1,
+                  to: Math.min(page * data.pageSize, data.total),
+                })}
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={page <= 1 || loading}
+                  onClick={() => onPageChange(page - 1)}
+                  className="rounded border border-sage-300 bg-white px-3 py-1 disabled:opacity-40"
+                >
+                  {t("am_dash.prev")}
+                </button>
+                <span className="px-2">
+                  {page} / {totalPages}
+                </span>
+                <button
+                  type="button"
+                  disabled={page >= totalPages || loading}
+                  onClick={() => onPageChange(page + 1)}
+                  className="rounded border border-sage-300 bg-white px-3 py-1 disabled:opacity-40"
+                >
+                  {t("am_dash.next")}
+                </button>
+              </div>
             </div>
           </>
         )}

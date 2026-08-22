@@ -101,7 +101,13 @@ export function AppShell({
             <span>{t("shell.menu")}</span>
           </button>
 
-          <div className="min-w-0 flex-1 text-center">{centerSlot}</div>
+          <div className="min-w-0 flex-1 text-center">
+            {centerSlot ?? (
+              <span className="crm-font-display text-base font-semibold tracking-[0.14em] text-brand-brown md:text-lg">
+                {t("am_dash.brand")}
+              </span>
+            )}
+          </div>
 
           <div className="ami-ui shrink-0">
             <LanguageSwitcher variant="header" />

@@ -51,9 +51,11 @@ export async function listCaseManagerParties(
   kind: EntityKind,
   cmId: string | null,
   sessionUserId: string,
-  opts?: { q?: string; limit?: number; includeDeleted?: boolean },
-): Promise<PartyListRow[]> {
-  const limit = Math.min(500, Math.max(1, opts?.limit ?? 200));
+  opts?: { q?: string; limit?: number; includeDeleted?: boolean; page?: number; pageSize?: number },
+): Promise<{ rows: PartyListRow[]; total: number; page: number; pageSize: number }> {
+  const fetchLimit = Math.min(500, Math.max(1, opts?.limit ?? 200));
+  const pageSize = Math.min(50, Math.max(1, opts?.pageSize ?? 10));
+  const page = Math.max(1, opts?.page ?? 1);
   const q = opts?.q?.trim().toLowerCase() ?? "";
   const includeDeleted = opts?.includeDeleted === true;
   const accessOr = caseManagerAccessOrClauses(cmId, sessionUserId);
@@ -73,7 +75,7 @@ export async function listCaseManagerParties(
             }
           }
         `,
-        variables: { where: caseWhere, limit },
+        variables: { where: caseWhere, limit: fetchLimit },
       });
       for (const c of data.cases ?? []) {
         if (!c.intended_parent) continue;
@@ -92,7 +94,7 @@ export async function listCaseManagerParties(
             }
           }
         `,
-        variables: { where: caseWhere, limit },
+        variables: { where: caseWhere, limit: fetchLimit },
       });
       for (const c of data.cases ?? []) {
         if (!c.surrogate_mother) continue;
@@ -120,7 +122,7 @@ export async function listCaseManagerParties(
               }
             }
           `,
-          variables: { where: createdWhere, limit },
+          variables: { where: createdWhere, limit: fetchLimit },
         });
         for (const r of data.intended_parents ?? []) {
           const row = mapIp(r, byId.has(String(r.id)) ? "case" : "created");
@@ -135,7 +137,7 @@ export async function listCaseManagerParties(
               }
             }
           `,
-          variables: { where: createdWhere, limit },
+          variables: { where: createdWhere, limit: fetchLimit },
         });
         for (const r of data.surrogate_mothers ?? []) {
           const row = mapSm(r, byId.has(String(r.id)) ? "case" : "created");
@@ -158,7 +160,16 @@ export async function listCaseManagerParties(
         (r.userEmail?.toLowerCase().includes(q) ?? false),
     );
   }
-  return rows;
+  const total = rows.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const start = (safePage - 1) * pageSize;
+  return {
+    rows: rows.slice(start, start + pageSize),
+    total,
+    page: safePage,
+    pageSize,
+  };
 }
 
 export { readCreatedByCmId };

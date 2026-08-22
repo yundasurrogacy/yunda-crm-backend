@@ -20,10 +20,17 @@ export async function GET(req: Request) {
   if (!kind) return NextResponse.json({ error: "bad_kind" }, { status: 400 });
   const q = searchParams.get("q") ?? "";
   const includeDeleted = searchParams.get("includeDeleted") === "1";
+  const page = Math.max(1, Number(searchParams.get("page") ?? "1") || 1);
+  const pageSize = Math.min(50, Math.max(1, Number(searchParams.get("pageSize") ?? "10") || 10));
   try {
     const cmId = await resolveCaseManagerEntityId(session);
-    const rows = await listCaseManagerParties(kind, cmId, session.userId, { q, includeDeleted });
-    return NextResponse.json({ rows, cmId });
+    const result = await listCaseManagerParties(kind, cmId, session.userId, {
+      q,
+      includeDeleted,
+      page,
+      pageSize,
+    });
+    return NextResponse.json({ ...result, cmId });
   } catch (e) {
     console.error("[case-manager/parties GET]", e);
     return NextResponse.json({ error: "data_unavailable" }, { status: 503 });

@@ -12,6 +12,9 @@ export function CaseManagerPartyListPage({ kind }: { kind: EntityKind }) {
   const confirm = useConfirm();
   const [rows, setRows] = useState<PartyListRow[]>([]);
   const [q, setQ] = useState("");
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [email, setEmail] = useState("");
@@ -27,29 +30,43 @@ export function CaseManagerPartyListPage({ kind }: { kind: EntityKind }) {
       ? "/case_manager/parties/intended-parents"
       : "/case_manager/parties/surrogates";
 
-  const load = useCallback(async () => {
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  const load = useCallback(async (pageOverride?: number) => {
+    const pageToUse = pageOverride ?? page;
     setLoading(true);
     setError(null);
     try {
       const url = new URL("/api/case-manager/parties", window.location.origin);
       url.searchParams.set("kind", kind);
+      url.searchParams.set("page", String(pageToUse));
+      url.searchParams.set("pageSize", String(pageSize));
       if (q.trim()) url.searchParams.set("q", q.trim());
       if (includeDeleted) url.searchParams.set("includeDeleted", "1");
       const res = await fetch(url.pathname + url.search);
       if (!res.ok) throw new Error("load");
-      const json = (await res.json()) as { rows?: PartyListRow[] };
+      const json = (await res.json()) as {
+        rows?: PartyListRow[];
+        total?: number;
+        page?: number;
+      };
       setRows(json.rows ?? []);
+      setTotal(json.total ?? 0);
+      if (typeof json.page === "number" && json.page !== pageToUse) {
+        setPage(json.page);
+      }
     } catch {
       setError(t("cm_parties.error_load"));
       setRows([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
-  }, [kind, q, includeDeleted, t]);
+  }, [kind, q, includeDeleted, page, pageSize, t]);
 
   useEffect(() => {
     void load();
-  }, [kind, includeDeleted]); // eslint-disable-line react-hooks/exhaustive-deps -- search via button
+  }, [kind, includeDeleted, page]); // eslint-disable-line react-hooks/exhaustive-deps -- search via button
 
   async function onSoftDelete(row: PartyListRow, deleted: boolean) {
     if (busyId) return;
@@ -110,7 +127,8 @@ export function CaseManagerPartyListPage({ kind }: { kind: EntityKind }) {
       setEmail("");
       setDisplayName("");
       setMessage(t("cm_parties.created", { id: json.id ?? "" }));
-      await load();
+      setPage(1);
+      await load(1);
     } catch {
       setError(t("cm_parties.error_create"));
     } finally {
@@ -171,12 +189,22 @@ export function CaseManagerPartyListPage({ kind }: { kind: EntityKind }) {
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                setPage(1);
+                void load(1);
+              }
+            }}
             placeholder={t("cm_parties.search_placeholder")}
             className="min-w-[12rem] flex-1 rounded-md border border-sage-300 bg-white px-3 py-2 text-sm"
           />
           <button
             type="button"
-            onClick={() => void load()}
+            onClick={() => {
+              setPage(1);
+              void load(1);
+            }}
             className="rounded-md bg-sage-700 px-3 py-2 text-sm font-semibold text-white"
           >
             {t("cm_parties.search")}
@@ -185,7 +213,10 @@ export function CaseManagerPartyListPage({ kind }: { kind: EntityKind }) {
             <input
               type="checkbox"
               checked={includeDeleted}
-              onChange={(e) => setIncludeDeleted(e.target.checked)}
+              onChange={(e) => {
+                setIncludeDeleted(e.target.checked);
+                setPage(1);
+              }}
             />
             {t("cm_parties.show_deleted")}
           </label>
@@ -286,6 +317,37 @@ export function CaseManagerPartyListPage({ kind }: { kind: EntityKind }) {
               )}
             </tbody>
           </table>
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-sage-700">
+          <p className="min-w-0">
+            {t("cm_parties.list_stats", {
+              total,
+              from: total === 0 ? 0 : (page - 1) * pageSize + 1,
+              to: Math.min(page * pageSize, total),
+            })}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              className="rounded border border-sage-300 bg-white px-2 py-1 disabled:opacity-40"
+              disabled={page <= 1 || loading}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              {t("cm_parties.prev")}
+            </button>
+            <span>
+              {page} / {totalPages}
+            </span>
+            <button
+              type="button"
+              className="rounded border border-sage-300 bg-white px-2 py-1 disabled:opacity-40"
+              disabled={page >= totalPages || loading}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              {t("cm_parties.next")}
+            </button>
+          </div>
         </div>
       </section>
     </div>

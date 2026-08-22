@@ -1,8 +1,13 @@
 import { getClient } from "@/config-lib/graphql-client";
 import { resolveCaseManagerEntityId } from "@/lib/case-manager/fetch-dashboard-data";
-import { caseDetailWhere } from "@/lib/case-manager/fetch-case-detail";
+import {
+  caseDetailWhere,
+  type CaseDetailAccessMode,
+} from "@/lib/case-manager/fetch-case-detail";
 import type { AmWorkspacePayload } from "@/lib/case-manager/am-workspace-model";
 import type { CrmSession } from "@/types/portal";
+
+type WriteMode = Extract<CaseDetailAccessMode, "case_manager_api" | "admin_api">;
 
 const CASE_DATA_ROW = `
   query AmCaseDataRow($where: cases_bool_exp!) {
@@ -28,9 +33,16 @@ const UPDATE_CASE_STATUS = `
   }
 `;
 
-async function caseManagerScopedWhere(session: CrmSession, caseIdNumeric: bigint) {
+async function scopedCaseWhere(
+  session: CrmSession,
+  caseIdNumeric: bigint,
+  mode: WriteMode,
+) {
+  if (mode === "admin_api") {
+    return caseDetailWhere(caseIdNumeric, "admin_api", null);
+  }
   const cmId = await resolveCaseManagerEntityId(session);
-  return caseDetailWhere(caseIdNumeric, "case_manager_api", cmId);
+  return caseDetailWhere(caseIdNumeric, "case_manager_api", cmId, session.userId);
 }
 
 /** 将各阶段表单写入 `cases.data` 根级的 `v`、`byStage`，合并保留同字段其它键 */
@@ -38,9 +50,10 @@ export async function persistCaseDataWorkspace(
   session: CrmSession,
   caseIdNumeric: bigint,
   workspace: AmWorkspacePayload,
+  mode: WriteMode = "case_manager_api",
 ): Promise<void> {
   const client = getClient();
-  const where = await caseManagerScopedWhere(session, caseIdNumeric);
+  const where = await scopedCaseWhere(session, caseIdNumeric, mode);
   const existing = await client.execute<{ cases: { data: unknown }[] }>({
     query: CASE_DATA_ROW,
     variables: { where },
@@ -64,9 +77,10 @@ export async function updateCaseProcessStatus(
   session: CrmSession,
   caseIdNumeric: bigint,
   processStatus: string,
+  mode: WriteMode = "case_manager_api",
 ): Promise<void> {
   const client = getClient();
-  const where = await caseManagerScopedWhere(session, caseIdNumeric);
+  const where = await scopedCaseWhere(session, caseIdNumeric, mode);
   const data = await client.execute<{ update_cases: { affected_rows: number | null } | null }>({
     query: UPDATE_CASE_STATUS,
     variables: { where, process_status: processStatus },

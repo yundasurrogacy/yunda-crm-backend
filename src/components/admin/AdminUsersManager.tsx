@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { BindRoleKind } from "@/lib/admin/bind-user-role";
+import { BindEntityToUserModal } from "@/components/admin/BindEntityToUserModal";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 
 const ROLE_VALUES = ["user", "admin", "operator"] as const;
 
@@ -49,6 +51,7 @@ function RoleField({
 
 export function AdminUsersManager() {
   const { t } = useTranslation("portal");
+  const confirm = useConfirm();
   const [rows, setRows] = useState<UserRow[]>([]);
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
@@ -60,13 +63,15 @@ export function AdminUsersManager() {
     email: "",
     password: "",
     role: "user",
-    bindCm: false,
-    bindIp: false,
-    bindSm: false,
   });
   const [edit, setEdit] = useState<{ userId: string; email: string; role: string; password: string } | null>(
     null,
   );
+  const [bindModal, setBindModal] = useState<{
+    userId: string;
+    email: string;
+    kind: BindRoleKind;
+  } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -91,33 +96,35 @@ export function AdminUsersManager() {
     void load();
   }, [load]);
 
-  async function onBind(userId: string, kind: BindRoleKind) {
+  async function onUnbind(userId: string, kind: BindRoleKind) {
+    const confirmKey =
+      kind === "case_manager"
+        ? "admin_users.unbind_cm_confirm"
+        : kind === "intended_parent"
+          ? "admin_users.unbind_ip_confirm"
+          : "admin_users.unbind_sm_confirm";
+    if (!(await confirm({ message: t(confirmKey), danger: true }))) return;
     setMessage(null);
     try {
-      const res = await fetch("/api/admin/users/bind", {
+      const res = await fetch("/api/admin/users/unbind", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, kind }),
       });
       if (!res.ok) {
-        setMessage(t("admin_users.error_bind"));
+        setMessage(t("admin_users.error_unbind"));
         return;
       }
-      const json = (await res.json()) as { alreadyLinked?: boolean };
-      setMessage(json.alreadyLinked ? t("admin_users.bind_already") : t("admin_users.bind_ok"));
+      setMessage(t("admin_users.unbind_ok"));
       await load();
     } catch {
-      setMessage(t("admin_users.error_bind"));
+      setMessage(t("admin_users.error_unbind"));
     }
   }
 
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
     setMessage(null);
-    const bind: BindRoleKind[] = [];
-    if (create.bindCm) bind.push("case_manager");
-    if (create.bindIp) bind.push("intended_parent");
-    if (create.bindSm) bind.push("surrogate_mother");
     try {
       const res = await fetch("/api/admin/users", {
         method: "POST",
@@ -126,14 +133,13 @@ export function AdminUsersManager() {
           email: create.email,
           password: create.password,
           role: create.role,
-          bind,
         }),
       });
       if (!res.ok) {
         setMessage(t("admin_users.error_create"));
         return;
       }
-      setCreate({ email: "", password: "", role: "user", bindCm: false, bindIp: false, bindSm: false });
+      setCreate({ email: "", password: "", role: "user" });
       setMessage(t("admin_users.create_ok"));
       await load();
     } catch {
@@ -214,35 +220,6 @@ export function AdminUsersManager() {
                   value={create.role}
                   onChange={(role) => setCreate((p) => ({ ...p, role }))}
                 />
-              </label>
-            </div>
-            <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-sage-800">
-              <label className="inline-flex cursor-pointer items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={create.bindCm}
-                  onChange={(e) => setCreate((p) => ({ ...p, bindCm: e.target.checked }))}
-                  className="rounded border-sage-400"
-                />
-                {t("admin_users.bind_opt_cm")}
-              </label>
-              <label className="inline-flex cursor-pointer items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={create.bindIp}
-                  onChange={(e) => setCreate((p) => ({ ...p, bindIp: e.target.checked }))}
-                  className="rounded border-sage-400"
-                />
-                {t("admin_users.bind_opt_ip")}
-              </label>
-              <label className="inline-flex cursor-pointer items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={create.bindSm}
-                  onChange={(e) => setCreate((p) => ({ ...p, bindSm: e.target.checked }))}
-                  className="rounded border-sage-400"
-                />
-                {t("admin_users.bind_opt_sm")}
               </label>
             </div>
             <div className="flex justify-end">
@@ -364,30 +341,71 @@ export function AdminUsersManager() {
                       <td className="px-3 py-2.5 tabular-nums">{r.surrogateId ?? "—"}</td>
                       <td className="px-3 py-2.5">
                         <div className="flex flex-col gap-1">
-                          <button
-                            type="button"
-                            disabled={!!r.caseManagerId}
-                            onClick={() => void onBind(r.userId, "case_manager")}
-                            className="text-left text-xs font-semibold text-brand-brown underline disabled:opacity-40"
-                          >
-                            {t("admin_users.action_bind_cm")}
-                          </button>
-                          <button
-                            type="button"
-                            disabled={!!r.intendedParentId}
-                            onClick={() => void onBind(r.userId, "intended_parent")}
-                            className="text-left text-xs font-semibold text-brand-brown underline disabled:opacity-40"
-                          >
-                            {t("admin_users.action_bind_ip")}
-                          </button>
-                          <button
-                            type="button"
-                            disabled={!!r.surrogateId}
-                            onClick={() => void onBind(r.userId, "surrogate_mother")}
-                            className="text-left text-xs font-semibold text-brand-brown underline disabled:opacity-40"
-                          >
-                            {t("admin_users.action_bind_sm")}
-                          </button>
+                          {r.caseManagerId ? (
+                            <button
+                              type="button"
+                              onClick={() => void onUnbind(r.userId, "case_manager")}
+                              className="text-left text-xs font-semibold text-red-800 underline"
+                            >
+                              {t("admin_users.action_unbind_cm")}
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setBindModal({ userId: r.userId, email: r.email, kind: "case_manager" })
+                              }
+                              className="text-left text-xs font-semibold text-brand-brown underline"
+                            >
+                              {t("admin_users.action_bind_cm")}
+                            </button>
+                          )}
+                          {r.intendedParentId ? (
+                            <button
+                              type="button"
+                              onClick={() => void onUnbind(r.userId, "intended_parent")}
+                              className="text-left text-xs font-semibold text-red-800 underline"
+                            >
+                              {t("admin_users.action_unbind_ip")}
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setBindModal({
+                                  userId: r.userId,
+                                  email: r.email,
+                                  kind: "intended_parent",
+                                })
+                              }
+                              className="text-left text-xs font-semibold text-brand-brown underline"
+                            >
+                              {t("admin_users.action_bind_ip")}
+                            </button>
+                          )}
+                          {r.surrogateId ? (
+                            <button
+                              type="button"
+                              onClick={() => void onUnbind(r.userId, "surrogate_mother")}
+                              className="text-left text-xs font-semibold text-red-800 underline"
+                            >
+                              {t("admin_users.action_unbind_sm")}
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setBindModal({
+                                  userId: r.userId,
+                                  email: r.email,
+                                  kind: "surrogate_mother",
+                                })
+                              }
+                              className="text-left text-xs font-semibold text-brand-brown underline"
+                            >
+                              {t("admin_users.action_bind_sm")}
+                            </button>
+                          )}
                           <button
                             type="button"
                             onClick={() =>
@@ -430,6 +448,18 @@ export function AdminUsersManager() {
       </section>
 
       {message ? <p className="text-sm text-sage-900">{message}</p> : null}
+
+      {bindModal ? (
+        <BindEntityToUserModal
+          open
+          userId={bindModal.userId}
+          userEmail={bindModal.email}
+          kind={bindModal.kind}
+          onClose={() => setBindModal(null)}
+          onBound={() => void load()}
+          setBanner={setMessage}
+        />
+      ) : null}
     </div>
   );
 }

@@ -75,7 +75,11 @@ export function resolveProfileSection(
   const title = zh ? section.titleZh : section.titleEn;
   const rows = section.fields.map((field) => {
     const label = zh ? field.labelZh : field.labelEn;
-    const raw = resolveProfileFieldValue(flat, field);
+    let raw = resolveProfileFieldValue(flat, field);
+    if (raw && field.options?.length) {
+      const opt = field.options.find((o) => o.value === raw);
+      if (opt) raw = zh ? opt.labelZh : opt.labelEn;
+    }
     return { key: field.key, label, value: raw || "—" };
   });
   return { title, rows };

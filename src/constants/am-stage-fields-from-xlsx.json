@@ -53,6 +53,16 @@
     "stage": "Delivery Completed",
     "fields": [
       {
+        "key": "pregnancy_type",
+        "label": "Pregnancy Type (Singleton/Twins)",
+        "type": "Select",
+        "options": [
+          "Singleton",
+          "Twins"
+        ],
+        "required": true
+      },
+      {
         "key": "delivery_date",
         "label": "Delivery Date",
         "type": "Date"
@@ -63,24 +73,59 @@
         "type": "Text"
       },
       {
-        "key": "birth_weight",
-        "label": "Birth Weight",
-        "type": "Number / Text"
-      },
-      {
-        "key": "sex_gender",
-        "label": "Sex/Gender",
-        "type": "Text"
-      },
-      {
         "key": "gestational_age_at_delivery",
         "label": "Gestational Age at Delivery",
         "type": "Number / Text"
       },
       {
+        "key": "birth_weight",
+        "label": "Baby 1 Birth Weight",
+        "type": "Number / Text"
+      },
+      {
+        "key": "sex_gender",
+        "label": "Baby 1 Sex/Gender",
+        "type": "Text"
+      },
+      {
         "key": "complications_if_any",
-        "label": "Complications (if any)",
-        "type": "Long text"
+        "label": "Baby 1 Complications (if any)",
+        "type": "Long text",
+        "required": false
+      },
+      {
+        "key": "baby2_birth_weight",
+        "label": "Baby 2 Birth Weight",
+        "type": "Number / Text",
+        "showWhen": {
+          "key": "pregnancy_type",
+          "values": [
+            "Twins"
+          ]
+        }
+      },
+      {
+        "key": "baby2_sex_gender",
+        "label": "Baby 2 Sex/Gender",
+        "type": "Text",
+        "showWhen": {
+          "key": "pregnancy_type",
+          "values": [
+            "Twins"
+          ]
+        }
+      },
+      {
+        "key": "baby2_complications_if_any",
+        "label": "Baby 2 Complications (if any)",
+        "type": "Long text",
+        "required": false,
+        "showWhen": {
+          "key": "pregnancy_type",
+          "values": [
+            "Twins"
+          ]
+        }
       }
     ]
   },
@@ -136,6 +181,12 @@
         "key": "prescreening_submission_date",
         "label": "Prescreening Submission Date",
         "type": "Date"
+      },
+      {
+        "key": "medical_records_approval_date",
+        "label": "Medical Records Approval Date",
+        "type": "Date",
+        "required": false
       },
       {
         "key": "current_progress",
@@ -323,6 +374,12 @@
     "stage": "Medical Screening",
     "fields": [
       {
+        "key": "medical_screening_appointment_date",
+        "label": "Medical Screening Appointment Date",
+        "type": "Date",
+        "required": false
+      },
+      {
         "key": "psychological_clearance_complete",
         "label": "Psychological Clearance Complete",
         "type": "Date"
@@ -335,12 +392,14 @@
       {
         "key": "psychologist",
         "label": "Psychologist",
-        "type": "Text"
+        "type": "Text",
+        "internalOnly": true
       },
       {
         "key": "psychologist_email",
         "label": "Psychologist Email",
-        "type": "Email"
+        "type": "Email",
+        "internalOnly": true
       }
     ]
   },

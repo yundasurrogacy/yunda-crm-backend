@@ -1,0 +1,10 @@
+# Hasura CLI config — used for migrations/metadata without opening the Console.
+# Endpoint/secret: export HASURA_GRAPHQL_ENDPOINT / HASURA_GRAPHQL_ADMIN_SECRET
+# or pass: hasura migrate apply --endpoint ... --admin-secret ...
+version: 3
+endpoint: https://hasura-yundasurrogacy-1.weweknow.com
+metadata_directory: metadata
+migrations_directory: migrations
+actions:
+  kind: synchronous
+  handler_webhook_baseurl: http://localhost:3000

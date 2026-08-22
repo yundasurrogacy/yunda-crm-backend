@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getClient } from "@/config-lib/graphql-client";
 import { getServerSession } from "@/lib/auth/session-cookie";
 import { intendedParentDisplay, surrogateDisplayName } from "@/lib/case-manager/display-names";
+import { resolveCaseManagerEntityId } from "@/lib/case-manager/fetch-dashboard-data";
+import { caseManagerAccessOrClauses } from "@/lib/case-manager/case-manager-access";
 
 const OPTIONS_QUERY = `
   query CmCaseOptions($cmWhere: case_managers_bool_exp!, $partyWhere: cases_bool_exp!) {
@@ -10,7 +12,7 @@ const OPTIONS_QUERY = `
       user { email }
     }
     intended_parents(
-      where: { cases: $partyWhere }
+      where: { _and: [{ deleted_at: { _is_null: true } }, { cases: $partyWhere }] }
       order_by: { id: asc }
       limit: 500
     ) {
@@ -19,7 +21,7 @@ const OPTIONS_QUERY = `
       profile_data
     }
     surrogate_mothers(
-      where: { cases: $partyWhere }
+      where: { _and: [{ deleted_at: { _is_null: true } }, { cases: $partyWhere }] }
       order_by: { id: asc }
       limit: 500
     ) {
@@ -36,10 +38,14 @@ export async function GET() {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  /** 与 `/api/case-manager/dashboard` 一致：凡走案例经理端 API，均按当前登录用户绑定的案例经理筛选（含 admin 角色但有 CM 入口的账号）。 */
-  const partyWhere = { case_manager: { user_users: { _eq: session.userId } } };
+  const cmId = await resolveCaseManagerEntityId(session);
+  const accessOr = caseManagerAccessOrClauses(cmId, session.userId);
+  const partyWhere =
+    accessOr.length > 0 ? { _or: accessOr } : { id: { _eq: "0" } };
 
-  const cmWhere = { user_users: { _eq: session.userId } };
+  const cmWhere = {
+    _and: [{ user_users: { _eq: session.userId } }, { deleted_at: { _is_null: true } }],
+  };
 
   try {
     const client = getClient();

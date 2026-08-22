@@ -3,6 +3,7 @@
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { StructuredProfileView } from "@/components/profile/StructuredProfileView";
+import { ProfilePhotosView } from "@/components/profile/ProfilePhotosView";
 import type { ProfileSectionDef } from "@/constants/gc-profile-schema";
 
 type Props = {
@@ -17,6 +18,8 @@ type Props = {
   manageLabel?: string;
   /** 已在外层 section 包裹时设为 true */
   embedded?: boolean;
+  /** 展示 GC 头像/相册（profile_data 自由键） */
+  showPhotos?: boolean;
 };
 
 /** 案例详情中的代母 / 准父母档案卡片（只读 profile_data，可跳转编辑） */
@@ -31,6 +34,7 @@ export function CaseEntityProfileCard({
   manageHref,
   manageLabel,
   embedded = false,
+  showPhotos = false,
 }: Props) {
   const inner = (
     <>
@@ -51,6 +55,7 @@ export function CaseEntityProfileCard({
       </div>
       <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-sage-600">{profileTitle}</p>
       <StructuredProfileView sections={sections} sources={[profileData]} lng={lng} emptyMessage={emptyMessage} />
+      {showPhotos ? <ProfilePhotosView profileData={profileData} /> : null}
     </>
   );
 

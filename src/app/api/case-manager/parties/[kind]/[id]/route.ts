@@ -7,6 +7,10 @@ import {
   type EntityKind,
 } from "@/lib/admin/entity-profile";
 import { getServerSession } from "@/lib/auth/session-cookie";
+import {
+  getEntityDeletedAt,
+  setEntitySoftDeleted,
+} from "@/lib/soft-delete/entity-soft-delete";
 
 function parseKind(raw: string): EntityKind | null {
   if (raw === "intended_parent" || raw === "surrogate_mother") return raw;
@@ -40,6 +44,8 @@ export async function GET(_req: Request, ctx: RouteCtx) {
 type PatchBody = {
   email?: string;
   profileFields?: Record<string, string>;
+  /** true=软删除，false=恢复；与档案保存互斥 */
+  soft_deleted?: boolean;
 };
 
 export async function PATCH(req: Request, ctx: RouteCtx) {
@@ -60,6 +66,17 @@ export async function PATCH(req: Request, ctx: RouteCtx) {
     body = (await req.json()) as PatchBody;
   } catch {
     return NextResponse.json({ error: "bad_json" }, { status: 400 });
+  }
+
+  if (typeof body.soft_deleted === "boolean") {
+    const existing = await getEntityDeletedAt(kind, id);
+    if (!existing) return NextResponse.json({ error: "not_found" }, { status: 404 });
+    const result = await setEntitySoftDeleted(kind, id, body.soft_deleted);
+    if (!result.ok) {
+      const status = result.error === "not_found" ? 404 : 500;
+      return NextResponse.json({ error: result.error }, { status });
+    }
+    return NextResponse.json({ ok: true, deleted_at: result.deleted_at });
   }
 
   if (!body.profileFields || typeof body.profileFields !== "object") {

@@ -4,6 +4,8 @@ export type PortalNavItem = { readonly href: string; readonly labelKey: string }
 export const caseManagerNav = [
   { href: "/case_manager", labelKey: "nav.cm.dashboard" },
   { href: "/case_manager/my-cases", labelKey: "nav.cm.my_cases" },
+  { href: "/case_manager/parties/intended-parents", labelKey: "nav.cm.intended_parents" },
+  { href: "/case_manager/parties/surrogates", labelKey: "nav.cm.surrogates" },
 ] as const satisfies readonly PortalNavItem[];
 
 export const intendedParentNav = [
@@ -14,6 +16,7 @@ export const intendedParentNav = [
 export const surrogateMotherNav = [
   { href: "/surrogate_mother", labelKey: "nav.sm.home" },
   { href: "/surrogate_mother/my-cases", labelKey: "nav.sm.my_cases" },
+  { href: "/surrogate_mother/profile", labelKey: "nav.sm.profile" },
 ] as const satisfies readonly PortalNavItem[];
 
 /** 管理端：三类业务列表（在各自行绑定登录用户）；新建登录账号见「账号管理」 */

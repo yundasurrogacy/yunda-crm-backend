@@ -7,8 +7,8 @@ import { intendedParentDisplay } from "@/lib/case-manager/display-names";
 import { fetchSurrogatesAvailableForMatch } from "@/lib/case-manager/match-gc";
 
 const OPTIONS_QUERY = `
-  query CmCreateCaseOptions($where: intended_parents_bool_exp!) {
-    intended_parents(where: $where, order_by: { id: asc }, limit: 500) {
+  query CmCreateCaseOptions {
+    intended_parents(where: { deleted_at: { _is_null: true } }, order_by: { id: asc }, limit: 500) {
       id
       email
       profile_data
@@ -23,6 +23,7 @@ const CREATE_CASE_MUTATION = `
     $processStatus: String!
     $trustAccountBalance: numeric!
     $data: json!
+    $createdBy: bigint!
   ) {
     insert_cases_one(
       object: {
@@ -31,6 +32,10 @@ const CREATE_CASE_MUTATION = `
         process_status: $processStatus
         trust_account_balance: $trustAccountBalance
         data: $data
+        created_by: $createdBy
+        case_case_managers: {
+          data: [{ case_manager_case_managers: $caseManagerId }]
+        }
       }
     ) {
       id
@@ -46,13 +51,13 @@ function parseId(raw: unknown): string | null {
   return /^\d+$/u.test(t) ? t : null;
 }
 
-function classifyInsertError(message: string): "intended_parent_has_case" | "unknown" {
+function classifyInsertError(message: string): "surrogate_has_case" | "unknown" {
   const m = message.toLowerCase();
   if (
-    m.includes("cases_intended_parent_intended_parents") ||
-    (m.includes("intended_parent") && m.includes("unique"))
+    m.includes("cases_surrogate_mother_surrogate_mothers") ||
+    (m.includes("surrogate_mother") && m.includes("unique"))
   ) {
-    return "intended_parent_has_case";
+    return "surrogate_has_case";
   }
   return "unknown";
 }
@@ -71,7 +76,6 @@ export async function GET(req: Request) {
         intended_parents: { id: string | number; email: string | null; profile_data: unknown }[];
       }>({
         query: OPTIONS_QUERY,
-        variables: { where: { _not: { cases: {} } } },
       });
       return NextResponse.json({
         intendedParents: (data.intended_parents ?? []).map((r) => ({
@@ -129,6 +133,7 @@ export async function POST(req: Request) {
         processStatus: stage,
         trustAccountBalance: "0",
         data: EMPTY_CASE_DATA,
+        createdBy: session.userId,
       },
     });
     const id = data.insert_cases_one?.id;
@@ -139,8 +144,8 @@ export async function POST(req: Request) {
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     const kind = classifyInsertError(message);
-    if (kind === "intended_parent_has_case") {
-      return NextResponse.json({ error: "intended_parent_has_case", detail: message }, { status: 409 });
+    if (kind === "surrogate_has_case") {
+      return NextResponse.json({ error: "surrogate_has_case", detail: message }, { status: 409 });
     }
     return NextResponse.json({ error: "create_failed", detail: message }, { status: 500 });
   }

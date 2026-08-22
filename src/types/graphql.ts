@@ -19,6 +19,19 @@ export type Scalars = {
   timestamptz: { input: any; output: any; }
 };
 
+/** Boolean expression to compare columns of type "Boolean". All fields are combined with logical 'AND'. */
+export type Boolean_Comparison_Exp = {
+  _eq?: InputMaybe<Scalars['Boolean']['input']>;
+  _gt?: InputMaybe<Scalars['Boolean']['input']>;
+  _gte?: InputMaybe<Scalars['Boolean']['input']>;
+  _in?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _lt?: InputMaybe<Scalars['Boolean']['input']>;
+  _lte?: InputMaybe<Scalars['Boolean']['input']>;
+  _neq?: InputMaybe<Scalars['Boolean']['input']>;
+  _nin?: InputMaybe<Array<Scalars['Boolean']['input']>>;
+};
+
 /** Boolean expression to compare columns of type "Int". All fields are combined with logical 'AND'. */
 export type Int_Comparison_Exp = {
   _eq?: InputMaybe<Scalars['Int']['input']>;
@@ -395,6 +408,8 @@ export type Blogs = {
   created_at: Scalars['timestamptz']['output'];
   /** 多语言_英文内容 */
   en_content?: Maybe<Scalars['String']['output']>;
+  en_seo_description?: Maybe<Scalars['String']['output']>;
+  en_seo_title?: Maybe<Scalars['String']['output']>;
   /** 多语言_英文标题 */
   en_title?: Maybe<Scalars['String']['output']>;
   id: Scalars['bigint']['output'];
@@ -402,6 +417,8 @@ export type Blogs = {
   reference_author?: Maybe<Scalars['String']['output']>;
   /** 路由标识 */
   route_id?: Maybe<Scalars['String']['output']>;
+  seo_description?: Maybe<Scalars['String']['output']>;
+  seo_title?: Maybe<Scalars['String']['output']>;
   /** 标签，多个用｜分割，如：准父母｜心里准备 */
   tags?: Maybe<Scalars['String']['output']>;
   /** 中文_标题 */
@@ -455,10 +472,14 @@ export type Blogs_Bool_Exp = {
   cover_img_url?: InputMaybe<String_Comparison_Exp>;
   created_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   en_content?: InputMaybe<String_Comparison_Exp>;
+  en_seo_description?: InputMaybe<String_Comparison_Exp>;
+  en_seo_title?: InputMaybe<String_Comparison_Exp>;
   en_title?: InputMaybe<String_Comparison_Exp>;
   id?: InputMaybe<Bigint_Comparison_Exp>;
   reference_author?: InputMaybe<String_Comparison_Exp>;
   route_id?: InputMaybe<String_Comparison_Exp>;
+  seo_description?: InputMaybe<String_Comparison_Exp>;
+  seo_title?: InputMaybe<String_Comparison_Exp>;
   tags?: InputMaybe<String_Comparison_Exp>;
   title?: InputMaybe<String_Comparison_Exp>;
   updated_at?: InputMaybe<Timestamptz_Comparison_Exp>;
@@ -486,6 +507,8 @@ export type Blogs_Insert_Input = {
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
   /** 多语言_英文内容 */
   en_content?: InputMaybe<Scalars['String']['input']>;
+  en_seo_description?: InputMaybe<Scalars['String']['input']>;
+  en_seo_title?: InputMaybe<Scalars['String']['input']>;
   /** 多语言_英文标题 */
   en_title?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
@@ -493,6 +516,8 @@ export type Blogs_Insert_Input = {
   reference_author?: InputMaybe<Scalars['String']['input']>;
   /** 路由标识 */
   route_id?: InputMaybe<Scalars['String']['input']>;
+  seo_description?: InputMaybe<Scalars['String']['input']>;
+  seo_title?: InputMaybe<Scalars['String']['input']>;
   /** 标签，多个用｜分割，如：准父母｜心里准备 */
   tags?: InputMaybe<Scalars['String']['input']>;
   /** 中文_标题 */
@@ -512,6 +537,8 @@ export type Blogs_Max_Fields = {
   created_at?: Maybe<Scalars['timestamptz']['output']>;
   /** 多语言_英文内容 */
   en_content?: Maybe<Scalars['String']['output']>;
+  en_seo_description?: Maybe<Scalars['String']['output']>;
+  en_seo_title?: Maybe<Scalars['String']['output']>;
   /** 多语言_英文标题 */
   en_title?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['bigint']['output']>;
@@ -519,6 +546,8 @@ export type Blogs_Max_Fields = {
   reference_author?: Maybe<Scalars['String']['output']>;
   /** 路由标识 */
   route_id?: Maybe<Scalars['String']['output']>;
+  seo_description?: Maybe<Scalars['String']['output']>;
+  seo_title?: Maybe<Scalars['String']['output']>;
   /** 标签，多个用｜分割，如：准父母｜心里准备 */
   tags?: Maybe<Scalars['String']['output']>;
   /** 中文_标题 */
@@ -538,6 +567,8 @@ export type Blogs_Min_Fields = {
   created_at?: Maybe<Scalars['timestamptz']['output']>;
   /** 多语言_英文内容 */
   en_content?: Maybe<Scalars['String']['output']>;
+  en_seo_description?: Maybe<Scalars['String']['output']>;
+  en_seo_title?: Maybe<Scalars['String']['output']>;
   /** 多语言_英文标题 */
   en_title?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['bigint']['output']>;
@@ -545,6 +576,8 @@ export type Blogs_Min_Fields = {
   reference_author?: Maybe<Scalars['String']['output']>;
   /** 路由标识 */
   route_id?: Maybe<Scalars['String']['output']>;
+  seo_description?: Maybe<Scalars['String']['output']>;
+  seo_title?: Maybe<Scalars['String']['output']>;
   /** 标签，多个用｜分割，如：准父母｜心里准备 */
   tags?: Maybe<Scalars['String']['output']>;
   /** 中文_标题 */
@@ -575,10 +608,14 @@ export type Blogs_Order_By = {
   cover_img_url?: InputMaybe<Order_By>;
   created_at?: InputMaybe<Order_By>;
   en_content?: InputMaybe<Order_By>;
+  en_seo_description?: InputMaybe<Order_By>;
+  en_seo_title?: InputMaybe<Order_By>;
   en_title?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   reference_author?: InputMaybe<Order_By>;
   route_id?: InputMaybe<Order_By>;
+  seo_description?: InputMaybe<Order_By>;
+  seo_title?: InputMaybe<Order_By>;
   tags?: InputMaybe<Order_By>;
   title?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
@@ -602,6 +639,10 @@ export enum Blogs_Select_Column {
   /** column name */
   EnContent = 'en_content',
   /** column name */
+  EnSeoDescription = 'en_seo_description',
+  /** column name */
+  EnSeoTitle = 'en_seo_title',
+  /** column name */
   EnTitle = 'en_title',
   /** column name */
   Id = 'id',
@@ -609,6 +650,10 @@ export enum Blogs_Select_Column {
   ReferenceAuthor = 'reference_author',
   /** column name */
   RouteId = 'route_id',
+  /** column name */
+  SeoDescription = 'seo_description',
+  /** column name */
+  SeoTitle = 'seo_title',
   /** column name */
   Tags = 'tags',
   /** column name */
@@ -628,6 +673,8 @@ export type Blogs_Set_Input = {
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
   /** 多语言_英文内容 */
   en_content?: InputMaybe<Scalars['String']['input']>;
+  en_seo_description?: InputMaybe<Scalars['String']['input']>;
+  en_seo_title?: InputMaybe<Scalars['String']['input']>;
   /** 多语言_英文标题 */
   en_title?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
@@ -635,6 +682,8 @@ export type Blogs_Set_Input = {
   reference_author?: InputMaybe<Scalars['String']['input']>;
   /** 路由标识 */
   route_id?: InputMaybe<Scalars['String']['input']>;
+  seo_description?: InputMaybe<Scalars['String']['input']>;
+  seo_title?: InputMaybe<Scalars['String']['input']>;
   /** 标签，多个用｜分割，如：准父母｜心里准备 */
   tags?: InputMaybe<Scalars['String']['input']>;
   /** 中文_标题 */
@@ -679,6 +728,8 @@ export type Blogs_Stream_Cursor_Value_Input = {
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
   /** 多语言_英文内容 */
   en_content?: InputMaybe<Scalars['String']['input']>;
+  en_seo_description?: InputMaybe<Scalars['String']['input']>;
+  en_seo_title?: InputMaybe<Scalars['String']['input']>;
   /** 多语言_英文标题 */
   en_title?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
@@ -686,6 +737,8 @@ export type Blogs_Stream_Cursor_Value_Input = {
   reference_author?: InputMaybe<Scalars['String']['input']>;
   /** 路由标识 */
   route_id?: InputMaybe<Scalars['String']['input']>;
+  seo_description?: InputMaybe<Scalars['String']['input']>;
+  seo_title?: InputMaybe<Scalars['String']['input']>;
   /** 标签，多个用｜分割，如：准父母｜心里准备 */
   tags?: InputMaybe<Scalars['String']['input']>;
   /** 中文_标题 */
@@ -712,6 +765,10 @@ export enum Blogs_Update_Column {
   /** column name */
   EnContent = 'en_content',
   /** column name */
+  EnSeoDescription = 'en_seo_description',
+  /** column name */
+  EnSeoTitle = 'en_seo_title',
+  /** column name */
   EnTitle = 'en_title',
   /** column name */
   Id = 'id',
@@ -719,6 +776,10 @@ export enum Blogs_Update_Column {
   ReferenceAuthor = 'reference_author',
   /** column name */
   RouteId = 'route_id',
+  /** column name */
+  SeoDescription = 'seo_description',
+  /** column name */
+  SeoTitle = 'seo_title',
   /** column name */
   Tags = 'tags',
   /** column name */
@@ -754,22 +815,898 @@ export type Blogs_Variance_Fields = {
   id?: Maybe<Scalars['Float']['output']>;
 };
 
+/** columns and relationships of "case_case_managers" */
+export type Case_Case_Managers = {
+  __typename?: 'case_case_managers';
+  /** An object relationship */
+  case: Cases;
+  case_cases: Scalars['bigint']['output'];
+  /** An object relationship */
+  case_manager: Case_Managers;
+  case_manager_case_managers: Scalars['bigint']['output'];
+  created_at: Scalars['timestamptz']['output'];
+  id: Scalars['bigint']['output'];
+};
+
+/** aggregated selection of "case_case_managers" */
+export type Case_Case_Managers_Aggregate = {
+  __typename?: 'case_case_managers_aggregate';
+  aggregate?: Maybe<Case_Case_Managers_Aggregate_Fields>;
+  nodes: Array<Case_Case_Managers>;
+};
+
+export type Case_Case_Managers_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Case_Case_Managers_Aggregate_Bool_Exp_Count>;
+};
+
+export type Case_Case_Managers_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Case_Case_Managers_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Case_Case_Managers_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "case_case_managers" */
+export type Case_Case_Managers_Aggregate_Fields = {
+  __typename?: 'case_case_managers_aggregate_fields';
+  avg?: Maybe<Case_Case_Managers_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Case_Case_Managers_Max_Fields>;
+  min?: Maybe<Case_Case_Managers_Min_Fields>;
+  stddev?: Maybe<Case_Case_Managers_Stddev_Fields>;
+  stddev_pop?: Maybe<Case_Case_Managers_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Case_Case_Managers_Stddev_Samp_Fields>;
+  sum?: Maybe<Case_Case_Managers_Sum_Fields>;
+  var_pop?: Maybe<Case_Case_Managers_Var_Pop_Fields>;
+  var_samp?: Maybe<Case_Case_Managers_Var_Samp_Fields>;
+  variance?: Maybe<Case_Case_Managers_Variance_Fields>;
+};
+
+
+/** aggregate fields of "case_case_managers" */
+export type Case_Case_Managers_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Case_Case_Managers_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "case_case_managers" */
+export type Case_Case_Managers_Aggregate_Order_By = {
+  avg?: InputMaybe<Case_Case_Managers_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Case_Case_Managers_Max_Order_By>;
+  min?: InputMaybe<Case_Case_Managers_Min_Order_By>;
+  stddev?: InputMaybe<Case_Case_Managers_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Case_Case_Managers_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Case_Case_Managers_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Case_Case_Managers_Sum_Order_By>;
+  var_pop?: InputMaybe<Case_Case_Managers_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Case_Case_Managers_Var_Samp_Order_By>;
+  variance?: InputMaybe<Case_Case_Managers_Variance_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "case_case_managers" */
+export type Case_Case_Managers_Arr_Rel_Insert_Input = {
+  data: Array<Case_Case_Managers_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Case_Case_Managers_On_Conflict>;
+};
+
+/** aggregate avg on columns */
+export type Case_Case_Managers_Avg_Fields = {
+  __typename?: 'case_case_managers_avg_fields';
+  case_cases?: Maybe<Scalars['Float']['output']>;
+  case_manager_case_managers?: Maybe<Scalars['Float']['output']>;
+  id?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "case_case_managers" */
+export type Case_Case_Managers_Avg_Order_By = {
+  case_cases?: InputMaybe<Order_By>;
+  case_manager_case_managers?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+};
+
+/** Boolean expression to filter rows from the table "case_case_managers". All fields are combined with a logical 'AND'. */
+export type Case_Case_Managers_Bool_Exp = {
+  _and?: InputMaybe<Array<Case_Case_Managers_Bool_Exp>>;
+  _not?: InputMaybe<Case_Case_Managers_Bool_Exp>;
+  _or?: InputMaybe<Array<Case_Case_Managers_Bool_Exp>>;
+  case?: InputMaybe<Cases_Bool_Exp>;
+  case_cases?: InputMaybe<Bigint_Comparison_Exp>;
+  case_manager?: InputMaybe<Case_Managers_Bool_Exp>;
+  case_manager_case_managers?: InputMaybe<Bigint_Comparison_Exp>;
+  created_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  id?: InputMaybe<Bigint_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "case_case_managers" */
+export enum Case_Case_Managers_Constraint {
+  /** unique or primary key constraint on columns "case_cases", "case_manager_case_managers" */
+  CaseCaseManagersCaseCasesCaseManagerCaseManagersKey = 'case_case_managers_case_cases_case_manager_case_managers_key',
+  /** unique or primary key constraint on columns "id" */
+  CaseCaseManagersPkey = 'case_case_managers_pkey'
+}
+
+/** input type for incrementing numeric columns in table "case_case_managers" */
+export type Case_Case_Managers_Inc_Input = {
+  case_cases?: InputMaybe<Scalars['bigint']['input']>;
+  case_manager_case_managers?: InputMaybe<Scalars['bigint']['input']>;
+  id?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** input type for inserting data into table "case_case_managers" */
+export type Case_Case_Managers_Insert_Input = {
+  case?: InputMaybe<Cases_Obj_Rel_Insert_Input>;
+  case_cases?: InputMaybe<Scalars['bigint']['input']>;
+  case_manager?: InputMaybe<Case_Managers_Obj_Rel_Insert_Input>;
+  case_manager_case_managers?: InputMaybe<Scalars['bigint']['input']>;
+  created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** aggregate max on columns */
+export type Case_Case_Managers_Max_Fields = {
+  __typename?: 'case_case_managers_max_fields';
+  case_cases?: Maybe<Scalars['bigint']['output']>;
+  case_manager_case_managers?: Maybe<Scalars['bigint']['output']>;
+  created_at?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** order by max() on columns of table "case_case_managers" */
+export type Case_Case_Managers_Max_Order_By = {
+  case_cases?: InputMaybe<Order_By>;
+  case_manager_case_managers?: InputMaybe<Order_By>;
+  created_at?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Case_Case_Managers_Min_Fields = {
+  __typename?: 'case_case_managers_min_fields';
+  case_cases?: Maybe<Scalars['bigint']['output']>;
+  case_manager_case_managers?: Maybe<Scalars['bigint']['output']>;
+  created_at?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** order by min() on columns of table "case_case_managers" */
+export type Case_Case_Managers_Min_Order_By = {
+  case_cases?: InputMaybe<Order_By>;
+  case_manager_case_managers?: InputMaybe<Order_By>;
+  created_at?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "case_case_managers" */
+export type Case_Case_Managers_Mutation_Response = {
+  __typename?: 'case_case_managers_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Case_Case_Managers>;
+};
+
+/** on_conflict condition type for table "case_case_managers" */
+export type Case_Case_Managers_On_Conflict = {
+  constraint: Case_Case_Managers_Constraint;
+  update_columns?: Array<Case_Case_Managers_Update_Column>;
+  where?: InputMaybe<Case_Case_Managers_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "case_case_managers". */
+export type Case_Case_Managers_Order_By = {
+  case?: InputMaybe<Cases_Order_By>;
+  case_cases?: InputMaybe<Order_By>;
+  case_manager?: InputMaybe<Case_Managers_Order_By>;
+  case_manager_case_managers?: InputMaybe<Order_By>;
+  created_at?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: case_case_managers */
+export type Case_Case_Managers_Pk_Columns_Input = {
+  id: Scalars['bigint']['input'];
+};
+
+/** select columns of table "case_case_managers" */
+export enum Case_Case_Managers_Select_Column {
+  /** column name */
+  CaseCases = 'case_cases',
+  /** column name */
+  CaseManagerCaseManagers = 'case_manager_case_managers',
+  /** column name */
+  CreatedAt = 'created_at',
+  /** column name */
+  Id = 'id'
+}
+
+/** input type for updating data in table "case_case_managers" */
+export type Case_Case_Managers_Set_Input = {
+  case_cases?: InputMaybe<Scalars['bigint']['input']>;
+  case_manager_case_managers?: InputMaybe<Scalars['bigint']['input']>;
+  created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Case_Case_Managers_Stddev_Fields = {
+  __typename?: 'case_case_managers_stddev_fields';
+  case_cases?: Maybe<Scalars['Float']['output']>;
+  case_manager_case_managers?: Maybe<Scalars['Float']['output']>;
+  id?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "case_case_managers" */
+export type Case_Case_Managers_Stddev_Order_By = {
+  case_cases?: InputMaybe<Order_By>;
+  case_manager_case_managers?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Case_Case_Managers_Stddev_Pop_Fields = {
+  __typename?: 'case_case_managers_stddev_pop_fields';
+  case_cases?: Maybe<Scalars['Float']['output']>;
+  case_manager_case_managers?: Maybe<Scalars['Float']['output']>;
+  id?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_pop() on columns of table "case_case_managers" */
+export type Case_Case_Managers_Stddev_Pop_Order_By = {
+  case_cases?: InputMaybe<Order_By>;
+  case_manager_case_managers?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Case_Case_Managers_Stddev_Samp_Fields = {
+  __typename?: 'case_case_managers_stddev_samp_fields';
+  case_cases?: Maybe<Scalars['Float']['output']>;
+  case_manager_case_managers?: Maybe<Scalars['Float']['output']>;
+  id?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "case_case_managers" */
+export type Case_Case_Managers_Stddev_Samp_Order_By = {
+  case_cases?: InputMaybe<Order_By>;
+  case_manager_case_managers?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+};
+
+/** Streaming cursor of the table "case_case_managers" */
+export type Case_Case_Managers_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Case_Case_Managers_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Case_Case_Managers_Stream_Cursor_Value_Input = {
+  case_cases?: InputMaybe<Scalars['bigint']['input']>;
+  case_manager_case_managers?: InputMaybe<Scalars['bigint']['input']>;
+  created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  id?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Case_Case_Managers_Sum_Fields = {
+  __typename?: 'case_case_managers_sum_fields';
+  case_cases?: Maybe<Scalars['bigint']['output']>;
+  case_manager_case_managers?: Maybe<Scalars['bigint']['output']>;
+  id?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** order by sum() on columns of table "case_case_managers" */
+export type Case_Case_Managers_Sum_Order_By = {
+  case_cases?: InputMaybe<Order_By>;
+  case_manager_case_managers?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+};
+
+/** update columns of table "case_case_managers" */
+export enum Case_Case_Managers_Update_Column {
+  /** column name */
+  CaseCases = 'case_cases',
+  /** column name */
+  CaseManagerCaseManagers = 'case_manager_case_managers',
+  /** column name */
+  CreatedAt = 'created_at',
+  /** column name */
+  Id = 'id'
+}
+
+export type Case_Case_Managers_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Case_Case_Managers_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Case_Case_Managers_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Case_Case_Managers_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Case_Case_Managers_Var_Pop_Fields = {
+  __typename?: 'case_case_managers_var_pop_fields';
+  case_cases?: Maybe<Scalars['Float']['output']>;
+  case_manager_case_managers?: Maybe<Scalars['Float']['output']>;
+  id?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "case_case_managers" */
+export type Case_Case_Managers_Var_Pop_Order_By = {
+  case_cases?: InputMaybe<Order_By>;
+  case_manager_case_managers?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type Case_Case_Managers_Var_Samp_Fields = {
+  __typename?: 'case_case_managers_var_samp_fields';
+  case_cases?: Maybe<Scalars['Float']['output']>;
+  case_manager_case_managers?: Maybe<Scalars['Float']['output']>;
+  id?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_samp() on columns of table "case_case_managers" */
+export type Case_Case_Managers_Var_Samp_Order_By = {
+  case_cases?: InputMaybe<Order_By>;
+  case_manager_case_managers?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type Case_Case_Managers_Variance_Fields = {
+  __typename?: 'case_case_managers_variance_fields';
+  case_cases?: Maybe<Scalars['Float']['output']>;
+  case_manager_case_managers?: Maybe<Scalars['Float']['output']>;
+  id?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "case_case_managers" */
+export type Case_Case_Managers_Variance_Order_By = {
+  case_cases?: InputMaybe<Order_By>;
+  case_manager_case_managers?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+};
+
+/** columns and relationships of "case_gc_history" */
+export type Case_Gc_History = {
+  __typename?: 'case_gc_history';
+  /** An object relationship */
+  case: Cases;
+  case_cases: Scalars['bigint']['output'];
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: Maybe<Scalars['bigint']['output']>;
+  /** Display snapshot (usually email); no FK to users */
+  changed_by_label?: Maybe<Scalars['String']['output']>;
+  /** admin | case_manager — portal identity at audit time */
+  changed_by_role?: Maybe<Scalars['String']['output']>;
+  created_at: Scalars['timestamptz']['output'];
+  from_surrogate_mother?: Maybe<Scalars['bigint']['output']>;
+  id: Scalars['bigint']['output'];
+  remark?: Maybe<Scalars['String']['output']>;
+  to_surrogate_mother?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** aggregated selection of "case_gc_history" */
+export type Case_Gc_History_Aggregate = {
+  __typename?: 'case_gc_history_aggregate';
+  aggregate?: Maybe<Case_Gc_History_Aggregate_Fields>;
+  nodes: Array<Case_Gc_History>;
+};
+
+export type Case_Gc_History_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Case_Gc_History_Aggregate_Bool_Exp_Count>;
+};
+
+export type Case_Gc_History_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Case_Gc_History_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Case_Gc_History_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "case_gc_history" */
+export type Case_Gc_History_Aggregate_Fields = {
+  __typename?: 'case_gc_history_aggregate_fields';
+  avg?: Maybe<Case_Gc_History_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Case_Gc_History_Max_Fields>;
+  min?: Maybe<Case_Gc_History_Min_Fields>;
+  stddev?: Maybe<Case_Gc_History_Stddev_Fields>;
+  stddev_pop?: Maybe<Case_Gc_History_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Case_Gc_History_Stddev_Samp_Fields>;
+  sum?: Maybe<Case_Gc_History_Sum_Fields>;
+  var_pop?: Maybe<Case_Gc_History_Var_Pop_Fields>;
+  var_samp?: Maybe<Case_Gc_History_Var_Samp_Fields>;
+  variance?: Maybe<Case_Gc_History_Variance_Fields>;
+};
+
+
+/** aggregate fields of "case_gc_history" */
+export type Case_Gc_History_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Case_Gc_History_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "case_gc_history" */
+export type Case_Gc_History_Aggregate_Order_By = {
+  avg?: InputMaybe<Case_Gc_History_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Case_Gc_History_Max_Order_By>;
+  min?: InputMaybe<Case_Gc_History_Min_Order_By>;
+  stddev?: InputMaybe<Case_Gc_History_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Case_Gc_History_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Case_Gc_History_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Case_Gc_History_Sum_Order_By>;
+  var_pop?: InputMaybe<Case_Gc_History_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Case_Gc_History_Var_Samp_Order_By>;
+  variance?: InputMaybe<Case_Gc_History_Variance_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "case_gc_history" */
+export type Case_Gc_History_Arr_Rel_Insert_Input = {
+  data: Array<Case_Gc_History_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Case_Gc_History_On_Conflict>;
+};
+
+/** aggregate avg on columns */
+export type Case_Gc_History_Avg_Fields = {
+  __typename?: 'case_gc_history_avg_fields';
+  case_cases?: Maybe<Scalars['Float']['output']>;
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: Maybe<Scalars['Float']['output']>;
+  from_surrogate_mother?: Maybe<Scalars['Float']['output']>;
+  id?: Maybe<Scalars['Float']['output']>;
+  to_surrogate_mother?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "case_gc_history" */
+export type Case_Gc_History_Avg_Order_By = {
+  case_cases?: InputMaybe<Order_By>;
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: InputMaybe<Order_By>;
+  from_surrogate_mother?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  to_surrogate_mother?: InputMaybe<Order_By>;
+};
+
+/** Boolean expression to filter rows from the table "case_gc_history". All fields are combined with a logical 'AND'. */
+export type Case_Gc_History_Bool_Exp = {
+  _and?: InputMaybe<Array<Case_Gc_History_Bool_Exp>>;
+  _not?: InputMaybe<Case_Gc_History_Bool_Exp>;
+  _or?: InputMaybe<Array<Case_Gc_History_Bool_Exp>>;
+  case?: InputMaybe<Cases_Bool_Exp>;
+  case_cases?: InputMaybe<Bigint_Comparison_Exp>;
+  changed_by_entity_id?: InputMaybe<Bigint_Comparison_Exp>;
+  changed_by_label?: InputMaybe<String_Comparison_Exp>;
+  changed_by_role?: InputMaybe<String_Comparison_Exp>;
+  created_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  from_surrogate_mother?: InputMaybe<Bigint_Comparison_Exp>;
+  id?: InputMaybe<Bigint_Comparison_Exp>;
+  remark?: InputMaybe<String_Comparison_Exp>;
+  to_surrogate_mother?: InputMaybe<Bigint_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "case_gc_history" */
+export enum Case_Gc_History_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  CaseGcHistoryPkey = 'case_gc_history_pkey'
+}
+
+/** input type for incrementing numeric columns in table "case_gc_history" */
+export type Case_Gc_History_Inc_Input = {
+  case_cases?: InputMaybe<Scalars['bigint']['input']>;
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: InputMaybe<Scalars['bigint']['input']>;
+  from_surrogate_mother?: InputMaybe<Scalars['bigint']['input']>;
+  id?: InputMaybe<Scalars['bigint']['input']>;
+  to_surrogate_mother?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** input type for inserting data into table "case_gc_history" */
+export type Case_Gc_History_Insert_Input = {
+  case?: InputMaybe<Cases_Obj_Rel_Insert_Input>;
+  case_cases?: InputMaybe<Scalars['bigint']['input']>;
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: InputMaybe<Scalars['bigint']['input']>;
+  /** Display snapshot (usually email); no FK to users */
+  changed_by_label?: InputMaybe<Scalars['String']['input']>;
+  /** admin | case_manager — portal identity at audit time */
+  changed_by_role?: InputMaybe<Scalars['String']['input']>;
+  created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  from_surrogate_mother?: InputMaybe<Scalars['bigint']['input']>;
+  id?: InputMaybe<Scalars['bigint']['input']>;
+  remark?: InputMaybe<Scalars['String']['input']>;
+  to_surrogate_mother?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** aggregate max on columns */
+export type Case_Gc_History_Max_Fields = {
+  __typename?: 'case_gc_history_max_fields';
+  case_cases?: Maybe<Scalars['bigint']['output']>;
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: Maybe<Scalars['bigint']['output']>;
+  /** Display snapshot (usually email); no FK to users */
+  changed_by_label?: Maybe<Scalars['String']['output']>;
+  /** admin | case_manager — portal identity at audit time */
+  changed_by_role?: Maybe<Scalars['String']['output']>;
+  created_at?: Maybe<Scalars['timestamptz']['output']>;
+  from_surrogate_mother?: Maybe<Scalars['bigint']['output']>;
+  id?: Maybe<Scalars['bigint']['output']>;
+  remark?: Maybe<Scalars['String']['output']>;
+  to_surrogate_mother?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** order by max() on columns of table "case_gc_history" */
+export type Case_Gc_History_Max_Order_By = {
+  case_cases?: InputMaybe<Order_By>;
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: InputMaybe<Order_By>;
+  /** Display snapshot (usually email); no FK to users */
+  changed_by_label?: InputMaybe<Order_By>;
+  /** admin | case_manager — portal identity at audit time */
+  changed_by_role?: InputMaybe<Order_By>;
+  created_at?: InputMaybe<Order_By>;
+  from_surrogate_mother?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  remark?: InputMaybe<Order_By>;
+  to_surrogate_mother?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Case_Gc_History_Min_Fields = {
+  __typename?: 'case_gc_history_min_fields';
+  case_cases?: Maybe<Scalars['bigint']['output']>;
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: Maybe<Scalars['bigint']['output']>;
+  /** Display snapshot (usually email); no FK to users */
+  changed_by_label?: Maybe<Scalars['String']['output']>;
+  /** admin | case_manager — portal identity at audit time */
+  changed_by_role?: Maybe<Scalars['String']['output']>;
+  created_at?: Maybe<Scalars['timestamptz']['output']>;
+  from_surrogate_mother?: Maybe<Scalars['bigint']['output']>;
+  id?: Maybe<Scalars['bigint']['output']>;
+  remark?: Maybe<Scalars['String']['output']>;
+  to_surrogate_mother?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** order by min() on columns of table "case_gc_history" */
+export type Case_Gc_History_Min_Order_By = {
+  case_cases?: InputMaybe<Order_By>;
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: InputMaybe<Order_By>;
+  /** Display snapshot (usually email); no FK to users */
+  changed_by_label?: InputMaybe<Order_By>;
+  /** admin | case_manager — portal identity at audit time */
+  changed_by_role?: InputMaybe<Order_By>;
+  created_at?: InputMaybe<Order_By>;
+  from_surrogate_mother?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  remark?: InputMaybe<Order_By>;
+  to_surrogate_mother?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "case_gc_history" */
+export type Case_Gc_History_Mutation_Response = {
+  __typename?: 'case_gc_history_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Case_Gc_History>;
+};
+
+/** on_conflict condition type for table "case_gc_history" */
+export type Case_Gc_History_On_Conflict = {
+  constraint: Case_Gc_History_Constraint;
+  update_columns?: Array<Case_Gc_History_Update_Column>;
+  where?: InputMaybe<Case_Gc_History_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "case_gc_history". */
+export type Case_Gc_History_Order_By = {
+  case?: InputMaybe<Cases_Order_By>;
+  case_cases?: InputMaybe<Order_By>;
+  changed_by_entity_id?: InputMaybe<Order_By>;
+  changed_by_label?: InputMaybe<Order_By>;
+  changed_by_role?: InputMaybe<Order_By>;
+  created_at?: InputMaybe<Order_By>;
+  from_surrogate_mother?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  remark?: InputMaybe<Order_By>;
+  to_surrogate_mother?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: case_gc_history */
+export type Case_Gc_History_Pk_Columns_Input = {
+  id: Scalars['bigint']['input'];
+};
+
+/** select columns of table "case_gc_history" */
+export enum Case_Gc_History_Select_Column {
+  /** column name */
+  CaseCases = 'case_cases',
+  /** column name */
+  ChangedByEntityId = 'changed_by_entity_id',
+  /** column name */
+  ChangedByLabel = 'changed_by_label',
+  /** column name */
+  ChangedByRole = 'changed_by_role',
+  /** column name */
+  CreatedAt = 'created_at',
+  /** column name */
+  FromSurrogateMother = 'from_surrogate_mother',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  Remark = 'remark',
+  /** column name */
+  ToSurrogateMother = 'to_surrogate_mother'
+}
+
+/** input type for updating data in table "case_gc_history" */
+export type Case_Gc_History_Set_Input = {
+  case_cases?: InputMaybe<Scalars['bigint']['input']>;
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: InputMaybe<Scalars['bigint']['input']>;
+  /** Display snapshot (usually email); no FK to users */
+  changed_by_label?: InputMaybe<Scalars['String']['input']>;
+  /** admin | case_manager — portal identity at audit time */
+  changed_by_role?: InputMaybe<Scalars['String']['input']>;
+  created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  from_surrogate_mother?: InputMaybe<Scalars['bigint']['input']>;
+  id?: InputMaybe<Scalars['bigint']['input']>;
+  remark?: InputMaybe<Scalars['String']['input']>;
+  to_surrogate_mother?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Case_Gc_History_Stddev_Fields = {
+  __typename?: 'case_gc_history_stddev_fields';
+  case_cases?: Maybe<Scalars['Float']['output']>;
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: Maybe<Scalars['Float']['output']>;
+  from_surrogate_mother?: Maybe<Scalars['Float']['output']>;
+  id?: Maybe<Scalars['Float']['output']>;
+  to_surrogate_mother?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "case_gc_history" */
+export type Case_Gc_History_Stddev_Order_By = {
+  case_cases?: InputMaybe<Order_By>;
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: InputMaybe<Order_By>;
+  from_surrogate_mother?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  to_surrogate_mother?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Case_Gc_History_Stddev_Pop_Fields = {
+  __typename?: 'case_gc_history_stddev_pop_fields';
+  case_cases?: Maybe<Scalars['Float']['output']>;
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: Maybe<Scalars['Float']['output']>;
+  from_surrogate_mother?: Maybe<Scalars['Float']['output']>;
+  id?: Maybe<Scalars['Float']['output']>;
+  to_surrogate_mother?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_pop() on columns of table "case_gc_history" */
+export type Case_Gc_History_Stddev_Pop_Order_By = {
+  case_cases?: InputMaybe<Order_By>;
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: InputMaybe<Order_By>;
+  from_surrogate_mother?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  to_surrogate_mother?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Case_Gc_History_Stddev_Samp_Fields = {
+  __typename?: 'case_gc_history_stddev_samp_fields';
+  case_cases?: Maybe<Scalars['Float']['output']>;
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: Maybe<Scalars['Float']['output']>;
+  from_surrogate_mother?: Maybe<Scalars['Float']['output']>;
+  id?: Maybe<Scalars['Float']['output']>;
+  to_surrogate_mother?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "case_gc_history" */
+export type Case_Gc_History_Stddev_Samp_Order_By = {
+  case_cases?: InputMaybe<Order_By>;
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: InputMaybe<Order_By>;
+  from_surrogate_mother?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  to_surrogate_mother?: InputMaybe<Order_By>;
+};
+
+/** Streaming cursor of the table "case_gc_history" */
+export type Case_Gc_History_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Case_Gc_History_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Case_Gc_History_Stream_Cursor_Value_Input = {
+  case_cases?: InputMaybe<Scalars['bigint']['input']>;
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: InputMaybe<Scalars['bigint']['input']>;
+  /** Display snapshot (usually email); no FK to users */
+  changed_by_label?: InputMaybe<Scalars['String']['input']>;
+  /** admin | case_manager — portal identity at audit time */
+  changed_by_role?: InputMaybe<Scalars['String']['input']>;
+  created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  from_surrogate_mother?: InputMaybe<Scalars['bigint']['input']>;
+  id?: InputMaybe<Scalars['bigint']['input']>;
+  remark?: InputMaybe<Scalars['String']['input']>;
+  to_surrogate_mother?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Case_Gc_History_Sum_Fields = {
+  __typename?: 'case_gc_history_sum_fields';
+  case_cases?: Maybe<Scalars['bigint']['output']>;
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: Maybe<Scalars['bigint']['output']>;
+  from_surrogate_mother?: Maybe<Scalars['bigint']['output']>;
+  id?: Maybe<Scalars['bigint']['output']>;
+  to_surrogate_mother?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** order by sum() on columns of table "case_gc_history" */
+export type Case_Gc_History_Sum_Order_By = {
+  case_cases?: InputMaybe<Order_By>;
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: InputMaybe<Order_By>;
+  from_surrogate_mother?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  to_surrogate_mother?: InputMaybe<Order_By>;
+};
+
+/** update columns of table "case_gc_history" */
+export enum Case_Gc_History_Update_Column {
+  /** column name */
+  CaseCases = 'case_cases',
+  /** column name */
+  ChangedByEntityId = 'changed_by_entity_id',
+  /** column name */
+  ChangedByLabel = 'changed_by_label',
+  /** column name */
+  ChangedByRole = 'changed_by_role',
+  /** column name */
+  CreatedAt = 'created_at',
+  /** column name */
+  FromSurrogateMother = 'from_surrogate_mother',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  Remark = 'remark',
+  /** column name */
+  ToSurrogateMother = 'to_surrogate_mother'
+}
+
+export type Case_Gc_History_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Case_Gc_History_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Case_Gc_History_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Case_Gc_History_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Case_Gc_History_Var_Pop_Fields = {
+  __typename?: 'case_gc_history_var_pop_fields';
+  case_cases?: Maybe<Scalars['Float']['output']>;
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: Maybe<Scalars['Float']['output']>;
+  from_surrogate_mother?: Maybe<Scalars['Float']['output']>;
+  id?: Maybe<Scalars['Float']['output']>;
+  to_surrogate_mother?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "case_gc_history" */
+export type Case_Gc_History_Var_Pop_Order_By = {
+  case_cases?: InputMaybe<Order_By>;
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: InputMaybe<Order_By>;
+  from_surrogate_mother?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  to_surrogate_mother?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type Case_Gc_History_Var_Samp_Fields = {
+  __typename?: 'case_gc_history_var_samp_fields';
+  case_cases?: Maybe<Scalars['Float']['output']>;
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: Maybe<Scalars['Float']['output']>;
+  from_surrogate_mother?: Maybe<Scalars['Float']['output']>;
+  id?: Maybe<Scalars['Float']['output']>;
+  to_surrogate_mother?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_samp() on columns of table "case_gc_history" */
+export type Case_Gc_History_Var_Samp_Order_By = {
+  case_cases?: InputMaybe<Order_By>;
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: InputMaybe<Order_By>;
+  from_surrogate_mother?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  to_surrogate_mother?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type Case_Gc_History_Variance_Fields = {
+  __typename?: 'case_gc_history_variance_fields';
+  case_cases?: Maybe<Scalars['Float']['output']>;
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: Maybe<Scalars['Float']['output']>;
+  from_surrogate_mother?: Maybe<Scalars['Float']['output']>;
+  id?: Maybe<Scalars['Float']['output']>;
+  to_surrogate_mother?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "case_gc_history" */
+export type Case_Gc_History_Variance_Order_By = {
+  case_cases?: InputMaybe<Order_By>;
+  /** Business entity id (e.g. case_managers.id); NULL for admin */
+  changed_by_entity_id?: InputMaybe<Order_By>;
+  from_surrogate_mother?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  to_surrogate_mother?: InputMaybe<Order_By>;
+};
+
 /** 案例经理表 */
 export type Case_Managers = {
   __typename?: 'case_managers';
+  /** An array relationship */
+  case_case_managers: Array<Case_Case_Managers>;
+  /** An aggregate relationship */
+  case_case_managers_aggregate: Case_Case_Managers_Aggregate;
   /** An array relationship */
   cases: Array<Cases>;
   /** An aggregate relationship */
   cases_aggregate: Cases_Aggregate;
   created_at: Scalars['timestamptz']['output'];
+  /** Soft delete timestamp; NULL means active. Data retained permanently. */
+  deleted_at?: Maybe<Scalars['timestamptz']['output']>;
   id: Scalars['bigint']['output'];
   profile_data: Scalars['json']['output'];
   /** 角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理） */
   role: Scalars['String']['output'];
   updated_at: Scalars['timestamptz']['output'];
   /** An object relationship */
-  user: Users;
-  user_users: Scalars['bigint']['output'];
+  user?: Maybe<Users>;
+  user_users?: Maybe<Scalars['bigint']['output']>;
+};
+
+
+/** 案例经理表 */
+export type Case_ManagersCase_Case_ManagersArgs = {
+  distinct_on?: InputMaybe<Array<Case_Case_Managers_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Case_Case_Managers_Order_By>>;
+  where?: InputMaybe<Case_Case_Managers_Bool_Exp>;
+};
+
+
+/** 案例经理表 */
+export type Case_ManagersCase_Case_Managers_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Case_Case_Managers_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Case_Case_Managers_Order_By>>;
+  where?: InputMaybe<Case_Case_Managers_Bool_Exp>;
 };
 
 
@@ -879,9 +1816,12 @@ export type Case_Managers_Bool_Exp = {
   _and?: InputMaybe<Array<Case_Managers_Bool_Exp>>;
   _not?: InputMaybe<Case_Managers_Bool_Exp>;
   _or?: InputMaybe<Array<Case_Managers_Bool_Exp>>;
+  case_case_managers?: InputMaybe<Case_Case_Managers_Bool_Exp>;
+  case_case_managers_aggregate?: InputMaybe<Case_Case_Managers_Aggregate_Bool_Exp>;
   cases?: InputMaybe<Cases_Bool_Exp>;
   cases_aggregate?: InputMaybe<Cases_Aggregate_Bool_Exp>;
   created_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  deleted_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   id?: InputMaybe<Bigint_Comparison_Exp>;
   profile_data?: InputMaybe<Json_Comparison_Exp>;
   role?: InputMaybe<String_Comparison_Exp>;
@@ -906,8 +1846,11 @@ export type Case_Managers_Inc_Input = {
 
 /** input type for inserting data into table "case_managers" */
 export type Case_Managers_Insert_Input = {
+  case_case_managers?: InputMaybe<Case_Case_Managers_Arr_Rel_Insert_Input>;
   cases?: InputMaybe<Cases_Arr_Rel_Insert_Input>;
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** Soft delete timestamp; NULL means active. Data retained permanently. */
+  deleted_at?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
   profile_data?: InputMaybe<Scalars['json']['input']>;
   /** 角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理） */
@@ -921,6 +1864,8 @@ export type Case_Managers_Insert_Input = {
 export type Case_Managers_Max_Fields = {
   __typename?: 'case_managers_max_fields';
   created_at?: Maybe<Scalars['timestamptz']['output']>;
+  /** Soft delete timestamp; NULL means active. Data retained permanently. */
+  deleted_at?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['bigint']['output']>;
   /** 角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理） */
   role?: Maybe<Scalars['String']['output']>;
@@ -931,6 +1876,8 @@ export type Case_Managers_Max_Fields = {
 /** order by max() on columns of table "case_managers" */
 export type Case_Managers_Max_Order_By = {
   created_at?: InputMaybe<Order_By>;
+  /** Soft delete timestamp; NULL means active. Data retained permanently. */
+  deleted_at?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   /** 角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理） */
   role?: InputMaybe<Order_By>;
@@ -942,6 +1889,8 @@ export type Case_Managers_Max_Order_By = {
 export type Case_Managers_Min_Fields = {
   __typename?: 'case_managers_min_fields';
   created_at?: Maybe<Scalars['timestamptz']['output']>;
+  /** Soft delete timestamp; NULL means active. Data retained permanently. */
+  deleted_at?: Maybe<Scalars['timestamptz']['output']>;
   id?: Maybe<Scalars['bigint']['output']>;
   /** 角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理） */
   role?: Maybe<Scalars['String']['output']>;
@@ -952,6 +1901,8 @@ export type Case_Managers_Min_Fields = {
 /** order by min() on columns of table "case_managers" */
 export type Case_Managers_Min_Order_By = {
   created_at?: InputMaybe<Order_By>;
+  /** Soft delete timestamp; NULL means active. Data retained permanently. */
+  deleted_at?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   /** 角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理） */
   role?: InputMaybe<Order_By>;
@@ -984,8 +1935,10 @@ export type Case_Managers_On_Conflict = {
 
 /** Ordering options when selecting data from "case_managers". */
 export type Case_Managers_Order_By = {
+  case_case_managers_aggregate?: InputMaybe<Case_Case_Managers_Aggregate_Order_By>;
   cases_aggregate?: InputMaybe<Cases_Aggregate_Order_By>;
   created_at?: InputMaybe<Order_By>;
+  deleted_at?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   profile_data?: InputMaybe<Order_By>;
   role?: InputMaybe<Order_By>;
@@ -1004,6 +1957,8 @@ export enum Case_Managers_Select_Column {
   /** column name */
   CreatedAt = 'created_at',
   /** column name */
+  DeletedAt = 'deleted_at',
+  /** column name */
   Id = 'id',
   /** column name */
   ProfileData = 'profile_data',
@@ -1018,6 +1973,8 @@ export enum Case_Managers_Select_Column {
 /** input type for updating data in table "case_managers" */
 export type Case_Managers_Set_Input = {
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** Soft delete timestamp; NULL means active. Data retained permanently. */
+  deleted_at?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
   profile_data?: InputMaybe<Scalars['json']['input']>;
   /** 角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理） */
@@ -1076,6 +2033,8 @@ export type Case_Managers_Stream_Cursor_Input = {
 /** Initial value of the column from where the streaming should start */
 export type Case_Managers_Stream_Cursor_Value_Input = {
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** Soft delete timestamp; NULL means active. Data retained permanently. */
+  deleted_at?: InputMaybe<Scalars['timestamptz']['input']>;
   id?: InputMaybe<Scalars['bigint']['input']>;
   profile_data?: InputMaybe<Scalars['json']['input']>;
   /** 角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理） */
@@ -1101,6 +2060,8 @@ export type Case_Managers_Sum_Order_By = {
 export enum Case_Managers_Update_Column {
   /** column name */
   CreatedAt = 'created_at',
+  /** column name */
+  DeletedAt = 'deleted_at',
   /** column name */
   Id = 'id',
   /** column name */
@@ -1161,13 +2122,503 @@ export type Case_Managers_Variance_Order_By = {
   user_users?: InputMaybe<Order_By>;
 };
 
+/** columns and relationships of "case_messages" */
+export type Case_Messages = {
+  __typename?: 'case_messages';
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: Maybe<Scalars['bigint']['output']>;
+  /** Display snapshot (usually email); no FK to users */
+  author_label?: Maybe<Scalars['String']['output']>;
+  author_role: Scalars['String']['output'];
+  body: Scalars['String']['output'];
+  /** An object relationship */
+  case: Cases;
+  case_cases: Scalars['bigint']['output'];
+  created_at: Scalars['timestamptz']['output'];
+  email_notify: Scalars['Boolean']['output'];
+  id: Scalars['bigint']['output'];
+  updated_at: Scalars['timestamptz']['output'];
+};
+
+/** aggregated selection of "case_messages" */
+export type Case_Messages_Aggregate = {
+  __typename?: 'case_messages_aggregate';
+  aggregate?: Maybe<Case_Messages_Aggregate_Fields>;
+  nodes: Array<Case_Messages>;
+};
+
+export type Case_Messages_Aggregate_Bool_Exp = {
+  bool_and?: InputMaybe<Case_Messages_Aggregate_Bool_Exp_Bool_And>;
+  bool_or?: InputMaybe<Case_Messages_Aggregate_Bool_Exp_Bool_Or>;
+  count?: InputMaybe<Case_Messages_Aggregate_Bool_Exp_Count>;
+};
+
+export type Case_Messages_Aggregate_Bool_Exp_Bool_And = {
+  arguments: Case_Messages_Select_Column_Case_Messages_Aggregate_Bool_Exp_Bool_And_Arguments_Columns;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Case_Messages_Bool_Exp>;
+  predicate: Boolean_Comparison_Exp;
+};
+
+export type Case_Messages_Aggregate_Bool_Exp_Bool_Or = {
+  arguments: Case_Messages_Select_Column_Case_Messages_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Case_Messages_Bool_Exp>;
+  predicate: Boolean_Comparison_Exp;
+};
+
+export type Case_Messages_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Case_Messages_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Case_Messages_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "case_messages" */
+export type Case_Messages_Aggregate_Fields = {
+  __typename?: 'case_messages_aggregate_fields';
+  avg?: Maybe<Case_Messages_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Case_Messages_Max_Fields>;
+  min?: Maybe<Case_Messages_Min_Fields>;
+  stddev?: Maybe<Case_Messages_Stddev_Fields>;
+  stddev_pop?: Maybe<Case_Messages_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Case_Messages_Stddev_Samp_Fields>;
+  sum?: Maybe<Case_Messages_Sum_Fields>;
+  var_pop?: Maybe<Case_Messages_Var_Pop_Fields>;
+  var_samp?: Maybe<Case_Messages_Var_Samp_Fields>;
+  variance?: Maybe<Case_Messages_Variance_Fields>;
+};
+
+
+/** aggregate fields of "case_messages" */
+export type Case_Messages_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Case_Messages_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "case_messages" */
+export type Case_Messages_Aggregate_Order_By = {
+  avg?: InputMaybe<Case_Messages_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Case_Messages_Max_Order_By>;
+  min?: InputMaybe<Case_Messages_Min_Order_By>;
+  stddev?: InputMaybe<Case_Messages_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Case_Messages_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Case_Messages_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Case_Messages_Sum_Order_By>;
+  var_pop?: InputMaybe<Case_Messages_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Case_Messages_Var_Samp_Order_By>;
+  variance?: InputMaybe<Case_Messages_Variance_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "case_messages" */
+export type Case_Messages_Arr_Rel_Insert_Input = {
+  data: Array<Case_Messages_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Case_Messages_On_Conflict>;
+};
+
+/** aggregate avg on columns */
+export type Case_Messages_Avg_Fields = {
+  __typename?: 'case_messages_avg_fields';
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: Maybe<Scalars['Float']['output']>;
+  case_cases?: Maybe<Scalars['Float']['output']>;
+  id?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "case_messages" */
+export type Case_Messages_Avg_Order_By = {
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: InputMaybe<Order_By>;
+  case_cases?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+};
+
+/** Boolean expression to filter rows from the table "case_messages". All fields are combined with a logical 'AND'. */
+export type Case_Messages_Bool_Exp = {
+  _and?: InputMaybe<Array<Case_Messages_Bool_Exp>>;
+  _not?: InputMaybe<Case_Messages_Bool_Exp>;
+  _or?: InputMaybe<Array<Case_Messages_Bool_Exp>>;
+  author_entity_id?: InputMaybe<Bigint_Comparison_Exp>;
+  author_label?: InputMaybe<String_Comparison_Exp>;
+  author_role?: InputMaybe<String_Comparison_Exp>;
+  body?: InputMaybe<String_Comparison_Exp>;
+  case?: InputMaybe<Cases_Bool_Exp>;
+  case_cases?: InputMaybe<Bigint_Comparison_Exp>;
+  created_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  email_notify?: InputMaybe<Boolean_Comparison_Exp>;
+  id?: InputMaybe<Bigint_Comparison_Exp>;
+  updated_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "case_messages" */
+export enum Case_Messages_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  CaseMessagesPkey = 'case_messages_pkey'
+}
+
+/** input type for incrementing numeric columns in table "case_messages" */
+export type Case_Messages_Inc_Input = {
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: InputMaybe<Scalars['bigint']['input']>;
+  case_cases?: InputMaybe<Scalars['bigint']['input']>;
+  id?: InputMaybe<Scalars['bigint']['input']>;
+};
+
+/** input type for inserting data into table "case_messages" */
+export type Case_Messages_Insert_Input = {
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: InputMaybe<Scalars['bigint']['input']>;
+  /** Display snapshot (usually email); no FK to users */
+  author_label?: InputMaybe<Scalars['String']['input']>;
+  author_role?: InputMaybe<Scalars['String']['input']>;
+  body?: InputMaybe<Scalars['String']['input']>;
+  case?: InputMaybe<Cases_Obj_Rel_Insert_Input>;
+  case_cases?: InputMaybe<Scalars['bigint']['input']>;
+  created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  email_notify?: InputMaybe<Scalars['Boolean']['input']>;
+  id?: InputMaybe<Scalars['bigint']['input']>;
+  updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate max on columns */
+export type Case_Messages_Max_Fields = {
+  __typename?: 'case_messages_max_fields';
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: Maybe<Scalars['bigint']['output']>;
+  /** Display snapshot (usually email); no FK to users */
+  author_label?: Maybe<Scalars['String']['output']>;
+  author_role?: Maybe<Scalars['String']['output']>;
+  body?: Maybe<Scalars['String']['output']>;
+  case_cases?: Maybe<Scalars['bigint']['output']>;
+  created_at?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['bigint']['output']>;
+  updated_at?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** order by max() on columns of table "case_messages" */
+export type Case_Messages_Max_Order_By = {
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: InputMaybe<Order_By>;
+  /** Display snapshot (usually email); no FK to users */
+  author_label?: InputMaybe<Order_By>;
+  author_role?: InputMaybe<Order_By>;
+  body?: InputMaybe<Order_By>;
+  case_cases?: InputMaybe<Order_By>;
+  created_at?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  updated_at?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Case_Messages_Min_Fields = {
+  __typename?: 'case_messages_min_fields';
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: Maybe<Scalars['bigint']['output']>;
+  /** Display snapshot (usually email); no FK to users */
+  author_label?: Maybe<Scalars['String']['output']>;
+  author_role?: Maybe<Scalars['String']['output']>;
+  body?: Maybe<Scalars['String']['output']>;
+  case_cases?: Maybe<Scalars['bigint']['output']>;
+  created_at?: Maybe<Scalars['timestamptz']['output']>;
+  id?: Maybe<Scalars['bigint']['output']>;
+  updated_at?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** order by min() on columns of table "case_messages" */
+export type Case_Messages_Min_Order_By = {
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: InputMaybe<Order_By>;
+  /** Display snapshot (usually email); no FK to users */
+  author_label?: InputMaybe<Order_By>;
+  author_role?: InputMaybe<Order_By>;
+  body?: InputMaybe<Order_By>;
+  case_cases?: InputMaybe<Order_By>;
+  created_at?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  updated_at?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "case_messages" */
+export type Case_Messages_Mutation_Response = {
+  __typename?: 'case_messages_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Case_Messages>;
+};
+
+/** on_conflict condition type for table "case_messages" */
+export type Case_Messages_On_Conflict = {
+  constraint: Case_Messages_Constraint;
+  update_columns?: Array<Case_Messages_Update_Column>;
+  where?: InputMaybe<Case_Messages_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "case_messages". */
+export type Case_Messages_Order_By = {
+  author_entity_id?: InputMaybe<Order_By>;
+  author_label?: InputMaybe<Order_By>;
+  author_role?: InputMaybe<Order_By>;
+  body?: InputMaybe<Order_By>;
+  case?: InputMaybe<Cases_Order_By>;
+  case_cases?: InputMaybe<Order_By>;
+  created_at?: InputMaybe<Order_By>;
+  email_notify?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  updated_at?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: case_messages */
+export type Case_Messages_Pk_Columns_Input = {
+  id: Scalars['bigint']['input'];
+};
+
+/** select columns of table "case_messages" */
+export enum Case_Messages_Select_Column {
+  /** column name */
+  AuthorEntityId = 'author_entity_id',
+  /** column name */
+  AuthorLabel = 'author_label',
+  /** column name */
+  AuthorRole = 'author_role',
+  /** column name */
+  Body = 'body',
+  /** column name */
+  CaseCases = 'case_cases',
+  /** column name */
+  CreatedAt = 'created_at',
+  /** column name */
+  EmailNotify = 'email_notify',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  UpdatedAt = 'updated_at'
+}
+
+/** select "case_messages_aggregate_bool_exp_bool_and_arguments_columns" columns of table "case_messages" */
+export enum Case_Messages_Select_Column_Case_Messages_Aggregate_Bool_Exp_Bool_And_Arguments_Columns {
+  /** column name */
+  EmailNotify = 'email_notify'
+}
+
+/** select "case_messages_aggregate_bool_exp_bool_or_arguments_columns" columns of table "case_messages" */
+export enum Case_Messages_Select_Column_Case_Messages_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns {
+  /** column name */
+  EmailNotify = 'email_notify'
+}
+
+/** input type for updating data in table "case_messages" */
+export type Case_Messages_Set_Input = {
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: InputMaybe<Scalars['bigint']['input']>;
+  /** Display snapshot (usually email); no FK to users */
+  author_label?: InputMaybe<Scalars['String']['input']>;
+  author_role?: InputMaybe<Scalars['String']['input']>;
+  body?: InputMaybe<Scalars['String']['input']>;
+  case_cases?: InputMaybe<Scalars['bigint']['input']>;
+  created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  email_notify?: InputMaybe<Scalars['Boolean']['input']>;
+  id?: InputMaybe<Scalars['bigint']['input']>;
+  updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Case_Messages_Stddev_Fields = {
+  __typename?: 'case_messages_stddev_fields';
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: Maybe<Scalars['Float']['output']>;
+  case_cases?: Maybe<Scalars['Float']['output']>;
+  id?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "case_messages" */
+export type Case_Messages_Stddev_Order_By = {
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: InputMaybe<Order_By>;
+  case_cases?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Case_Messages_Stddev_Pop_Fields = {
+  __typename?: 'case_messages_stddev_pop_fields';
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: Maybe<Scalars['Float']['output']>;
+  case_cases?: Maybe<Scalars['Float']['output']>;
+  id?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_pop() on columns of table "case_messages" */
+export type Case_Messages_Stddev_Pop_Order_By = {
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: InputMaybe<Order_By>;
+  case_cases?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Case_Messages_Stddev_Samp_Fields = {
+  __typename?: 'case_messages_stddev_samp_fields';
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: Maybe<Scalars['Float']['output']>;
+  case_cases?: Maybe<Scalars['Float']['output']>;
+  id?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "case_messages" */
+export type Case_Messages_Stddev_Samp_Order_By = {
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: InputMaybe<Order_By>;
+  case_cases?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+};
+
+/** Streaming cursor of the table "case_messages" */
+export type Case_Messages_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Case_Messages_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Case_Messages_Stream_Cursor_Value_Input = {
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: InputMaybe<Scalars['bigint']['input']>;
+  /** Display snapshot (usually email); no FK to users */
+  author_label?: InputMaybe<Scalars['String']['input']>;
+  author_role?: InputMaybe<Scalars['String']['input']>;
+  body?: InputMaybe<Scalars['String']['input']>;
+  case_cases?: InputMaybe<Scalars['bigint']['input']>;
+  created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  email_notify?: InputMaybe<Scalars['Boolean']['input']>;
+  id?: InputMaybe<Scalars['bigint']['input']>;
+  updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Case_Messages_Sum_Fields = {
+  __typename?: 'case_messages_sum_fields';
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: Maybe<Scalars['bigint']['output']>;
+  case_cases?: Maybe<Scalars['bigint']['output']>;
+  id?: Maybe<Scalars['bigint']['output']>;
+};
+
+/** order by sum() on columns of table "case_messages" */
+export type Case_Messages_Sum_Order_By = {
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: InputMaybe<Order_By>;
+  case_cases?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+};
+
+/** update columns of table "case_messages" */
+export enum Case_Messages_Update_Column {
+  /** column name */
+  AuthorEntityId = 'author_entity_id',
+  /** column name */
+  AuthorLabel = 'author_label',
+  /** column name */
+  AuthorRole = 'author_role',
+  /** column name */
+  Body = 'body',
+  /** column name */
+  CaseCases = 'case_cases',
+  /** column name */
+  CreatedAt = 'created_at',
+  /** column name */
+  EmailNotify = 'email_notify',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  UpdatedAt = 'updated_at'
+}
+
+export type Case_Messages_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Case_Messages_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Case_Messages_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Case_Messages_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Case_Messages_Var_Pop_Fields = {
+  __typename?: 'case_messages_var_pop_fields';
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: Maybe<Scalars['Float']['output']>;
+  case_cases?: Maybe<Scalars['Float']['output']>;
+  id?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "case_messages" */
+export type Case_Messages_Var_Pop_Order_By = {
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: InputMaybe<Order_By>;
+  case_cases?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type Case_Messages_Var_Samp_Fields = {
+  __typename?: 'case_messages_var_samp_fields';
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: Maybe<Scalars['Float']['output']>;
+  case_cases?: Maybe<Scalars['Float']['output']>;
+  id?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_samp() on columns of table "case_messages" */
+export type Case_Messages_Var_Samp_Order_By = {
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: InputMaybe<Order_By>;
+  case_cases?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type Case_Messages_Variance_Fields = {
+  __typename?: 'case_messages_variance_fields';
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: Maybe<Scalars['Float']['output']>;
+  case_cases?: Maybe<Scalars['Float']['output']>;
+  id?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "case_messages" */
+export type Case_Messages_Variance_Order_By = {
+  /** Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin */
+  author_entity_id?: InputMaybe<Order_By>;
+  case_cases?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+};
+
 /** columns and relationships of "cases" */
 export type Cases = {
   __typename?: 'cases';
+  /** Soft archive timestamp; NULL means active */
+  archived_at?: Maybe<Scalars['timestamptz']['output']>;
+  /** An array relationship */
+  case_case_managers: Array<Case_Case_Managers>;
+  /** An aggregate relationship */
+  case_case_managers_aggregate: Case_Case_Managers_Aggregate;
+  /** An array relationship */
+  case_gc_histories: Array<Case_Gc_History>;
+  /** An aggregate relationship */
+  case_gc_histories_aggregate: Case_Gc_History_Aggregate;
   /** An object relationship */
   case_manager?: Maybe<Case_Managers>;
   /** 分配的案例经理，新版 */
   case_manager_case_managers?: Maybe<Scalars['bigint']['output']>;
+  /** An array relationship */
+  case_messages: Array<Case_Messages>;
+  /** An aggregate relationship */
+  case_messages_aggregate: Case_Messages_Aggregate;
   /** An array relationship */
   cases_files: Array<Cases_Files>;
   /** An aggregate relationship */
@@ -1213,6 +2664,66 @@ export type Cases = {
   updated_at: Scalars['timestamptz']['output'];
   /** An object relationship */
   user?: Maybe<Users>;
+};
+
+
+/** columns and relationships of "cases" */
+export type CasesCase_Case_ManagersArgs = {
+  distinct_on?: InputMaybe<Array<Case_Case_Managers_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Case_Case_Managers_Order_By>>;
+  where?: InputMaybe<Case_Case_Managers_Bool_Exp>;
+};
+
+
+/** columns and relationships of "cases" */
+export type CasesCase_Case_Managers_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Case_Case_Managers_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Case_Case_Managers_Order_By>>;
+  where?: InputMaybe<Case_Case_Managers_Bool_Exp>;
+};
+
+
+/** columns and relationships of "cases" */
+export type CasesCase_Gc_HistoriesArgs = {
+  distinct_on?: InputMaybe<Array<Case_Gc_History_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Case_Gc_History_Order_By>>;
+  where?: InputMaybe<Case_Gc_History_Bool_Exp>;
+};
+
+
+/** columns and relationships of "cases" */
+export type CasesCase_Gc_Histories_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Case_Gc_History_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Case_Gc_History_Order_By>>;
+  where?: InputMaybe<Case_Gc_History_Bool_Exp>;
+};
+
+
+/** columns and relationships of "cases" */
+export type CasesCase_MessagesArgs = {
+  distinct_on?: InputMaybe<Array<Case_Messages_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Case_Messages_Order_By>>;
+  where?: InputMaybe<Case_Messages_Bool_Exp>;
+};
+
+
+/** columns and relationships of "cases" */
+export type CasesCase_Messages_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Case_Messages_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Case_Messages_Order_By>>;
+  where?: InputMaybe<Case_Messages_Bool_Exp>;
 };
 
 
@@ -1424,8 +2935,15 @@ export type Cases_Bool_Exp = {
   _and?: InputMaybe<Array<Cases_Bool_Exp>>;
   _not?: InputMaybe<Cases_Bool_Exp>;
   _or?: InputMaybe<Array<Cases_Bool_Exp>>;
+  archived_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  case_case_managers?: InputMaybe<Case_Case_Managers_Bool_Exp>;
+  case_case_managers_aggregate?: InputMaybe<Case_Case_Managers_Aggregate_Bool_Exp>;
+  case_gc_histories?: InputMaybe<Case_Gc_History_Bool_Exp>;
+  case_gc_histories_aggregate?: InputMaybe<Case_Gc_History_Aggregate_Bool_Exp>;
   case_manager?: InputMaybe<Case_Managers_Bool_Exp>;
   case_manager_case_managers?: InputMaybe<Bigint_Comparison_Exp>;
+  case_messages?: InputMaybe<Case_Messages_Bool_Exp>;
+  case_messages_aggregate?: InputMaybe<Case_Messages_Aggregate_Bool_Exp>;
   cases_files?: InputMaybe<Cases_Files_Bool_Exp>;
   cases_files_aggregate?: InputMaybe<Cases_Files_Aggregate_Bool_Exp>;
   client_manager?: InputMaybe<Client_Managers_Bool_Exp>;
@@ -1454,12 +2972,8 @@ export type Cases_Bool_Exp = {
 
 /** unique or primary key constraints on table "cases" */
 export enum Cases_Constraint {
-  /** unique or primary key constraint on columns "intended_parent_intended_parents" */
-  CasesIntendedParentIntendedParentsKey = 'cases_intended_parent_intended_parents_key',
   /** unique or primary key constraint on columns "id" */
-  CasesPkey = 'cases_pkey',
-  /** unique or primary key constraint on columns "surrogate_mother_surrogate_mothers" */
-  CasesSurrogateMotherSurrogateMothersKey = 'cases_surrogate_mother_surrogate_mothers_key'
+  CasesPkey = 'cases_pkey'
 }
 
 /** 案子的相关文件 */
@@ -1485,6 +2999,8 @@ export type Cases_Files = {
   journey_journeys?: Maybe<Scalars['bigint']['output']>;
   note?: Maybe<Scalars['String']['output']>;
   updated_at: Scalars['timestamptz']['output'];
+  /** all=client visible; manager=internal only */
+  visibility?: Maybe<Scalars['String']['output']>;
 };
 
 /** aggregated selection of "cases_files" */
@@ -1586,6 +3102,7 @@ export type Cases_Files_Bool_Exp = {
   journey_journeys?: InputMaybe<Bigint_Comparison_Exp>;
   note?: InputMaybe<String_Comparison_Exp>;
   updated_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  visibility?: InputMaybe<String_Comparison_Exp>;
 };
 
 /** unique or primary key constraints on table "cases_files" */
@@ -1623,6 +3140,8 @@ export type Cases_Files_Insert_Input = {
   journey_journeys?: InputMaybe<Scalars['bigint']['input']>;
   note?: InputMaybe<Scalars['String']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** all=client visible; manager=internal only */
+  visibility?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** aggregate max on columns */
@@ -1644,6 +3163,8 @@ export type Cases_Files_Max_Fields = {
   journey_journeys?: Maybe<Scalars['bigint']['output']>;
   note?: Maybe<Scalars['String']['output']>;
   updated_at?: Maybe<Scalars['timestamptz']['output']>;
+  /** all=client visible; manager=internal only */
+  visibility?: Maybe<Scalars['String']['output']>;
 };
 
 /** order by max() on columns of table "cases_files" */
@@ -1664,6 +3185,8 @@ export type Cases_Files_Max_Order_By = {
   journey_journeys?: InputMaybe<Order_By>;
   note?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
+  /** all=client visible; manager=internal only */
+  visibility?: InputMaybe<Order_By>;
 };
 
 /** aggregate min on columns */
@@ -1685,6 +3208,8 @@ export type Cases_Files_Min_Fields = {
   journey_journeys?: Maybe<Scalars['bigint']['output']>;
   note?: Maybe<Scalars['String']['output']>;
   updated_at?: Maybe<Scalars['timestamptz']['output']>;
+  /** all=client visible; manager=internal only */
+  visibility?: Maybe<Scalars['String']['output']>;
 };
 
 /** order by min() on columns of table "cases_files" */
@@ -1705,6 +3230,8 @@ export type Cases_Files_Min_Order_By = {
   journey_journeys?: InputMaybe<Order_By>;
   note?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
+  /** all=client visible; manager=internal only */
+  visibility?: InputMaybe<Order_By>;
 };
 
 /** response of any mutation on the table "cases_files" */
@@ -1737,6 +3264,7 @@ export type Cases_Files_Order_By = {
   journey_journeys?: InputMaybe<Order_By>;
   note?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
+  visibility?: InputMaybe<Order_By>;
 };
 
 /** primary key columns input for table: cases_files */
@@ -1765,7 +3293,9 @@ export enum Cases_Files_Select_Column {
   /** column name */
   Note = 'note',
   /** column name */
-  UpdatedAt = 'updated_at'
+  UpdatedAt = 'updated_at',
+  /** column name */
+  Visibility = 'visibility'
 }
 
 /** input type for updating data in table "cases_files" */
@@ -1786,6 +3316,8 @@ export type Cases_Files_Set_Input = {
   journey_journeys?: InputMaybe<Scalars['bigint']['input']>;
   note?: InputMaybe<Scalars['String']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** all=client visible; manager=internal only */
+  visibility?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** aggregate stddev on columns */
@@ -1871,6 +3403,8 @@ export type Cases_Files_Stream_Cursor_Value_Input = {
   journey_journeys?: InputMaybe<Scalars['bigint']['input']>;
   note?: InputMaybe<Scalars['String']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** all=client visible; manager=internal only */
+  visibility?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** aggregate sum on columns */
@@ -1913,7 +3447,9 @@ export enum Cases_Files_Update_Column {
   /** column name */
   Note = 'note',
   /** column name */
-  UpdatedAt = 'updated_at'
+  UpdatedAt = 'updated_at',
+  /** column name */
+  Visibility = 'visibility'
 }
 
 export type Cases_Files_Updates = {
@@ -2001,9 +3537,14 @@ export type Cases_Inc_Input = {
 
 /** input type for inserting data into table "cases" */
 export type Cases_Insert_Input = {
+  /** Soft archive timestamp; NULL means active */
+  archived_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  case_case_managers?: InputMaybe<Case_Case_Managers_Arr_Rel_Insert_Input>;
+  case_gc_histories?: InputMaybe<Case_Gc_History_Arr_Rel_Insert_Input>;
   case_manager?: InputMaybe<Case_Managers_Obj_Rel_Insert_Input>;
   /** 分配的案例经理，新版 */
   case_manager_case_managers?: InputMaybe<Scalars['bigint']['input']>;
+  case_messages?: InputMaybe<Case_Messages_Arr_Rel_Insert_Input>;
   cases_files?: InputMaybe<Cases_Files_Arr_Rel_Insert_Input>;
   client_manager?: InputMaybe<Client_Managers_Obj_Rel_Insert_Input>;
   /** 弃用，外键，客户经理 */
@@ -2035,6 +3576,8 @@ export type Cases_Insert_Input = {
 /** aggregate max on columns */
 export type Cases_Max_Fields = {
   __typename?: 'cases_max_fields';
+  /** Soft archive timestamp; NULL means active */
+  archived_at?: Maybe<Scalars['timestamptz']['output']>;
   /** 分配的案例经理，新版 */
   case_manager_case_managers?: Maybe<Scalars['bigint']['output']>;
   /** 弃用，外键，客户经理 */
@@ -2056,6 +3599,8 @@ export type Cases_Max_Fields = {
 
 /** order by max() on columns of table "cases" */
 export type Cases_Max_Order_By = {
+  /** Soft archive timestamp; NULL means active */
+  archived_at?: InputMaybe<Order_By>;
   /** 分配的案例经理，新版 */
   case_manager_case_managers?: InputMaybe<Order_By>;
   /** 弃用，外键，客户经理 */
@@ -2078,6 +3623,8 @@ export type Cases_Max_Order_By = {
 /** aggregate min on columns */
 export type Cases_Min_Fields = {
   __typename?: 'cases_min_fields';
+  /** Soft archive timestamp; NULL means active */
+  archived_at?: Maybe<Scalars['timestamptz']['output']>;
   /** 分配的案例经理，新版 */
   case_manager_case_managers?: Maybe<Scalars['bigint']['output']>;
   /** 弃用，外键，客户经理 */
@@ -2099,6 +3646,8 @@ export type Cases_Min_Fields = {
 
 /** order by min() on columns of table "cases" */
 export type Cases_Min_Order_By = {
+  /** Soft archive timestamp; NULL means active */
+  archived_at?: InputMaybe<Order_By>;
   /** 分配的案例经理，新版 */
   case_manager_case_managers?: InputMaybe<Order_By>;
   /** 弃用，外键，客户经理 */
@@ -2143,8 +3692,12 @@ export type Cases_On_Conflict = {
 
 /** Ordering options when selecting data from "cases". */
 export type Cases_Order_By = {
+  archived_at?: InputMaybe<Order_By>;
+  case_case_managers_aggregate?: InputMaybe<Case_Case_Managers_Aggregate_Order_By>;
+  case_gc_histories_aggregate?: InputMaybe<Case_Gc_History_Aggregate_Order_By>;
   case_manager?: InputMaybe<Case_Managers_Order_By>;
   case_manager_case_managers?: InputMaybe<Order_By>;
+  case_messages_aggregate?: InputMaybe<Case_Messages_Aggregate_Order_By>;
   cases_files_aggregate?: InputMaybe<Cases_Files_Aggregate_Order_By>;
   client_manager?: InputMaybe<Client_Managers_Order_By>;
   client_manager_client_managers?: InputMaybe<Order_By>;
@@ -2174,6 +3727,8 @@ export type Cases_Pk_Columns_Input = {
 /** select columns of table "cases" */
 export enum Cases_Select_Column {
   /** column name */
+  ArchivedAt = 'archived_at',
+  /** column name */
   CaseManagerCaseManagers = 'case_manager_case_managers',
   /** column name */
   ClientManagerClientManagers = 'client_manager_client_managers',
@@ -2199,6 +3754,8 @@ export enum Cases_Select_Column {
 
 /** input type for updating data in table "cases" */
 export type Cases_Set_Input = {
+  /** Soft archive timestamp; NULL means active */
+  archived_at?: InputMaybe<Scalars['timestamptz']['input']>;
   /** 分配的案例经理，新版 */
   case_manager_case_managers?: InputMaybe<Scalars['bigint']['input']>;
   /** 弃用，外键，客户经理 */
@@ -2335,6 +3892,8 @@ export type Cases_Stream_Cursor_Input = {
 
 /** Initial value of the column from where the streaming should start */
 export type Cases_Stream_Cursor_Value_Input = {
+  /** Soft archive timestamp; NULL means active */
+  archived_at?: InputMaybe<Scalars['timestamptz']['input']>;
   /** 分配的案例经理，新版 */
   case_manager_case_managers?: InputMaybe<Scalars['bigint']['input']>;
   /** 弃用，外键，客户经理 */
@@ -2393,6 +3952,8 @@ export type Cases_Sum_Order_By = {
 
 /** update columns of table "cases" */
 export enum Cases_Update_Column {
+  /** column name */
+  ArchivedAt = 'archived_at',
   /** column name */
   CaseManagerCaseManagers = 'case_manager_case_managers',
   /** column name */
@@ -2958,6 +4519,8 @@ export type Intended_Parents = {
   /** 弃用，联系信息 */
   contact_information?: Maybe<Scalars['jsonb']['output']>;
   created_at: Scalars['timestamptz']['output'];
+  /** Soft delete timestamp; NULL means active. Data retained permanently. */
+  deleted_at?: Maybe<Scalars['timestamptz']['output']>;
   /** 弃用，准父母邮箱，作为登录的邮箱 */
   email: Scalars['String']['output'];
   /** 弃用，家庭资料 */
@@ -2970,7 +4533,7 @@ export type Intended_Parents = {
   /** An aggregate relationship */
   post_comments_aggregate: Post_Comments_Aggregate;
   /** 简介数据，新版使用 */
-  profile_data: Scalars['json']['output'];
+  profile_data: Scalars['jsonb']['output'];
   /** 弃用，项目意向 */
   program_interests?: Maybe<Scalars['jsonb']['output']>;
   /** 弃用，渠道及初步沟通 */
@@ -3123,6 +4686,8 @@ export type Intended_Parents_Append_Input = {
   contact_information?: InputMaybe<Scalars['jsonb']['input']>;
   /** 弃用，家庭资料 */
   family_profile?: InputMaybe<Scalars['jsonb']['input']>;
+  /** 简介数据，新版使用 */
+  profile_data?: InputMaybe<Scalars['jsonb']['input']>;
   /** 弃用，项目意向 */
   program_interests?: InputMaybe<Scalars['jsonb']['input']>;
   /** 弃用，渠道及初步沟通 */
@@ -3164,13 +4729,14 @@ export type Intended_Parents_Bool_Exp = {
   cases_aggregate?: InputMaybe<Cases_Aggregate_Bool_Exp>;
   contact_information?: InputMaybe<Jsonb_Comparison_Exp>;
   created_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  deleted_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   email?: InputMaybe<String_Comparison_Exp>;
   family_profile?: InputMaybe<Jsonb_Comparison_Exp>;
   id?: InputMaybe<Bigint_Comparison_Exp>;
   password?: InputMaybe<String_Comparison_Exp>;
   post_comments?: InputMaybe<Post_Comments_Bool_Exp>;
   post_comments_aggregate?: InputMaybe<Post_Comments_Aggregate_Bool_Exp>;
-  profile_data?: InputMaybe<Json_Comparison_Exp>;
+  profile_data?: InputMaybe<Jsonb_Comparison_Exp>;
   program_interests?: InputMaybe<Jsonb_Comparison_Exp>;
   referral?: InputMaybe<Jsonb_Comparison_Exp>;
   trust_account_balance?: InputMaybe<Numeric_Comparison_Exp>;
@@ -3197,6 +4763,8 @@ export type Intended_Parents_Delete_At_Path_Input = {
   contact_information?: InputMaybe<Array<Scalars['String']['input']>>;
   /** 弃用，家庭资料 */
   family_profile?: InputMaybe<Array<Scalars['String']['input']>>;
+  /** 简介数据，新版使用 */
+  profile_data?: InputMaybe<Array<Scalars['String']['input']>>;
   /** 弃用，项目意向 */
   program_interests?: InputMaybe<Array<Scalars['String']['input']>>;
   /** 弃用，渠道及初步沟通 */
@@ -3211,6 +4779,8 @@ export type Intended_Parents_Delete_Elem_Input = {
   contact_information?: InputMaybe<Scalars['Int']['input']>;
   /** 弃用，家庭资料 */
   family_profile?: InputMaybe<Scalars['Int']['input']>;
+  /** 简介数据，新版使用 */
+  profile_data?: InputMaybe<Scalars['Int']['input']>;
   /** 弃用，项目意向 */
   program_interests?: InputMaybe<Scalars['Int']['input']>;
   /** 弃用，渠道及初步沟通 */
@@ -3225,6 +4795,8 @@ export type Intended_Parents_Delete_Key_Input = {
   contact_information?: InputMaybe<Scalars['String']['input']>;
   /** 弃用，家庭资料 */
   family_profile?: InputMaybe<Scalars['String']['input']>;
+  /** 简介数据，新版使用 */
+  profile_data?: InputMaybe<Scalars['String']['input']>;
   /** 弃用，项目意向 */
   program_interests?: InputMaybe<Scalars['String']['input']>;
   /** 弃用，渠道及初步沟通 */
@@ -3248,6 +4820,8 @@ export type Intended_Parents_Insert_Input = {
   /** 弃用，联系信息 */
   contact_information?: InputMaybe<Scalars['jsonb']['input']>;
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** Soft delete timestamp; NULL means active. Data retained permanently. */
+  deleted_at?: InputMaybe<Scalars['timestamptz']['input']>;
   /** 弃用，准父母邮箱，作为登录的邮箱 */
   email?: InputMaybe<Scalars['String']['input']>;
   /** 弃用，家庭资料 */
@@ -3257,7 +4831,7 @@ export type Intended_Parents_Insert_Input = {
   password?: InputMaybe<Scalars['String']['input']>;
   post_comments?: InputMaybe<Post_Comments_Arr_Rel_Insert_Input>;
   /** 简介数据，新版使用 */
-  profile_data?: InputMaybe<Scalars['json']['input']>;
+  profile_data?: InputMaybe<Scalars['jsonb']['input']>;
   /** 弃用，项目意向 */
   program_interests?: InputMaybe<Scalars['jsonb']['input']>;
   /** 弃用，渠道及初步沟通 */
@@ -3273,6 +4847,8 @@ export type Intended_Parents_Insert_Input = {
 export type Intended_Parents_Max_Fields = {
   __typename?: 'intended_parents_max_fields';
   created_at?: Maybe<Scalars['timestamptz']['output']>;
+  /** Soft delete timestamp; NULL means active. Data retained permanently. */
+  deleted_at?: Maybe<Scalars['timestamptz']['output']>;
   /** 弃用，准父母邮箱，作为登录的邮箱 */
   email?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['bigint']['output']>;
@@ -3287,6 +4863,8 @@ export type Intended_Parents_Max_Fields = {
 /** order by max() on columns of table "intended_parents" */
 export type Intended_Parents_Max_Order_By = {
   created_at?: InputMaybe<Order_By>;
+  /** Soft delete timestamp; NULL means active. Data retained permanently. */
+  deleted_at?: InputMaybe<Order_By>;
   /** 弃用，准父母邮箱，作为登录的邮箱 */
   email?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -3302,6 +4880,8 @@ export type Intended_Parents_Max_Order_By = {
 export type Intended_Parents_Min_Fields = {
   __typename?: 'intended_parents_min_fields';
   created_at?: Maybe<Scalars['timestamptz']['output']>;
+  /** Soft delete timestamp; NULL means active. Data retained permanently. */
+  deleted_at?: Maybe<Scalars['timestamptz']['output']>;
   /** 弃用，准父母邮箱，作为登录的邮箱 */
   email?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['bigint']['output']>;
@@ -3316,6 +4896,8 @@ export type Intended_Parents_Min_Fields = {
 /** order by min() on columns of table "intended_parents" */
 export type Intended_Parents_Min_Order_By = {
   created_at?: InputMaybe<Order_By>;
+  /** Soft delete timestamp; NULL means active. Data retained permanently. */
+  deleted_at?: InputMaybe<Order_By>;
   /** 弃用，准父母邮箱，作为登录的邮箱 */
   email?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -3357,6 +4939,7 @@ export type Intended_Parents_Order_By = {
   cases_aggregate?: InputMaybe<Cases_Aggregate_Order_By>;
   contact_information?: InputMaybe<Order_By>;
   created_at?: InputMaybe<Order_By>;
+  deleted_at?: InputMaybe<Order_By>;
   email?: InputMaybe<Order_By>;
   family_profile?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -3384,6 +4967,8 @@ export type Intended_Parents_Prepend_Input = {
   contact_information?: InputMaybe<Scalars['jsonb']['input']>;
   /** 弃用，家庭资料 */
   family_profile?: InputMaybe<Scalars['jsonb']['input']>;
+  /** 简介数据，新版使用 */
+  profile_data?: InputMaybe<Scalars['jsonb']['input']>;
   /** 弃用，项目意向 */
   program_interests?: InputMaybe<Scalars['jsonb']['input']>;
   /** 弃用，渠道及初步沟通 */
@@ -3398,6 +4983,8 @@ export enum Intended_Parents_Select_Column {
   ContactInformation = 'contact_information',
   /** column name */
   CreatedAt = 'created_at',
+  /** column name */
+  DeletedAt = 'deleted_at',
   /** column name */
   Email = 'email',
   /** column name */
@@ -3427,6 +5014,8 @@ export type Intended_Parents_Set_Input = {
   /** 弃用，联系信息 */
   contact_information?: InputMaybe<Scalars['jsonb']['input']>;
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** Soft delete timestamp; NULL means active. Data retained permanently. */
+  deleted_at?: InputMaybe<Scalars['timestamptz']['input']>;
   /** 弃用，准父母邮箱，作为登录的邮箱 */
   email?: InputMaybe<Scalars['String']['input']>;
   /** 弃用，家庭资料 */
@@ -3435,7 +5024,7 @@ export type Intended_Parents_Set_Input = {
   /** 弃用，新版使用user.password作为统一登录 */
   password?: InputMaybe<Scalars['String']['input']>;
   /** 简介数据，新版使用 */
-  profile_data?: InputMaybe<Scalars['json']['input']>;
+  profile_data?: InputMaybe<Scalars['jsonb']['input']>;
   /** 弃用，项目意向 */
   program_interests?: InputMaybe<Scalars['jsonb']['input']>;
   /** 弃用，渠道及初步沟通 */
@@ -3512,6 +5101,8 @@ export type Intended_Parents_Stream_Cursor_Value_Input = {
   /** 弃用，联系信息 */
   contact_information?: InputMaybe<Scalars['jsonb']['input']>;
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** Soft delete timestamp; NULL means active. Data retained permanently. */
+  deleted_at?: InputMaybe<Scalars['timestamptz']['input']>;
   /** 弃用，准父母邮箱，作为登录的邮箱 */
   email?: InputMaybe<Scalars['String']['input']>;
   /** 弃用，家庭资料 */
@@ -3520,7 +5111,7 @@ export type Intended_Parents_Stream_Cursor_Value_Input = {
   /** 弃用，新版使用user.password作为统一登录 */
   password?: InputMaybe<Scalars['String']['input']>;
   /** 简介数据，新版使用 */
-  profile_data?: InputMaybe<Scalars['json']['input']>;
+  profile_data?: InputMaybe<Scalars['jsonb']['input']>;
   /** 弃用，项目意向 */
   program_interests?: InputMaybe<Scalars['jsonb']['input']>;
   /** 弃用，渠道及初步沟通 */
@@ -3556,6 +5147,8 @@ export enum Intended_Parents_Update_Column {
   ContactInformation = 'contact_information',
   /** column name */
   CreatedAt = 'created_at',
+  /** column name */
+  DeletedAt = 'deleted_at',
   /** column name */
   Email = 'email',
   /** column name */
@@ -4916,10 +6509,22 @@ export type Mutation_Root = {
   delete_blogs?: Maybe<Blogs_Mutation_Response>;
   /** delete single row from the table: "blogs" */
   delete_blogs_by_pk?: Maybe<Blogs>;
+  /** delete data from the table: "case_case_managers" */
+  delete_case_case_managers?: Maybe<Case_Case_Managers_Mutation_Response>;
+  /** delete single row from the table: "case_case_managers" */
+  delete_case_case_managers_by_pk?: Maybe<Case_Case_Managers>;
+  /** delete data from the table: "case_gc_history" */
+  delete_case_gc_history?: Maybe<Case_Gc_History_Mutation_Response>;
+  /** delete single row from the table: "case_gc_history" */
+  delete_case_gc_history_by_pk?: Maybe<Case_Gc_History>;
   /** delete data from the table: "case_managers" */
   delete_case_managers?: Maybe<Case_Managers_Mutation_Response>;
   /** delete single row from the table: "case_managers" */
   delete_case_managers_by_pk?: Maybe<Case_Managers>;
+  /** delete data from the table: "case_messages" */
+  delete_case_messages?: Maybe<Case_Messages_Mutation_Response>;
+  /** delete single row from the table: "case_messages" */
+  delete_case_messages_by_pk?: Maybe<Case_Messages>;
   /** delete data from the table: "cases" */
   delete_cases?: Maybe<Cases_Mutation_Response>;
   /** delete single row from the table: "cases" */
@@ -4976,10 +6581,22 @@ export type Mutation_Root = {
   insert_blogs?: Maybe<Blogs_Mutation_Response>;
   /** insert a single row into the table: "blogs" */
   insert_blogs_one?: Maybe<Blogs>;
+  /** insert data into the table: "case_case_managers" */
+  insert_case_case_managers?: Maybe<Case_Case_Managers_Mutation_Response>;
+  /** insert a single row into the table: "case_case_managers" */
+  insert_case_case_managers_one?: Maybe<Case_Case_Managers>;
+  /** insert data into the table: "case_gc_history" */
+  insert_case_gc_history?: Maybe<Case_Gc_History_Mutation_Response>;
+  /** insert a single row into the table: "case_gc_history" */
+  insert_case_gc_history_one?: Maybe<Case_Gc_History>;
   /** insert data into the table: "case_managers" */
   insert_case_managers?: Maybe<Case_Managers_Mutation_Response>;
   /** insert a single row into the table: "case_managers" */
   insert_case_managers_one?: Maybe<Case_Managers>;
+  /** insert data into the table: "case_messages" */
+  insert_case_messages?: Maybe<Case_Messages_Mutation_Response>;
+  /** insert a single row into the table: "case_messages" */
+  insert_case_messages_one?: Maybe<Case_Messages>;
   /** insert data into the table: "cases" */
   insert_cases?: Maybe<Cases_Mutation_Response>;
   /** insert data into the table: "cases_files" */
@@ -5040,12 +6657,30 @@ export type Mutation_Root = {
   update_blogs_by_pk?: Maybe<Blogs>;
   /** update multiples rows of table: "blogs" */
   update_blogs_many?: Maybe<Array<Maybe<Blogs_Mutation_Response>>>;
+  /** update data of the table: "case_case_managers" */
+  update_case_case_managers?: Maybe<Case_Case_Managers_Mutation_Response>;
+  /** update single row of the table: "case_case_managers" */
+  update_case_case_managers_by_pk?: Maybe<Case_Case_Managers>;
+  /** update multiples rows of table: "case_case_managers" */
+  update_case_case_managers_many?: Maybe<Array<Maybe<Case_Case_Managers_Mutation_Response>>>;
+  /** update data of the table: "case_gc_history" */
+  update_case_gc_history?: Maybe<Case_Gc_History_Mutation_Response>;
+  /** update single row of the table: "case_gc_history" */
+  update_case_gc_history_by_pk?: Maybe<Case_Gc_History>;
+  /** update multiples rows of table: "case_gc_history" */
+  update_case_gc_history_many?: Maybe<Array<Maybe<Case_Gc_History_Mutation_Response>>>;
   /** update data of the table: "case_managers" */
   update_case_managers?: Maybe<Case_Managers_Mutation_Response>;
   /** update single row of the table: "case_managers" */
   update_case_managers_by_pk?: Maybe<Case_Managers>;
   /** update multiples rows of table: "case_managers" */
   update_case_managers_many?: Maybe<Array<Maybe<Case_Managers_Mutation_Response>>>;
+  /** update data of the table: "case_messages" */
+  update_case_messages?: Maybe<Case_Messages_Mutation_Response>;
+  /** update single row of the table: "case_messages" */
+  update_case_messages_by_pk?: Maybe<Case_Messages>;
+  /** update multiples rows of table: "case_messages" */
+  update_case_messages_many?: Maybe<Array<Maybe<Case_Messages_Mutation_Response>>>;
   /** update data of the table: "cases" */
   update_cases?: Maybe<Cases_Mutation_Response>;
   /** update single row of the table: "cases" */
@@ -5146,6 +6781,30 @@ export type Mutation_RootDelete_Blogs_By_PkArgs = {
 
 
 /** mutation root */
+export type Mutation_RootDelete_Case_Case_ManagersArgs = {
+  where: Case_Case_Managers_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Case_Case_Managers_By_PkArgs = {
+  id: Scalars['bigint']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Case_Gc_HistoryArgs = {
+  where: Case_Gc_History_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Case_Gc_History_By_PkArgs = {
+  id: Scalars['bigint']['input'];
+};
+
+
+/** mutation root */
 export type Mutation_RootDelete_Case_ManagersArgs = {
   where: Case_Managers_Bool_Exp;
 };
@@ -5153,6 +6812,18 @@ export type Mutation_RootDelete_Case_ManagersArgs = {
 
 /** mutation root */
 export type Mutation_RootDelete_Case_Managers_By_PkArgs = {
+  id: Scalars['bigint']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Case_MessagesArgs = {
+  where: Case_Messages_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Case_Messages_By_PkArgs = {
   id: Scalars['bigint']['input'];
 };
 
@@ -5330,6 +7001,34 @@ export type Mutation_RootInsert_Blogs_OneArgs = {
 
 
 /** mutation root */
+export type Mutation_RootInsert_Case_Case_ManagersArgs = {
+  objects: Array<Case_Case_Managers_Insert_Input>;
+  on_conflict?: InputMaybe<Case_Case_Managers_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Case_Case_Managers_OneArgs = {
+  object: Case_Case_Managers_Insert_Input;
+  on_conflict?: InputMaybe<Case_Case_Managers_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Case_Gc_HistoryArgs = {
+  objects: Array<Case_Gc_History_Insert_Input>;
+  on_conflict?: InputMaybe<Case_Gc_History_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Case_Gc_History_OneArgs = {
+  object: Case_Gc_History_Insert_Input;
+  on_conflict?: InputMaybe<Case_Gc_History_On_Conflict>;
+};
+
+
+/** mutation root */
 export type Mutation_RootInsert_Case_ManagersArgs = {
   objects: Array<Case_Managers_Insert_Input>;
   on_conflict?: InputMaybe<Case_Managers_On_Conflict>;
@@ -5340,6 +7039,20 @@ export type Mutation_RootInsert_Case_ManagersArgs = {
 export type Mutation_RootInsert_Case_Managers_OneArgs = {
   object: Case_Managers_Insert_Input;
   on_conflict?: InputMaybe<Case_Managers_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Case_MessagesArgs = {
+  objects: Array<Case_Messages_Insert_Input>;
+  on_conflict?: InputMaybe<Case_Messages_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Case_Messages_OneArgs = {
+  object: Case_Messages_Insert_Input;
+  on_conflict?: InputMaybe<Case_Messages_On_Conflict>;
 };
 
 
@@ -5566,6 +7279,50 @@ export type Mutation_RootUpdate_Blogs_ManyArgs = {
 
 
 /** mutation root */
+export type Mutation_RootUpdate_Case_Case_ManagersArgs = {
+  _inc?: InputMaybe<Case_Case_Managers_Inc_Input>;
+  _set?: InputMaybe<Case_Case_Managers_Set_Input>;
+  where: Case_Case_Managers_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Case_Case_Managers_By_PkArgs = {
+  _inc?: InputMaybe<Case_Case_Managers_Inc_Input>;
+  _set?: InputMaybe<Case_Case_Managers_Set_Input>;
+  pk_columns: Case_Case_Managers_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Case_Case_Managers_ManyArgs = {
+  updates: Array<Case_Case_Managers_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Case_Gc_HistoryArgs = {
+  _inc?: InputMaybe<Case_Gc_History_Inc_Input>;
+  _set?: InputMaybe<Case_Gc_History_Set_Input>;
+  where: Case_Gc_History_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Case_Gc_History_By_PkArgs = {
+  _inc?: InputMaybe<Case_Gc_History_Inc_Input>;
+  _set?: InputMaybe<Case_Gc_History_Set_Input>;
+  pk_columns: Case_Gc_History_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Case_Gc_History_ManyArgs = {
+  updates: Array<Case_Gc_History_Updates>;
+};
+
+
+/** mutation root */
 export type Mutation_RootUpdate_Case_ManagersArgs = {
   _inc?: InputMaybe<Case_Managers_Inc_Input>;
   _set?: InputMaybe<Case_Managers_Set_Input>;
@@ -5584,6 +7341,28 @@ export type Mutation_RootUpdate_Case_Managers_By_PkArgs = {
 /** mutation root */
 export type Mutation_RootUpdate_Case_Managers_ManyArgs = {
   updates: Array<Case_Managers_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Case_MessagesArgs = {
+  _inc?: InputMaybe<Case_Messages_Inc_Input>;
+  _set?: InputMaybe<Case_Messages_Set_Input>;
+  where: Case_Messages_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Case_Messages_By_PkArgs = {
+  _inc?: InputMaybe<Case_Messages_Inc_Input>;
+  _set?: InputMaybe<Case_Messages_Set_Input>;
+  pk_columns: Case_Messages_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Case_Messages_ManyArgs = {
+  updates: Array<Case_Messages_Updates>;
 };
 
 
@@ -6944,11 +8723,29 @@ export type Query_Root = {
   /** fetch data from the table: "blogs" using primary key columns */
   blogs_by_pk?: Maybe<Blogs>;
   /** An array relationship */
+  case_case_managers: Array<Case_Case_Managers>;
+  /** An aggregate relationship */
+  case_case_managers_aggregate: Case_Case_Managers_Aggregate;
+  /** fetch data from the table: "case_case_managers" using primary key columns */
+  case_case_managers_by_pk?: Maybe<Case_Case_Managers>;
+  /** fetch data from the table: "case_gc_history" */
+  case_gc_history: Array<Case_Gc_History>;
+  /** fetch aggregated fields from the table: "case_gc_history" */
+  case_gc_history_aggregate: Case_Gc_History_Aggregate;
+  /** fetch data from the table: "case_gc_history" using primary key columns */
+  case_gc_history_by_pk?: Maybe<Case_Gc_History>;
+  /** An array relationship */
   case_managers: Array<Case_Managers>;
   /** An aggregate relationship */
   case_managers_aggregate: Case_Managers_Aggregate;
   /** fetch data from the table: "case_managers" using primary key columns */
   case_managers_by_pk?: Maybe<Case_Managers>;
+  /** An array relationship */
+  case_messages: Array<Case_Messages>;
+  /** An aggregate relationship */
+  case_messages_aggregate: Case_Messages_Aggregate;
+  /** fetch data from the table: "case_messages" using primary key columns */
+  case_messages_by_pk?: Maybe<Case_Messages>;
   /** An array relationship */
   cases: Array<Cases>;
   /** An aggregate relationship */
@@ -7070,6 +8867,52 @@ export type Query_RootBlogs_By_PkArgs = {
 };
 
 
+export type Query_RootCase_Case_ManagersArgs = {
+  distinct_on?: InputMaybe<Array<Case_Case_Managers_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Case_Case_Managers_Order_By>>;
+  where?: InputMaybe<Case_Case_Managers_Bool_Exp>;
+};
+
+
+export type Query_RootCase_Case_Managers_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Case_Case_Managers_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Case_Case_Managers_Order_By>>;
+  where?: InputMaybe<Case_Case_Managers_Bool_Exp>;
+};
+
+
+export type Query_RootCase_Case_Managers_By_PkArgs = {
+  id: Scalars['bigint']['input'];
+};
+
+
+export type Query_RootCase_Gc_HistoryArgs = {
+  distinct_on?: InputMaybe<Array<Case_Gc_History_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Case_Gc_History_Order_By>>;
+  where?: InputMaybe<Case_Gc_History_Bool_Exp>;
+};
+
+
+export type Query_RootCase_Gc_History_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Case_Gc_History_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Case_Gc_History_Order_By>>;
+  where?: InputMaybe<Case_Gc_History_Bool_Exp>;
+};
+
+
+export type Query_RootCase_Gc_History_By_PkArgs = {
+  id: Scalars['bigint']['input'];
+};
+
+
 export type Query_RootCase_ManagersArgs = {
   distinct_on?: InputMaybe<Array<Case_Managers_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -7089,6 +8932,29 @@ export type Query_RootCase_Managers_AggregateArgs = {
 
 
 export type Query_RootCase_Managers_By_PkArgs = {
+  id: Scalars['bigint']['input'];
+};
+
+
+export type Query_RootCase_MessagesArgs = {
+  distinct_on?: InputMaybe<Array<Case_Messages_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Case_Messages_Order_By>>;
+  where?: InputMaybe<Case_Messages_Bool_Exp>;
+};
+
+
+export type Query_RootCase_Messages_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Case_Messages_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Case_Messages_Order_By>>;
+  where?: InputMaybe<Case_Messages_Bool_Exp>;
+};
+
+
+export type Query_RootCase_Messages_By_PkArgs = {
   id: Scalars['bigint']['input'];
 };
 
@@ -7387,6 +9253,22 @@ export type Subscription_Root = {
   /** fetch data from the table in a streaming manner: "blogs" */
   blogs_stream: Array<Blogs>;
   /** An array relationship */
+  case_case_managers: Array<Case_Case_Managers>;
+  /** An aggregate relationship */
+  case_case_managers_aggregate: Case_Case_Managers_Aggregate;
+  /** fetch data from the table: "case_case_managers" using primary key columns */
+  case_case_managers_by_pk?: Maybe<Case_Case_Managers>;
+  /** fetch data from the table in a streaming manner: "case_case_managers" */
+  case_case_managers_stream: Array<Case_Case_Managers>;
+  /** fetch data from the table: "case_gc_history" */
+  case_gc_history: Array<Case_Gc_History>;
+  /** fetch aggregated fields from the table: "case_gc_history" */
+  case_gc_history_aggregate: Case_Gc_History_Aggregate;
+  /** fetch data from the table: "case_gc_history" using primary key columns */
+  case_gc_history_by_pk?: Maybe<Case_Gc_History>;
+  /** fetch data from the table in a streaming manner: "case_gc_history" */
+  case_gc_history_stream: Array<Case_Gc_History>;
+  /** An array relationship */
   case_managers: Array<Case_Managers>;
   /** An aggregate relationship */
   case_managers_aggregate: Case_Managers_Aggregate;
@@ -7394,6 +9276,14 @@ export type Subscription_Root = {
   case_managers_by_pk?: Maybe<Case_Managers>;
   /** fetch data from the table in a streaming manner: "case_managers" */
   case_managers_stream: Array<Case_Managers>;
+  /** An array relationship */
+  case_messages: Array<Case_Messages>;
+  /** An aggregate relationship */
+  case_messages_aggregate: Case_Messages_Aggregate;
+  /** fetch data from the table: "case_messages" using primary key columns */
+  case_messages_by_pk?: Maybe<Case_Messages>;
+  /** fetch data from the table in a streaming manner: "case_messages" */
+  case_messages_stream: Array<Case_Messages>;
   /** An array relationship */
   cases: Array<Cases>;
   /** An aggregate relationship */
@@ -7553,6 +9443,66 @@ export type Subscription_RootBlogs_StreamArgs = {
 };
 
 
+export type Subscription_RootCase_Case_ManagersArgs = {
+  distinct_on?: InputMaybe<Array<Case_Case_Managers_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Case_Case_Managers_Order_By>>;
+  where?: InputMaybe<Case_Case_Managers_Bool_Exp>;
+};
+
+
+export type Subscription_RootCase_Case_Managers_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Case_Case_Managers_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Case_Case_Managers_Order_By>>;
+  where?: InputMaybe<Case_Case_Managers_Bool_Exp>;
+};
+
+
+export type Subscription_RootCase_Case_Managers_By_PkArgs = {
+  id: Scalars['bigint']['input'];
+};
+
+
+export type Subscription_RootCase_Case_Managers_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Case_Case_Managers_Stream_Cursor_Input>>;
+  where?: InputMaybe<Case_Case_Managers_Bool_Exp>;
+};
+
+
+export type Subscription_RootCase_Gc_HistoryArgs = {
+  distinct_on?: InputMaybe<Array<Case_Gc_History_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Case_Gc_History_Order_By>>;
+  where?: InputMaybe<Case_Gc_History_Bool_Exp>;
+};
+
+
+export type Subscription_RootCase_Gc_History_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Case_Gc_History_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Case_Gc_History_Order_By>>;
+  where?: InputMaybe<Case_Gc_History_Bool_Exp>;
+};
+
+
+export type Subscription_RootCase_Gc_History_By_PkArgs = {
+  id: Scalars['bigint']['input'];
+};
+
+
+export type Subscription_RootCase_Gc_History_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Case_Gc_History_Stream_Cursor_Input>>;
+  where?: InputMaybe<Case_Gc_History_Bool_Exp>;
+};
+
+
 export type Subscription_RootCase_ManagersArgs = {
   distinct_on?: InputMaybe<Array<Case_Managers_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -7580,6 +9530,36 @@ export type Subscription_RootCase_Managers_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Case_Managers_Stream_Cursor_Input>>;
   where?: InputMaybe<Case_Managers_Bool_Exp>;
+};
+
+
+export type Subscription_RootCase_MessagesArgs = {
+  distinct_on?: InputMaybe<Array<Case_Messages_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Case_Messages_Order_By>>;
+  where?: InputMaybe<Case_Messages_Bool_Exp>;
+};
+
+
+export type Subscription_RootCase_Messages_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Case_Messages_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Case_Messages_Order_By>>;
+  where?: InputMaybe<Case_Messages_Bool_Exp>;
+};
+
+
+export type Subscription_RootCase_Messages_By_PkArgs = {
+  id: Scalars['bigint']['input'];
+};
+
+
+export type Subscription_RootCase_Messages_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Case_Messages_Stream_Cursor_Input>>;
+  where?: InputMaybe<Case_Messages_Bool_Exp>;
 };
 
 
@@ -7956,6 +9936,8 @@ export type Surrogate_Mothers = {
   /** 弃用，联系方式 */
   contact_information?: Maybe<Scalars['jsonb']['output']>;
   created_at: Scalars['timestamptz']['output'];
+  /** Soft delete timestamp; NULL means active. Data retained permanently. */
+  deleted_at?: Maybe<Scalars['timestamptz']['output']>;
   /** 弃用，登录的邮箱 */
   email: Scalars['String']['output'];
   /** 弃用， */
@@ -7970,7 +9952,7 @@ export type Surrogate_Mothers = {
   /** 弃用，准生育与健康经历 */
   pregnancy_and_health?: Maybe<Scalars['jsonb']['output']>;
   /** 新版使用 */
-  profile_data: Scalars['json']['output'];
+  profile_data: Scalars['jsonb']['output'];
   updated_at: Scalars['timestamptz']['output'];
   /** 弃用，上传的图片，至少两张 array-jsonb，如：[{"name":"a.png","url":"https://test.com/a.png"}] */
   upload_photos?: Maybe<Scalars['jsonb']['output']>;
@@ -8121,6 +10103,8 @@ export type Surrogate_Mothers_Append_Input = {
   gestational_surrogacy_interview?: InputMaybe<Scalars['jsonb']['input']>;
   /** 弃用，准生育与健康经历 */
   pregnancy_and_health?: InputMaybe<Scalars['jsonb']['input']>;
+  /** 新版使用 */
+  profile_data?: InputMaybe<Scalars['jsonb']['input']>;
   /** 弃用，上传的图片，至少两张 array-jsonb，如：[{"name":"a.png","url":"https://test.com/a.png"}] */
   upload_photos?: InputMaybe<Scalars['jsonb']['input']>;
 };
@@ -8156,6 +10140,7 @@ export type Surrogate_Mothers_Bool_Exp = {
   cases_aggregate?: InputMaybe<Cases_Aggregate_Bool_Exp>;
   contact_information?: InputMaybe<Jsonb_Comparison_Exp>;
   created_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  deleted_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   email?: InputMaybe<String_Comparison_Exp>;
   gestational_surrogacy_interview?: InputMaybe<Jsonb_Comparison_Exp>;
   id?: InputMaybe<Bigint_Comparison_Exp>;
@@ -8163,7 +10148,7 @@ export type Surrogate_Mothers_Bool_Exp = {
   post_comments?: InputMaybe<Post_Comments_Bool_Exp>;
   post_comments_aggregate?: InputMaybe<Post_Comments_Aggregate_Bool_Exp>;
   pregnancy_and_health?: InputMaybe<Jsonb_Comparison_Exp>;
-  profile_data?: InputMaybe<Json_Comparison_Exp>;
+  profile_data?: InputMaybe<Jsonb_Comparison_Exp>;
   updated_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   upload_photos?: InputMaybe<Jsonb_Comparison_Exp>;
   user?: InputMaybe<Users_Bool_Exp>;
@@ -8190,6 +10175,8 @@ export type Surrogate_Mothers_Delete_At_Path_Input = {
   gestational_surrogacy_interview?: InputMaybe<Array<Scalars['String']['input']>>;
   /** 弃用，准生育与健康经历 */
   pregnancy_and_health?: InputMaybe<Array<Scalars['String']['input']>>;
+  /** 新版使用 */
+  profile_data?: InputMaybe<Array<Scalars['String']['input']>>;
   /** 弃用，上传的图片，至少两张 array-jsonb，如：[{"name":"a.png","url":"https://test.com/a.png"}] */
   upload_photos?: InputMaybe<Array<Scalars['String']['input']>>;
 };
@@ -8204,6 +10191,8 @@ export type Surrogate_Mothers_Delete_Elem_Input = {
   gestational_surrogacy_interview?: InputMaybe<Scalars['Int']['input']>;
   /** 弃用，准生育与健康经历 */
   pregnancy_and_health?: InputMaybe<Scalars['Int']['input']>;
+  /** 新版使用 */
+  profile_data?: InputMaybe<Scalars['Int']['input']>;
   /** 弃用，上传的图片，至少两张 array-jsonb，如：[{"name":"a.png","url":"https://test.com/a.png"}] */
   upload_photos?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -8218,6 +10207,8 @@ export type Surrogate_Mothers_Delete_Key_Input = {
   gestational_surrogacy_interview?: InputMaybe<Scalars['String']['input']>;
   /** 弃用，准生育与健康经历 */
   pregnancy_and_health?: InputMaybe<Scalars['String']['input']>;
+  /** 新版使用 */
+  profile_data?: InputMaybe<Scalars['String']['input']>;
   /** 弃用，上传的图片，至少两张 array-jsonb，如：[{"name":"a.png","url":"https://test.com/a.png"}] */
   upload_photos?: InputMaybe<Scalars['String']['input']>;
 };
@@ -8237,6 +10228,8 @@ export type Surrogate_Mothers_Insert_Input = {
   /** 弃用，联系方式 */
   contact_information?: InputMaybe<Scalars['jsonb']['input']>;
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** Soft delete timestamp; NULL means active. Data retained permanently. */
+  deleted_at?: InputMaybe<Scalars['timestamptz']['input']>;
   /** 弃用，登录的邮箱 */
   email?: InputMaybe<Scalars['String']['input']>;
   /** 弃用， */
@@ -8248,7 +10241,7 @@ export type Surrogate_Mothers_Insert_Input = {
   /** 弃用，准生育与健康经历 */
   pregnancy_and_health?: InputMaybe<Scalars['jsonb']['input']>;
   /** 新版使用 */
-  profile_data?: InputMaybe<Scalars['json']['input']>;
+  profile_data?: InputMaybe<Scalars['jsonb']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
   /** 弃用，上传的图片，至少两张 array-jsonb，如：[{"name":"a.png","url":"https://test.com/a.png"}] */
   upload_photos?: InputMaybe<Scalars['jsonb']['input']>;
@@ -8260,6 +10253,8 @@ export type Surrogate_Mothers_Insert_Input = {
 export type Surrogate_Mothers_Max_Fields = {
   __typename?: 'surrogate_mothers_max_fields';
   created_at?: Maybe<Scalars['timestamptz']['output']>;
+  /** Soft delete timestamp; NULL means active. Data retained permanently. */
+  deleted_at?: Maybe<Scalars['timestamptz']['output']>;
   /** 弃用，登录的邮箱 */
   email?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['bigint']['output']>;
@@ -8272,6 +10267,8 @@ export type Surrogate_Mothers_Max_Fields = {
 /** order by max() on columns of table "surrogate_mothers" */
 export type Surrogate_Mothers_Max_Order_By = {
   created_at?: InputMaybe<Order_By>;
+  /** Soft delete timestamp; NULL means active. Data retained permanently. */
+  deleted_at?: InputMaybe<Order_By>;
   /** 弃用，登录的邮箱 */
   email?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -8285,6 +10282,8 @@ export type Surrogate_Mothers_Max_Order_By = {
 export type Surrogate_Mothers_Min_Fields = {
   __typename?: 'surrogate_mothers_min_fields';
   created_at?: Maybe<Scalars['timestamptz']['output']>;
+  /** Soft delete timestamp; NULL means active. Data retained permanently. */
+  deleted_at?: Maybe<Scalars['timestamptz']['output']>;
   /** 弃用，登录的邮箱 */
   email?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['bigint']['output']>;
@@ -8297,6 +10296,8 @@ export type Surrogate_Mothers_Min_Fields = {
 /** order by min() on columns of table "surrogate_mothers" */
 export type Surrogate_Mothers_Min_Order_By = {
   created_at?: InputMaybe<Order_By>;
+  /** Soft delete timestamp; NULL means active. Data retained permanently. */
+  deleted_at?: InputMaybe<Order_By>;
   /** 弃用，登录的邮箱 */
   email?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -8336,6 +10337,7 @@ export type Surrogate_Mothers_Order_By = {
   cases_aggregate?: InputMaybe<Cases_Aggregate_Order_By>;
   contact_information?: InputMaybe<Order_By>;
   created_at?: InputMaybe<Order_By>;
+  deleted_at?: InputMaybe<Order_By>;
   email?: InputMaybe<Order_By>;
   gestational_surrogacy_interview?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -8364,6 +10366,8 @@ export type Surrogate_Mothers_Prepend_Input = {
   gestational_surrogacy_interview?: InputMaybe<Scalars['jsonb']['input']>;
   /** 弃用，准生育与健康经历 */
   pregnancy_and_health?: InputMaybe<Scalars['jsonb']['input']>;
+  /** 新版使用 */
+  profile_data?: InputMaybe<Scalars['jsonb']['input']>;
   /** 弃用，上传的图片，至少两张 array-jsonb，如：[{"name":"a.png","url":"https://test.com/a.png"}] */
   upload_photos?: InputMaybe<Scalars['jsonb']['input']>;
 };
@@ -8376,6 +10380,8 @@ export enum Surrogate_Mothers_Select_Column {
   ContactInformation = 'contact_information',
   /** column name */
   CreatedAt = 'created_at',
+  /** column name */
+  DeletedAt = 'deleted_at',
   /** column name */
   Email = 'email',
   /** column name */
@@ -8403,6 +10409,8 @@ export type Surrogate_Mothers_Set_Input = {
   /** 弃用，联系方式 */
   contact_information?: InputMaybe<Scalars['jsonb']['input']>;
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** Soft delete timestamp; NULL means active. Data retained permanently. */
+  deleted_at?: InputMaybe<Scalars['timestamptz']['input']>;
   /** 弃用，登录的邮箱 */
   email?: InputMaybe<Scalars['String']['input']>;
   /** 弃用， */
@@ -8413,7 +10421,7 @@ export type Surrogate_Mothers_Set_Input = {
   /** 弃用，准生育与健康经历 */
   pregnancy_and_health?: InputMaybe<Scalars['jsonb']['input']>;
   /** 新版使用 */
-  profile_data?: InputMaybe<Scalars['json']['input']>;
+  profile_data?: InputMaybe<Scalars['jsonb']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
   /** 弃用，上传的图片，至少两张 array-jsonb，如：[{"name":"a.png","url":"https://test.com/a.png"}] */
   upload_photos?: InputMaybe<Scalars['jsonb']['input']>;
@@ -8474,6 +10482,8 @@ export type Surrogate_Mothers_Stream_Cursor_Value_Input = {
   /** 弃用，联系方式 */
   contact_information?: InputMaybe<Scalars['jsonb']['input']>;
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** Soft delete timestamp; NULL means active. Data retained permanently. */
+  deleted_at?: InputMaybe<Scalars['timestamptz']['input']>;
   /** 弃用，登录的邮箱 */
   email?: InputMaybe<Scalars['String']['input']>;
   /** 弃用， */
@@ -8484,7 +10494,7 @@ export type Surrogate_Mothers_Stream_Cursor_Value_Input = {
   /** 弃用，准生育与健康经历 */
   pregnancy_and_health?: InputMaybe<Scalars['jsonb']['input']>;
   /** 新版使用 */
-  profile_data?: InputMaybe<Scalars['json']['input']>;
+  profile_data?: InputMaybe<Scalars['jsonb']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
   /** 弃用，上传的图片，至少两张 array-jsonb，如：[{"name":"a.png","url":"https://test.com/a.png"}] */
   upload_photos?: InputMaybe<Scalars['jsonb']['input']>;
@@ -8512,6 +10522,8 @@ export enum Surrogate_Mothers_Update_Column {
   ContactInformation = 'contact_information',
   /** column name */
   CreatedAt = 'created_at',
+  /** column name */
+  DeletedAt = 'deleted_at',
   /** column name */
   Email = 'email',
   /** column name */
@@ -8627,6 +10639,8 @@ export type Trust_Account_Balance_Changes = {
   updated_at: Scalars['timestamptz']['output'];
   /** 谁可见选项： 1.all（所有人可见） 2.manager（只有客户经理和管理员可见） */
   visibility?: Maybe<Scalars['String']['output']>;
+  /** Payment voucher / receipt file URL (Qiniu); no FK */
+  voucher_url?: Maybe<Scalars['String']['output']>;
 };
 
 /** aggregated selection of "trust_account_balance_changes" */
@@ -8736,6 +10750,7 @@ export type Trust_Account_Balance_Changes_Bool_Exp = {
   remark?: InputMaybe<String_Comparison_Exp>;
   updated_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   visibility?: InputMaybe<String_Comparison_Exp>;
+  voucher_url?: InputMaybe<String_Comparison_Exp>;
 };
 
 /** unique or primary key constraints on table "trust_account_balance_changes" */
@@ -8779,6 +10794,8 @@ export type Trust_Account_Balance_Changes_Insert_Input = {
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
   /** 谁可见选项： 1.all（所有人可见） 2.manager（只有客户经理和管理员可见） */
   visibility?: InputMaybe<Scalars['String']['input']>;
+  /** Payment voucher / receipt file URL (Qiniu); no FK */
+  voucher_url?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** aggregate max on columns */
@@ -8803,6 +10820,8 @@ export type Trust_Account_Balance_Changes_Max_Fields = {
   updated_at?: Maybe<Scalars['timestamptz']['output']>;
   /** 谁可见选项： 1.all（所有人可见） 2.manager（只有客户经理和管理员可见） */
   visibility?: Maybe<Scalars['String']['output']>;
+  /** Payment voucher / receipt file URL (Qiniu); no FK */
+  voucher_url?: Maybe<Scalars['String']['output']>;
 };
 
 /** order by max() on columns of table "trust_account_balance_changes" */
@@ -8826,6 +10845,8 @@ export type Trust_Account_Balance_Changes_Max_Order_By = {
   updated_at?: InputMaybe<Order_By>;
   /** 谁可见选项： 1.all（所有人可见） 2.manager（只有客户经理和管理员可见） */
   visibility?: InputMaybe<Order_By>;
+  /** Payment voucher / receipt file URL (Qiniu); no FK */
+  voucher_url?: InputMaybe<Order_By>;
 };
 
 /** aggregate min on columns */
@@ -8850,6 +10871,8 @@ export type Trust_Account_Balance_Changes_Min_Fields = {
   updated_at?: Maybe<Scalars['timestamptz']['output']>;
   /** 谁可见选项： 1.all（所有人可见） 2.manager（只有客户经理和管理员可见） */
   visibility?: Maybe<Scalars['String']['output']>;
+  /** Payment voucher / receipt file URL (Qiniu); no FK */
+  voucher_url?: Maybe<Scalars['String']['output']>;
 };
 
 /** order by min() on columns of table "trust_account_balance_changes" */
@@ -8873,6 +10896,8 @@ export type Trust_Account_Balance_Changes_Min_Order_By = {
   updated_at?: InputMaybe<Order_By>;
   /** 谁可见选项： 1.all（所有人可见） 2.manager（只有客户经理和管理员可见） */
   visibility?: InputMaybe<Order_By>;
+  /** Payment voucher / receipt file URL (Qiniu); no FK */
+  voucher_url?: InputMaybe<Order_By>;
 };
 
 /** response of any mutation on the table "trust_account_balance_changes" */
@@ -8905,6 +10930,7 @@ export type Trust_Account_Balance_Changes_Order_By = {
   remark?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
   visibility?: InputMaybe<Order_By>;
+  voucher_url?: InputMaybe<Order_By>;
 };
 
 /** primary key columns input for table: trust_account_balance_changes */
@@ -8935,7 +10961,9 @@ export enum Trust_Account_Balance_Changes_Select_Column {
   /** column name */
   UpdatedAt = 'updated_at',
   /** column name */
-  Visibility = 'visibility'
+  Visibility = 'visibility',
+  /** column name */
+  VoucherUrl = 'voucher_url'
 }
 
 /** input type for updating data in table "trust_account_balance_changes" */
@@ -8959,6 +10987,8 @@ export type Trust_Account_Balance_Changes_Set_Input = {
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
   /** 谁可见选项： 1.all（所有人可见） 2.manager（只有客户经理和管理员可见） */
   visibility?: InputMaybe<Scalars['String']['input']>;
+  /** Payment voucher / receipt file URL (Qiniu); no FK */
+  voucher_url?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** aggregate stddev on columns */
@@ -9071,6 +11101,8 @@ export type Trust_Account_Balance_Changes_Stream_Cursor_Value_Input = {
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
   /** 谁可见选项： 1.all（所有人可见） 2.manager（只有客户经理和管理员可见） */
   visibility?: InputMaybe<Scalars['String']['input']>;
+  /** Payment voucher / receipt file URL (Qiniu); no FK */
+  voucher_url?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** aggregate sum on columns */
@@ -9123,7 +11155,9 @@ export enum Trust_Account_Balance_Changes_Update_Column {
   /** column name */
   UpdatedAt = 'updated_at',
   /** column name */
-  Visibility = 'visibility'
+  Visibility = 'visibility',
+  /** column name */
+  VoucherUrl = 'voucher_url'
 }
 
 export type Trust_Account_Balance_Changes_Updates = {

@@ -5,9 +5,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CaseEntityProfileCard } from "@/components/case-manager/CaseEntityProfileCard";
+import { PartyCaseProgressTimeline } from "@/components/party/PartyCaseProgressTimeline";
+import { PartyCaseExtras } from "@/components/party/PartyCaseExtras";
+import { PartyTrustLedgerPanel } from "@/components/party/PartyTrustLedgerPanel";
 import type { AmCaseDetail } from "@/lib/case-manager/fetch-case-detail";
-import { GC_PROFILE_SECTIONS } from "@/constants/gc-profile-schema";
-import { IP_PROFILE_SECTIONS } from "@/constants/ip-profile-schema";
+import {
+  partyVisibleGcProfileSections,
+  partyVisibleIpProfileSections,
+} from "@/lib/party/redact-case-detail-for-party";
 import { translateProcessStatus } from "@/lib/i18n/translate-process-status";
 
 function formatDt(iso: string, lng: string) {
@@ -26,10 +31,13 @@ export function PartyCaseDetailPage({
   caseId,
   apiBase,
   listHref,
+  canPostMessages = false,
 }: {
   caseId: string;
   apiBase: string;
   listHref: string;
+  /** IP 可发留言；GC 暂只读对客附件 */
+  canPostMessages?: boolean;
 }) {
   const { t } = useTranslation("portal");
   const { t: tCommon } = useTranslation("common");
@@ -138,26 +146,35 @@ export function PartyCaseDetailPage({
             </dl>
           </section>
 
+          <PartyCaseProgressTimeline processStatus={data.process_status} />
+
+          {canPostMessages ? (
+            <PartyTrustLedgerPanel caseId={caseId} apiBase={apiBase} />
+          ) : null}
+
           <div className="grid gap-4 lg:grid-cols-2">
             <CaseEntityProfileCard
               title={t("case_detail.section_surrogate")}
               subtitle={data.surrogate.displayName || data.surrogate.email || null}
               profileTitle={t("case_detail.section_gc_profile")}
-              sections={GC_PROFILE_SECTIONS}
+              sections={partyVisibleGcProfileSections()}
               profileData={data.surrogate.profile_data}
               lng={lng}
               emptyMessage={t("case_detail.profile_empty_gc")}
+              showPhotos
             />
             <CaseEntityProfileCard
               title={t("case_detail.section_intended_parents")}
               subtitle={data.intended_parent.displayName || data.intended_parent.email || null}
               profileTitle={t("case_detail.section_ip_profile")}
-              sections={IP_PROFILE_SECTIONS}
+              sections={partyVisibleIpProfileSections()}
               profileData={data.intended_parent.profile_data}
               lng={lng}
               emptyMessage={t("case_detail.profile_empty_ip")}
             />
           </div>
+
+          <PartyCaseExtras caseId={caseId} apiBase={apiBase} canPostMessages={canPostMessages} />
         </>
       ) : null}
     </div>

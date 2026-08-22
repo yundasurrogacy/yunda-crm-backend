@@ -11,6 +11,7 @@ export default function IntendedParentCaseDetailPage() {
       caseId={id}
       apiBase="/api/intended-parent/cases"
       listHref="/intended_parent/my-cases"
+      canPostMessages
     />
   );
 }

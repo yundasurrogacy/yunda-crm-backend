@@ -1,0 +1,25 @@
+import { NextResponse } from "next/server";
+import { listCaseGcHistory } from "@/lib/case-manager/case-gc-history";
+import { fetchCaseDetail } from "@/lib/case-manager/fetch-case-detail";
+import { getServerSession } from "@/lib/auth/session-cookie";
+
+export async function GET(_req: Request, context: { params: Promise<{ id: string }> }) {
+  const session = await getServerSession();
+  if (!session) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
+  const isAdmin = session.role === "admin";
+  const isCm = session.portals.includes("case_manager");
+  if (!isAdmin && !isCm) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
+  const { id } = await context.params;
+  try {
+    const detail = await fetchCaseDetail(session, id, {
+      mode: isAdmin ? "admin_api" : "case_manager_api",
+    });
+    if (!detail) return NextResponse.json({ error: "not_found" }, { status: 404 });
+    const entries = await listCaseGcHistory(id);
+    return NextResponse.json({ entries });
+  } catch {
+    return NextResponse.json({ error: "data_unavailable" }, { status: 503 });
+  }
+}

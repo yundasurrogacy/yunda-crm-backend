@@ -14,6 +14,21 @@ directive @cached(
 ) on QUERY
 
 """
+Boolean expression to compare columns of type "Boolean". All fields are combined with logical 'AND'.
+"""
+input Boolean_comparison_exp {
+  _eq: Boolean
+  _gt: Boolean
+  _gte: Boolean
+  _in: [Boolean!]
+  _is_null: Boolean
+  _lt: Boolean
+  _lte: Boolean
+  _neq: Boolean
+  _nin: [Boolean!]
+}
+
+"""
 Boolean expression to compare columns of type "Int". All fields are combined with logical 'AND'.
 """
 input Int_comparison_exp {
@@ -460,6 +475,8 @@ type blogs {
 
   """多语言_英文内容"""
   en_content: String
+  en_seo_description: String
+  en_seo_title: String
 
   """多语言_英文标题"""
   en_title: String
@@ -470,6 +487,8 @@ type blogs {
 
   """路由标识"""
   route_id: String
+  seo_description: String
+  seo_title: String
 
   """标签，多个用｜分割，如：准父母｜心里准备"""
   tags: String
@@ -521,10 +540,14 @@ input blogs_bool_exp {
   cover_img_url: String_comparison_exp
   created_at: timestamptz_comparison_exp
   en_content: String_comparison_exp
+  en_seo_description: String_comparison_exp
+  en_seo_title: String_comparison_exp
   en_title: String_comparison_exp
   id: bigint_comparison_exp
   reference_author: String_comparison_exp
   route_id: String_comparison_exp
+  seo_description: String_comparison_exp
+  seo_title: String_comparison_exp
   tags: String_comparison_exp
   title: String_comparison_exp
   updated_at: timestamptz_comparison_exp
@@ -563,6 +586,8 @@ input blogs_insert_input {
 
   """多语言_英文内容"""
   en_content: String
+  en_seo_description: String
+  en_seo_title: String
 
   """多语言_英文标题"""
   en_title: String
@@ -573,6 +598,8 @@ input blogs_insert_input {
 
   """路由标识"""
   route_id: String
+  seo_description: String
+  seo_title: String
 
   """标签，多个用｜分割，如：准父母｜心里准备"""
   tags: String
@@ -596,6 +623,8 @@ type blogs_max_fields {
 
   """多语言_英文内容"""
   en_content: String
+  en_seo_description: String
+  en_seo_title: String
 
   """多语言_英文标题"""
   en_title: String
@@ -606,6 +635,8 @@ type blogs_max_fields {
 
   """路由标识"""
   route_id: String
+  seo_description: String
+  seo_title: String
 
   """标签，多个用｜分割，如：准父母｜心里准备"""
   tags: String
@@ -629,6 +660,8 @@ type blogs_min_fields {
 
   """多语言_英文内容"""
   en_content: String
+  en_seo_description: String
+  en_seo_title: String
 
   """多语言_英文标题"""
   en_title: String
@@ -639,6 +672,8 @@ type blogs_min_fields {
 
   """路由标识"""
   route_id: String
+  seo_description: String
+  seo_title: String
 
   """标签，多个用｜分割，如：准父母｜心里准备"""
   tags: String
@@ -675,10 +710,14 @@ input blogs_order_by {
   cover_img_url: order_by
   created_at: order_by
   en_content: order_by
+  en_seo_description: order_by
+  en_seo_title: order_by
   en_title: order_by
   id: order_by
   reference_author: order_by
   route_id: order_by
+  seo_description: order_by
+  seo_title: order_by
   tags: order_by
   title: order_by
   updated_at: order_by
@@ -709,6 +748,12 @@ enum blogs_select_column {
   en_content
 
   """column name"""
+  en_seo_description
+
+  """column name"""
+  en_seo_title
+
+  """column name"""
   en_title
 
   """column name"""
@@ -719,6 +764,12 @@ enum blogs_select_column {
 
   """column name"""
   route_id
+
+  """column name"""
+  seo_description
+
+  """column name"""
+  seo_title
 
   """column name"""
   tags
@@ -746,6 +797,8 @@ input blogs_set_input {
 
   """多语言_英文内容"""
   en_content: String
+  en_seo_description: String
+  en_seo_title: String
 
   """多语言_英文标题"""
   en_title: String
@@ -756,6 +809,8 @@ input blogs_set_input {
 
   """路由标识"""
   route_id: String
+  seo_description: String
+  seo_title: String
 
   """标签，多个用｜分割，如：准父母｜心里准备"""
   tags: String
@@ -805,6 +860,8 @@ input blogs_stream_cursor_value_input {
 
   """多语言_英文内容"""
   en_content: String
+  en_seo_description: String
+  en_seo_title: String
 
   """多语言_英文标题"""
   en_title: String
@@ -815,6 +872,8 @@ input blogs_stream_cursor_value_input {
 
   """路由标识"""
   route_id: String
+  seo_description: String
+  seo_title: String
 
   """标签，多个用｜分割，如：准父母｜心里准备"""
   tags: String
@@ -849,6 +908,12 @@ enum blogs_update_column {
   en_content
 
   """column name"""
+  en_seo_description
+
+  """column name"""
+  en_seo_title
+
+  """column name"""
   en_title
 
   """column name"""
@@ -859,6 +924,12 @@ enum blogs_update_column {
 
   """column name"""
   route_id
+
+  """column name"""
+  seo_description
+
+  """column name"""
+  seo_title
 
   """column name"""
   tags
@@ -896,8 +967,1033 @@ type blogs_variance_fields {
   id: Float
 }
 
+"""
+columns and relationships of "case_case_managers"
+"""
+type case_case_managers {
+  """An object relationship"""
+  case: cases!
+  case_cases: bigint!
+
+  """An object relationship"""
+  case_manager: case_managers!
+  case_manager_case_managers: bigint!
+  created_at: timestamptz!
+  id: bigint!
+}
+
+"""
+aggregated selection of "case_case_managers"
+"""
+type case_case_managers_aggregate {
+  aggregate: case_case_managers_aggregate_fields
+  nodes: [case_case_managers!]!
+}
+
+input case_case_managers_aggregate_bool_exp {
+  count: case_case_managers_aggregate_bool_exp_count
+}
+
+input case_case_managers_aggregate_bool_exp_count {
+  arguments: [case_case_managers_select_column!]
+  distinct: Boolean
+  filter: case_case_managers_bool_exp
+  predicate: Int_comparison_exp!
+}
+
+"""
+aggregate fields of "case_case_managers"
+"""
+type case_case_managers_aggregate_fields {
+  avg: case_case_managers_avg_fields
+  count(columns: [case_case_managers_select_column!], distinct: Boolean): Int!
+  max: case_case_managers_max_fields
+  min: case_case_managers_min_fields
+  stddev: case_case_managers_stddev_fields
+  stddev_pop: case_case_managers_stddev_pop_fields
+  stddev_samp: case_case_managers_stddev_samp_fields
+  sum: case_case_managers_sum_fields
+  var_pop: case_case_managers_var_pop_fields
+  var_samp: case_case_managers_var_samp_fields
+  variance: case_case_managers_variance_fields
+}
+
+"""
+order by aggregate values of table "case_case_managers"
+"""
+input case_case_managers_aggregate_order_by {
+  avg: case_case_managers_avg_order_by
+  count: order_by
+  max: case_case_managers_max_order_by
+  min: case_case_managers_min_order_by
+  stddev: case_case_managers_stddev_order_by
+  stddev_pop: case_case_managers_stddev_pop_order_by
+  stddev_samp: case_case_managers_stddev_samp_order_by
+  sum: case_case_managers_sum_order_by
+  var_pop: case_case_managers_var_pop_order_by
+  var_samp: case_case_managers_var_samp_order_by
+  variance: case_case_managers_variance_order_by
+}
+
+"""
+input type for inserting array relation for remote table "case_case_managers"
+"""
+input case_case_managers_arr_rel_insert_input {
+  data: [case_case_managers_insert_input!]!
+
+  """upsert condition"""
+  on_conflict: case_case_managers_on_conflict
+}
+
+"""aggregate avg on columns"""
+type case_case_managers_avg_fields {
+  case_cases: Float
+  case_manager_case_managers: Float
+  id: Float
+}
+
+"""
+order by avg() on columns of table "case_case_managers"
+"""
+input case_case_managers_avg_order_by {
+  case_cases: order_by
+  case_manager_case_managers: order_by
+  id: order_by
+}
+
+"""
+Boolean expression to filter rows from the table "case_case_managers". All fields are combined with a logical 'AND'.
+"""
+input case_case_managers_bool_exp {
+  _and: [case_case_managers_bool_exp!]
+  _not: case_case_managers_bool_exp
+  _or: [case_case_managers_bool_exp!]
+  case: cases_bool_exp
+  case_cases: bigint_comparison_exp
+  case_manager: case_managers_bool_exp
+  case_manager_case_managers: bigint_comparison_exp
+  created_at: timestamptz_comparison_exp
+  id: bigint_comparison_exp
+}
+
+"""
+unique or primary key constraints on table "case_case_managers"
+"""
+enum case_case_managers_constraint {
+  """
+  unique or primary key constraint on columns "case_cases", "case_manager_case_managers"
+  """
+  case_case_managers_case_cases_case_manager_case_managers_key
+
+  """
+  unique or primary key constraint on columns "id"
+  """
+  case_case_managers_pkey
+}
+
+"""
+input type for incrementing numeric columns in table "case_case_managers"
+"""
+input case_case_managers_inc_input {
+  case_cases: bigint
+  case_manager_case_managers: bigint
+  id: bigint
+}
+
+"""
+input type for inserting data into table "case_case_managers"
+"""
+input case_case_managers_insert_input {
+  case: cases_obj_rel_insert_input
+  case_cases: bigint
+  case_manager: case_managers_obj_rel_insert_input
+  case_manager_case_managers: bigint
+  created_at: timestamptz
+  id: bigint
+}
+
+"""aggregate max on columns"""
+type case_case_managers_max_fields {
+  case_cases: bigint
+  case_manager_case_managers: bigint
+  created_at: timestamptz
+  id: bigint
+}
+
+"""
+order by max() on columns of table "case_case_managers"
+"""
+input case_case_managers_max_order_by {
+  case_cases: order_by
+  case_manager_case_managers: order_by
+  created_at: order_by
+  id: order_by
+}
+
+"""aggregate min on columns"""
+type case_case_managers_min_fields {
+  case_cases: bigint
+  case_manager_case_managers: bigint
+  created_at: timestamptz
+  id: bigint
+}
+
+"""
+order by min() on columns of table "case_case_managers"
+"""
+input case_case_managers_min_order_by {
+  case_cases: order_by
+  case_manager_case_managers: order_by
+  created_at: order_by
+  id: order_by
+}
+
+"""
+response of any mutation on the table "case_case_managers"
+"""
+type case_case_managers_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [case_case_managers!]!
+}
+
+"""
+on_conflict condition type for table "case_case_managers"
+"""
+input case_case_managers_on_conflict {
+  constraint: case_case_managers_constraint!
+  update_columns: [case_case_managers_update_column!]! = []
+  where: case_case_managers_bool_exp
+}
+
+"""Ordering options when selecting data from "case_case_managers"."""
+input case_case_managers_order_by {
+  case: cases_order_by
+  case_cases: order_by
+  case_manager: case_managers_order_by
+  case_manager_case_managers: order_by
+  created_at: order_by
+  id: order_by
+}
+
+"""primary key columns input for table: case_case_managers"""
+input case_case_managers_pk_columns_input {
+  id: bigint!
+}
+
+"""
+select columns of table "case_case_managers"
+"""
+enum case_case_managers_select_column {
+  """column name"""
+  case_cases
+
+  """column name"""
+  case_manager_case_managers
+
+  """column name"""
+  created_at
+
+  """column name"""
+  id
+}
+
+"""
+input type for updating data in table "case_case_managers"
+"""
+input case_case_managers_set_input {
+  case_cases: bigint
+  case_manager_case_managers: bigint
+  created_at: timestamptz
+  id: bigint
+}
+
+"""aggregate stddev on columns"""
+type case_case_managers_stddev_fields {
+  case_cases: Float
+  case_manager_case_managers: Float
+  id: Float
+}
+
+"""
+order by stddev() on columns of table "case_case_managers"
+"""
+input case_case_managers_stddev_order_by {
+  case_cases: order_by
+  case_manager_case_managers: order_by
+  id: order_by
+}
+
+"""aggregate stddev_pop on columns"""
+type case_case_managers_stddev_pop_fields {
+  case_cases: Float
+  case_manager_case_managers: Float
+  id: Float
+}
+
+"""
+order by stddev_pop() on columns of table "case_case_managers"
+"""
+input case_case_managers_stddev_pop_order_by {
+  case_cases: order_by
+  case_manager_case_managers: order_by
+  id: order_by
+}
+
+"""aggregate stddev_samp on columns"""
+type case_case_managers_stddev_samp_fields {
+  case_cases: Float
+  case_manager_case_managers: Float
+  id: Float
+}
+
+"""
+order by stddev_samp() on columns of table "case_case_managers"
+"""
+input case_case_managers_stddev_samp_order_by {
+  case_cases: order_by
+  case_manager_case_managers: order_by
+  id: order_by
+}
+
+"""
+Streaming cursor of the table "case_case_managers"
+"""
+input case_case_managers_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: case_case_managers_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input case_case_managers_stream_cursor_value_input {
+  case_cases: bigint
+  case_manager_case_managers: bigint
+  created_at: timestamptz
+  id: bigint
+}
+
+"""aggregate sum on columns"""
+type case_case_managers_sum_fields {
+  case_cases: bigint
+  case_manager_case_managers: bigint
+  id: bigint
+}
+
+"""
+order by sum() on columns of table "case_case_managers"
+"""
+input case_case_managers_sum_order_by {
+  case_cases: order_by
+  case_manager_case_managers: order_by
+  id: order_by
+}
+
+"""
+update columns of table "case_case_managers"
+"""
+enum case_case_managers_update_column {
+  """column name"""
+  case_cases
+
+  """column name"""
+  case_manager_case_managers
+
+  """column name"""
+  created_at
+
+  """column name"""
+  id
+}
+
+input case_case_managers_updates {
+  """increments the numeric columns with given value of the filtered values"""
+  _inc: case_case_managers_inc_input
+
+  """sets the columns of the filtered rows to the given values"""
+  _set: case_case_managers_set_input
+
+  """filter the rows which have to be updated"""
+  where: case_case_managers_bool_exp!
+}
+
+"""aggregate var_pop on columns"""
+type case_case_managers_var_pop_fields {
+  case_cases: Float
+  case_manager_case_managers: Float
+  id: Float
+}
+
+"""
+order by var_pop() on columns of table "case_case_managers"
+"""
+input case_case_managers_var_pop_order_by {
+  case_cases: order_by
+  case_manager_case_managers: order_by
+  id: order_by
+}
+
+"""aggregate var_samp on columns"""
+type case_case_managers_var_samp_fields {
+  case_cases: Float
+  case_manager_case_managers: Float
+  id: Float
+}
+
+"""
+order by var_samp() on columns of table "case_case_managers"
+"""
+input case_case_managers_var_samp_order_by {
+  case_cases: order_by
+  case_manager_case_managers: order_by
+  id: order_by
+}
+
+"""aggregate variance on columns"""
+type case_case_managers_variance_fields {
+  case_cases: Float
+  case_manager_case_managers: Float
+  id: Float
+}
+
+"""
+order by variance() on columns of table "case_case_managers"
+"""
+input case_case_managers_variance_order_by {
+  case_cases: order_by
+  case_manager_case_managers: order_by
+  id: order_by
+}
+
+"""
+columns and relationships of "case_gc_history"
+"""
+type case_gc_history {
+  """An object relationship"""
+  case: cases!
+  case_cases: bigint!
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: bigint
+
+  """Display snapshot (usually email); no FK to users"""
+  changed_by_label: String
+
+  """admin | case_manager — portal identity at audit time"""
+  changed_by_role: String
+  created_at: timestamptz!
+  from_surrogate_mother: bigint
+  id: bigint!
+  remark: String
+  to_surrogate_mother: bigint
+}
+
+"""
+aggregated selection of "case_gc_history"
+"""
+type case_gc_history_aggregate {
+  aggregate: case_gc_history_aggregate_fields
+  nodes: [case_gc_history!]!
+}
+
+input case_gc_history_aggregate_bool_exp {
+  count: case_gc_history_aggregate_bool_exp_count
+}
+
+input case_gc_history_aggregate_bool_exp_count {
+  arguments: [case_gc_history_select_column!]
+  distinct: Boolean
+  filter: case_gc_history_bool_exp
+  predicate: Int_comparison_exp!
+}
+
+"""
+aggregate fields of "case_gc_history"
+"""
+type case_gc_history_aggregate_fields {
+  avg: case_gc_history_avg_fields
+  count(columns: [case_gc_history_select_column!], distinct: Boolean): Int!
+  max: case_gc_history_max_fields
+  min: case_gc_history_min_fields
+  stddev: case_gc_history_stddev_fields
+  stddev_pop: case_gc_history_stddev_pop_fields
+  stddev_samp: case_gc_history_stddev_samp_fields
+  sum: case_gc_history_sum_fields
+  var_pop: case_gc_history_var_pop_fields
+  var_samp: case_gc_history_var_samp_fields
+  variance: case_gc_history_variance_fields
+}
+
+"""
+order by aggregate values of table "case_gc_history"
+"""
+input case_gc_history_aggregate_order_by {
+  avg: case_gc_history_avg_order_by
+  count: order_by
+  max: case_gc_history_max_order_by
+  min: case_gc_history_min_order_by
+  stddev: case_gc_history_stddev_order_by
+  stddev_pop: case_gc_history_stddev_pop_order_by
+  stddev_samp: case_gc_history_stddev_samp_order_by
+  sum: case_gc_history_sum_order_by
+  var_pop: case_gc_history_var_pop_order_by
+  var_samp: case_gc_history_var_samp_order_by
+  variance: case_gc_history_variance_order_by
+}
+
+"""
+input type for inserting array relation for remote table "case_gc_history"
+"""
+input case_gc_history_arr_rel_insert_input {
+  data: [case_gc_history_insert_input!]!
+
+  """upsert condition"""
+  on_conflict: case_gc_history_on_conflict
+}
+
+"""aggregate avg on columns"""
+type case_gc_history_avg_fields {
+  case_cases: Float
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: Float
+  from_surrogate_mother: Float
+  id: Float
+  to_surrogate_mother: Float
+}
+
+"""
+order by avg() on columns of table "case_gc_history"
+"""
+input case_gc_history_avg_order_by {
+  case_cases: order_by
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: order_by
+  from_surrogate_mother: order_by
+  id: order_by
+  to_surrogate_mother: order_by
+}
+
+"""
+Boolean expression to filter rows from the table "case_gc_history". All fields are combined with a logical 'AND'.
+"""
+input case_gc_history_bool_exp {
+  _and: [case_gc_history_bool_exp!]
+  _not: case_gc_history_bool_exp
+  _or: [case_gc_history_bool_exp!]
+  case: cases_bool_exp
+  case_cases: bigint_comparison_exp
+  changed_by_entity_id: bigint_comparison_exp
+  changed_by_label: String_comparison_exp
+  changed_by_role: String_comparison_exp
+  created_at: timestamptz_comparison_exp
+  from_surrogate_mother: bigint_comparison_exp
+  id: bigint_comparison_exp
+  remark: String_comparison_exp
+  to_surrogate_mother: bigint_comparison_exp
+}
+
+"""
+unique or primary key constraints on table "case_gc_history"
+"""
+enum case_gc_history_constraint {
+  """
+  unique or primary key constraint on columns "id"
+  """
+  case_gc_history_pkey
+}
+
+"""
+input type for incrementing numeric columns in table "case_gc_history"
+"""
+input case_gc_history_inc_input {
+  case_cases: bigint
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: bigint
+  from_surrogate_mother: bigint
+  id: bigint
+  to_surrogate_mother: bigint
+}
+
+"""
+input type for inserting data into table "case_gc_history"
+"""
+input case_gc_history_insert_input {
+  case: cases_obj_rel_insert_input
+  case_cases: bigint
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: bigint
+
+  """Display snapshot (usually email); no FK to users"""
+  changed_by_label: String
+
+  """admin | case_manager — portal identity at audit time"""
+  changed_by_role: String
+  created_at: timestamptz
+  from_surrogate_mother: bigint
+  id: bigint
+  remark: String
+  to_surrogate_mother: bigint
+}
+
+"""aggregate max on columns"""
+type case_gc_history_max_fields {
+  case_cases: bigint
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: bigint
+
+  """Display snapshot (usually email); no FK to users"""
+  changed_by_label: String
+
+  """admin | case_manager — portal identity at audit time"""
+  changed_by_role: String
+  created_at: timestamptz
+  from_surrogate_mother: bigint
+  id: bigint
+  remark: String
+  to_surrogate_mother: bigint
+}
+
+"""
+order by max() on columns of table "case_gc_history"
+"""
+input case_gc_history_max_order_by {
+  case_cases: order_by
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: order_by
+
+  """Display snapshot (usually email); no FK to users"""
+  changed_by_label: order_by
+
+  """admin | case_manager — portal identity at audit time"""
+  changed_by_role: order_by
+  created_at: order_by
+  from_surrogate_mother: order_by
+  id: order_by
+  remark: order_by
+  to_surrogate_mother: order_by
+}
+
+"""aggregate min on columns"""
+type case_gc_history_min_fields {
+  case_cases: bigint
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: bigint
+
+  """Display snapshot (usually email); no FK to users"""
+  changed_by_label: String
+
+  """admin | case_manager — portal identity at audit time"""
+  changed_by_role: String
+  created_at: timestamptz
+  from_surrogate_mother: bigint
+  id: bigint
+  remark: String
+  to_surrogate_mother: bigint
+}
+
+"""
+order by min() on columns of table "case_gc_history"
+"""
+input case_gc_history_min_order_by {
+  case_cases: order_by
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: order_by
+
+  """Display snapshot (usually email); no FK to users"""
+  changed_by_label: order_by
+
+  """admin | case_manager — portal identity at audit time"""
+  changed_by_role: order_by
+  created_at: order_by
+  from_surrogate_mother: order_by
+  id: order_by
+  remark: order_by
+  to_surrogate_mother: order_by
+}
+
+"""
+response of any mutation on the table "case_gc_history"
+"""
+type case_gc_history_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [case_gc_history!]!
+}
+
+"""
+on_conflict condition type for table "case_gc_history"
+"""
+input case_gc_history_on_conflict {
+  constraint: case_gc_history_constraint!
+  update_columns: [case_gc_history_update_column!]! = []
+  where: case_gc_history_bool_exp
+}
+
+"""Ordering options when selecting data from "case_gc_history"."""
+input case_gc_history_order_by {
+  case: cases_order_by
+  case_cases: order_by
+  changed_by_entity_id: order_by
+  changed_by_label: order_by
+  changed_by_role: order_by
+  created_at: order_by
+  from_surrogate_mother: order_by
+  id: order_by
+  remark: order_by
+  to_surrogate_mother: order_by
+}
+
+"""primary key columns input for table: case_gc_history"""
+input case_gc_history_pk_columns_input {
+  id: bigint!
+}
+
+"""
+select columns of table "case_gc_history"
+"""
+enum case_gc_history_select_column {
+  """column name"""
+  case_cases
+
+  """column name"""
+  changed_by_entity_id
+
+  """column name"""
+  changed_by_label
+
+  """column name"""
+  changed_by_role
+
+  """column name"""
+  created_at
+
+  """column name"""
+  from_surrogate_mother
+
+  """column name"""
+  id
+
+  """column name"""
+  remark
+
+  """column name"""
+  to_surrogate_mother
+}
+
+"""
+input type for updating data in table "case_gc_history"
+"""
+input case_gc_history_set_input {
+  case_cases: bigint
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: bigint
+
+  """Display snapshot (usually email); no FK to users"""
+  changed_by_label: String
+
+  """admin | case_manager — portal identity at audit time"""
+  changed_by_role: String
+  created_at: timestamptz
+  from_surrogate_mother: bigint
+  id: bigint
+  remark: String
+  to_surrogate_mother: bigint
+}
+
+"""aggregate stddev on columns"""
+type case_gc_history_stddev_fields {
+  case_cases: Float
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: Float
+  from_surrogate_mother: Float
+  id: Float
+  to_surrogate_mother: Float
+}
+
+"""
+order by stddev() on columns of table "case_gc_history"
+"""
+input case_gc_history_stddev_order_by {
+  case_cases: order_by
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: order_by
+  from_surrogate_mother: order_by
+  id: order_by
+  to_surrogate_mother: order_by
+}
+
+"""aggregate stddev_pop on columns"""
+type case_gc_history_stddev_pop_fields {
+  case_cases: Float
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: Float
+  from_surrogate_mother: Float
+  id: Float
+  to_surrogate_mother: Float
+}
+
+"""
+order by stddev_pop() on columns of table "case_gc_history"
+"""
+input case_gc_history_stddev_pop_order_by {
+  case_cases: order_by
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: order_by
+  from_surrogate_mother: order_by
+  id: order_by
+  to_surrogate_mother: order_by
+}
+
+"""aggregate stddev_samp on columns"""
+type case_gc_history_stddev_samp_fields {
+  case_cases: Float
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: Float
+  from_surrogate_mother: Float
+  id: Float
+  to_surrogate_mother: Float
+}
+
+"""
+order by stddev_samp() on columns of table "case_gc_history"
+"""
+input case_gc_history_stddev_samp_order_by {
+  case_cases: order_by
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: order_by
+  from_surrogate_mother: order_by
+  id: order_by
+  to_surrogate_mother: order_by
+}
+
+"""
+Streaming cursor of the table "case_gc_history"
+"""
+input case_gc_history_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: case_gc_history_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input case_gc_history_stream_cursor_value_input {
+  case_cases: bigint
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: bigint
+
+  """Display snapshot (usually email); no FK to users"""
+  changed_by_label: String
+
+  """admin | case_manager — portal identity at audit time"""
+  changed_by_role: String
+  created_at: timestamptz
+  from_surrogate_mother: bigint
+  id: bigint
+  remark: String
+  to_surrogate_mother: bigint
+}
+
+"""aggregate sum on columns"""
+type case_gc_history_sum_fields {
+  case_cases: bigint
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: bigint
+  from_surrogate_mother: bigint
+  id: bigint
+  to_surrogate_mother: bigint
+}
+
+"""
+order by sum() on columns of table "case_gc_history"
+"""
+input case_gc_history_sum_order_by {
+  case_cases: order_by
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: order_by
+  from_surrogate_mother: order_by
+  id: order_by
+  to_surrogate_mother: order_by
+}
+
+"""
+update columns of table "case_gc_history"
+"""
+enum case_gc_history_update_column {
+  """column name"""
+  case_cases
+
+  """column name"""
+  changed_by_entity_id
+
+  """column name"""
+  changed_by_label
+
+  """column name"""
+  changed_by_role
+
+  """column name"""
+  created_at
+
+  """column name"""
+  from_surrogate_mother
+
+  """column name"""
+  id
+
+  """column name"""
+  remark
+
+  """column name"""
+  to_surrogate_mother
+}
+
+input case_gc_history_updates {
+  """increments the numeric columns with given value of the filtered values"""
+  _inc: case_gc_history_inc_input
+
+  """sets the columns of the filtered rows to the given values"""
+  _set: case_gc_history_set_input
+
+  """filter the rows which have to be updated"""
+  where: case_gc_history_bool_exp!
+}
+
+"""aggregate var_pop on columns"""
+type case_gc_history_var_pop_fields {
+  case_cases: Float
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: Float
+  from_surrogate_mother: Float
+  id: Float
+  to_surrogate_mother: Float
+}
+
+"""
+order by var_pop() on columns of table "case_gc_history"
+"""
+input case_gc_history_var_pop_order_by {
+  case_cases: order_by
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: order_by
+  from_surrogate_mother: order_by
+  id: order_by
+  to_surrogate_mother: order_by
+}
+
+"""aggregate var_samp on columns"""
+type case_gc_history_var_samp_fields {
+  case_cases: Float
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: Float
+  from_surrogate_mother: Float
+  id: Float
+  to_surrogate_mother: Float
+}
+
+"""
+order by var_samp() on columns of table "case_gc_history"
+"""
+input case_gc_history_var_samp_order_by {
+  case_cases: order_by
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: order_by
+  from_surrogate_mother: order_by
+  id: order_by
+  to_surrogate_mother: order_by
+}
+
+"""aggregate variance on columns"""
+type case_gc_history_variance_fields {
+  case_cases: Float
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: Float
+  from_surrogate_mother: Float
+  id: Float
+  to_surrogate_mother: Float
+}
+
+"""
+order by variance() on columns of table "case_gc_history"
+"""
+input case_gc_history_variance_order_by {
+  case_cases: order_by
+
+  """Business entity id (e.g. case_managers.id); NULL for admin"""
+  changed_by_entity_id: order_by
+  from_surrogate_mother: order_by
+  id: order_by
+  to_surrogate_mother: order_by
+}
+
 """案例经理表"""
 type case_managers {
+  """An array relationship"""
+  case_case_managers(
+    """distinct select on columns"""
+    distinct_on: [case_case_managers_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [case_case_managers_order_by!]
+
+    """filter the rows returned"""
+    where: case_case_managers_bool_exp
+  ): [case_case_managers!]!
+
+  """An aggregate relationship"""
+  case_case_managers_aggregate(
+    """distinct select on columns"""
+    distinct_on: [case_case_managers_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [case_case_managers_order_by!]
+
+    """filter the rows returned"""
+    where: case_case_managers_bool_exp
+  ): case_case_managers_aggregate!
+
   """An array relationship"""
   cases(
     """distinct select on columns"""
@@ -934,6 +2030,9 @@ type case_managers {
     where: cases_bool_exp
   ): cases_aggregate!
   created_at: timestamptz!
+
+  """Soft delete timestamp; NULL means active. Data retained permanently."""
+  deleted_at: timestamptz
   id: bigint!
   profile_data(
     """JSON select path"""
@@ -945,8 +2044,8 @@ type case_managers {
   updated_at: timestamptz!
 
   """An object relationship"""
-  user: users!
-  user_users: bigint!
+  user: users
+  user_users: bigint
 }
 
 """
@@ -1033,9 +2132,12 @@ input case_managers_bool_exp {
   _and: [case_managers_bool_exp!]
   _not: case_managers_bool_exp
   _or: [case_managers_bool_exp!]
+  case_case_managers: case_case_managers_bool_exp
+  case_case_managers_aggregate: case_case_managers_aggregate_bool_exp
   cases: cases_bool_exp
   cases_aggregate: cases_aggregate_bool_exp
   created_at: timestamptz_comparison_exp
+  deleted_at: timestamptz_comparison_exp
   id: bigint_comparison_exp
   profile_data: json_comparison_exp
   role: String_comparison_exp
@@ -1071,8 +2173,12 @@ input case_managers_inc_input {
 input type for inserting data into table "case_managers"
 """
 input case_managers_insert_input {
+  case_case_managers: case_case_managers_arr_rel_insert_input
   cases: cases_arr_rel_insert_input
   created_at: timestamptz
+
+  """Soft delete timestamp; NULL means active. Data retained permanently."""
+  deleted_at: timestamptz
   id: bigint
   profile_data: json
 
@@ -1086,6 +2192,9 @@ input case_managers_insert_input {
 """aggregate max on columns"""
 type case_managers_max_fields {
   created_at: timestamptz
+
+  """Soft delete timestamp; NULL means active. Data retained permanently."""
+  deleted_at: timestamptz
   id: bigint
 
   """角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理）"""
@@ -1099,6 +2208,9 @@ order by max() on columns of table "case_managers"
 """
 input case_managers_max_order_by {
   created_at: order_by
+
+  """Soft delete timestamp; NULL means active. Data retained permanently."""
+  deleted_at: order_by
   id: order_by
 
   """角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理）"""
@@ -1110,6 +2222,9 @@ input case_managers_max_order_by {
 """aggregate min on columns"""
 type case_managers_min_fields {
   created_at: timestamptz
+
+  """Soft delete timestamp; NULL means active. Data retained permanently."""
+  deleted_at: timestamptz
   id: bigint
 
   """角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理）"""
@@ -1123,6 +2238,9 @@ order by min() on columns of table "case_managers"
 """
 input case_managers_min_order_by {
   created_at: order_by
+
+  """Soft delete timestamp; NULL means active. Data retained permanently."""
+  deleted_at: order_by
   id: order_by
 
   """角色：user（可以查看自己负责的案例）、admin（可以创建案例并且分配给其他案例经理）"""
@@ -1163,8 +2281,10 @@ input case_managers_on_conflict {
 
 """Ordering options when selecting data from "case_managers"."""
 input case_managers_order_by {
+  case_case_managers_aggregate: case_case_managers_aggregate_order_by
   cases_aggregate: cases_aggregate_order_by
   created_at: order_by
+  deleted_at: order_by
   id: order_by
   profile_data: order_by
   role: order_by
@@ -1184,6 +2304,9 @@ select columns of table "case_managers"
 enum case_managers_select_column {
   """column name"""
   created_at
+
+  """column name"""
+  deleted_at
 
   """column name"""
   id
@@ -1206,6 +2329,9 @@ input type for updating data in table "case_managers"
 """
 input case_managers_set_input {
   created_at: timestamptz
+
+  """Soft delete timestamp; NULL means active. Data retained permanently."""
+  deleted_at: timestamptz
   id: bigint
   profile_data: json
 
@@ -1271,6 +2397,9 @@ input case_managers_stream_cursor_input {
 """Initial value of the column from where the streaming should start"""
 input case_managers_stream_cursor_value_input {
   created_at: timestamptz
+
+  """Soft delete timestamp; NULL means active. Data retained permanently."""
+  deleted_at: timestamptz
   id: bigint
   profile_data: json
 
@@ -1300,6 +2429,9 @@ update columns of table "case_managers"
 enum case_managers_update_column {
   """column name"""
   created_at
+
+  """column name"""
+  deleted_at
 
   """column name"""
   id
@@ -1371,14 +2503,716 @@ input case_managers_variance_order_by {
 }
 
 """
+columns and relationships of "case_messages"
+"""
+type case_messages {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: bigint
+
+  """Display snapshot (usually email); no FK to users"""
+  author_label: String
+  author_role: String!
+  body: String!
+
+  """An object relationship"""
+  case: cases!
+  case_cases: bigint!
+  created_at: timestamptz!
+  email_notify: Boolean!
+  id: bigint!
+  updated_at: timestamptz!
+}
+
+"""
+aggregated selection of "case_messages"
+"""
+type case_messages_aggregate {
+  aggregate: case_messages_aggregate_fields
+  nodes: [case_messages!]!
+}
+
+input case_messages_aggregate_bool_exp {
+  bool_and: case_messages_aggregate_bool_exp_bool_and
+  bool_or: case_messages_aggregate_bool_exp_bool_or
+  count: case_messages_aggregate_bool_exp_count
+}
+
+input case_messages_aggregate_bool_exp_bool_and {
+  arguments: case_messages_select_column_case_messages_aggregate_bool_exp_bool_and_arguments_columns!
+  distinct: Boolean
+  filter: case_messages_bool_exp
+  predicate: Boolean_comparison_exp!
+}
+
+input case_messages_aggregate_bool_exp_bool_or {
+  arguments: case_messages_select_column_case_messages_aggregate_bool_exp_bool_or_arguments_columns!
+  distinct: Boolean
+  filter: case_messages_bool_exp
+  predicate: Boolean_comparison_exp!
+}
+
+input case_messages_aggregate_bool_exp_count {
+  arguments: [case_messages_select_column!]
+  distinct: Boolean
+  filter: case_messages_bool_exp
+  predicate: Int_comparison_exp!
+}
+
+"""
+aggregate fields of "case_messages"
+"""
+type case_messages_aggregate_fields {
+  avg: case_messages_avg_fields
+  count(columns: [case_messages_select_column!], distinct: Boolean): Int!
+  max: case_messages_max_fields
+  min: case_messages_min_fields
+  stddev: case_messages_stddev_fields
+  stddev_pop: case_messages_stddev_pop_fields
+  stddev_samp: case_messages_stddev_samp_fields
+  sum: case_messages_sum_fields
+  var_pop: case_messages_var_pop_fields
+  var_samp: case_messages_var_samp_fields
+  variance: case_messages_variance_fields
+}
+
+"""
+order by aggregate values of table "case_messages"
+"""
+input case_messages_aggregate_order_by {
+  avg: case_messages_avg_order_by
+  count: order_by
+  max: case_messages_max_order_by
+  min: case_messages_min_order_by
+  stddev: case_messages_stddev_order_by
+  stddev_pop: case_messages_stddev_pop_order_by
+  stddev_samp: case_messages_stddev_samp_order_by
+  sum: case_messages_sum_order_by
+  var_pop: case_messages_var_pop_order_by
+  var_samp: case_messages_var_samp_order_by
+  variance: case_messages_variance_order_by
+}
+
+"""
+input type for inserting array relation for remote table "case_messages"
+"""
+input case_messages_arr_rel_insert_input {
+  data: [case_messages_insert_input!]!
+
+  """upsert condition"""
+  on_conflict: case_messages_on_conflict
+}
+
+"""aggregate avg on columns"""
+type case_messages_avg_fields {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: Float
+  case_cases: Float
+  id: Float
+}
+
+"""
+order by avg() on columns of table "case_messages"
+"""
+input case_messages_avg_order_by {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: order_by
+  case_cases: order_by
+  id: order_by
+}
+
+"""
+Boolean expression to filter rows from the table "case_messages". All fields are combined with a logical 'AND'.
+"""
+input case_messages_bool_exp {
+  _and: [case_messages_bool_exp!]
+  _not: case_messages_bool_exp
+  _or: [case_messages_bool_exp!]
+  author_entity_id: bigint_comparison_exp
+  author_label: String_comparison_exp
+  author_role: String_comparison_exp
+  body: String_comparison_exp
+  case: cases_bool_exp
+  case_cases: bigint_comparison_exp
+  created_at: timestamptz_comparison_exp
+  email_notify: Boolean_comparison_exp
+  id: bigint_comparison_exp
+  updated_at: timestamptz_comparison_exp
+}
+
+"""
+unique or primary key constraints on table "case_messages"
+"""
+enum case_messages_constraint {
+  """
+  unique or primary key constraint on columns "id"
+  """
+  case_messages_pkey
+}
+
+"""
+input type for incrementing numeric columns in table "case_messages"
+"""
+input case_messages_inc_input {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: bigint
+  case_cases: bigint
+  id: bigint
+}
+
+"""
+input type for inserting data into table "case_messages"
+"""
+input case_messages_insert_input {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: bigint
+
+  """Display snapshot (usually email); no FK to users"""
+  author_label: String
+  author_role: String
+  body: String
+  case: cases_obj_rel_insert_input
+  case_cases: bigint
+  created_at: timestamptz
+  email_notify: Boolean
+  id: bigint
+  updated_at: timestamptz
+}
+
+"""aggregate max on columns"""
+type case_messages_max_fields {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: bigint
+
+  """Display snapshot (usually email); no FK to users"""
+  author_label: String
+  author_role: String
+  body: String
+  case_cases: bigint
+  created_at: timestamptz
+  id: bigint
+  updated_at: timestamptz
+}
+
+"""
+order by max() on columns of table "case_messages"
+"""
+input case_messages_max_order_by {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: order_by
+
+  """Display snapshot (usually email); no FK to users"""
+  author_label: order_by
+  author_role: order_by
+  body: order_by
+  case_cases: order_by
+  created_at: order_by
+  id: order_by
+  updated_at: order_by
+}
+
+"""aggregate min on columns"""
+type case_messages_min_fields {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: bigint
+
+  """Display snapshot (usually email); no FK to users"""
+  author_label: String
+  author_role: String
+  body: String
+  case_cases: bigint
+  created_at: timestamptz
+  id: bigint
+  updated_at: timestamptz
+}
+
+"""
+order by min() on columns of table "case_messages"
+"""
+input case_messages_min_order_by {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: order_by
+
+  """Display snapshot (usually email); no FK to users"""
+  author_label: order_by
+  author_role: order_by
+  body: order_by
+  case_cases: order_by
+  created_at: order_by
+  id: order_by
+  updated_at: order_by
+}
+
+"""
+response of any mutation on the table "case_messages"
+"""
+type case_messages_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [case_messages!]!
+}
+
+"""
+on_conflict condition type for table "case_messages"
+"""
+input case_messages_on_conflict {
+  constraint: case_messages_constraint!
+  update_columns: [case_messages_update_column!]! = []
+  where: case_messages_bool_exp
+}
+
+"""Ordering options when selecting data from "case_messages"."""
+input case_messages_order_by {
+  author_entity_id: order_by
+  author_label: order_by
+  author_role: order_by
+  body: order_by
+  case: cases_order_by
+  case_cases: order_by
+  created_at: order_by
+  email_notify: order_by
+  id: order_by
+  updated_at: order_by
+}
+
+"""primary key columns input for table: case_messages"""
+input case_messages_pk_columns_input {
+  id: bigint!
+}
+
+"""
+select columns of table "case_messages"
+"""
+enum case_messages_select_column {
+  """column name"""
+  author_entity_id
+
+  """column name"""
+  author_label
+
+  """column name"""
+  author_role
+
+  """column name"""
+  body
+
+  """column name"""
+  case_cases
+
+  """column name"""
+  created_at
+
+  """column name"""
+  email_notify
+
+  """column name"""
+  id
+
+  """column name"""
+  updated_at
+}
+
+"""
+select "case_messages_aggregate_bool_exp_bool_and_arguments_columns" columns of table "case_messages"
+"""
+enum case_messages_select_column_case_messages_aggregate_bool_exp_bool_and_arguments_columns {
+  """column name"""
+  email_notify
+}
+
+"""
+select "case_messages_aggregate_bool_exp_bool_or_arguments_columns" columns of table "case_messages"
+"""
+enum case_messages_select_column_case_messages_aggregate_bool_exp_bool_or_arguments_columns {
+  """column name"""
+  email_notify
+}
+
+"""
+input type for updating data in table "case_messages"
+"""
+input case_messages_set_input {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: bigint
+
+  """Display snapshot (usually email); no FK to users"""
+  author_label: String
+  author_role: String
+  body: String
+  case_cases: bigint
+  created_at: timestamptz
+  email_notify: Boolean
+  id: bigint
+  updated_at: timestamptz
+}
+
+"""aggregate stddev on columns"""
+type case_messages_stddev_fields {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: Float
+  case_cases: Float
+  id: Float
+}
+
+"""
+order by stddev() on columns of table "case_messages"
+"""
+input case_messages_stddev_order_by {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: order_by
+  case_cases: order_by
+  id: order_by
+}
+
+"""aggregate stddev_pop on columns"""
+type case_messages_stddev_pop_fields {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: Float
+  case_cases: Float
+  id: Float
+}
+
+"""
+order by stddev_pop() on columns of table "case_messages"
+"""
+input case_messages_stddev_pop_order_by {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: order_by
+  case_cases: order_by
+  id: order_by
+}
+
+"""aggregate stddev_samp on columns"""
+type case_messages_stddev_samp_fields {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: Float
+  case_cases: Float
+  id: Float
+}
+
+"""
+order by stddev_samp() on columns of table "case_messages"
+"""
+input case_messages_stddev_samp_order_by {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: order_by
+  case_cases: order_by
+  id: order_by
+}
+
+"""
+Streaming cursor of the table "case_messages"
+"""
+input case_messages_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: case_messages_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input case_messages_stream_cursor_value_input {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: bigint
+
+  """Display snapshot (usually email); no FK to users"""
+  author_label: String
+  author_role: String
+  body: String
+  case_cases: bigint
+  created_at: timestamptz
+  email_notify: Boolean
+  id: bigint
+  updated_at: timestamptz
+}
+
+"""aggregate sum on columns"""
+type case_messages_sum_fields {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: bigint
+  case_cases: bigint
+  id: bigint
+}
+
+"""
+order by sum() on columns of table "case_messages"
+"""
+input case_messages_sum_order_by {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: order_by
+  case_cases: order_by
+  id: order_by
+}
+
+"""
+update columns of table "case_messages"
+"""
+enum case_messages_update_column {
+  """column name"""
+  author_entity_id
+
+  """column name"""
+  author_label
+
+  """column name"""
+  author_role
+
+  """column name"""
+  body
+
+  """column name"""
+  case_cases
+
+  """column name"""
+  created_at
+
+  """column name"""
+  email_notify
+
+  """column name"""
+  id
+
+  """column name"""
+  updated_at
+}
+
+input case_messages_updates {
+  """increments the numeric columns with given value of the filtered values"""
+  _inc: case_messages_inc_input
+
+  """sets the columns of the filtered rows to the given values"""
+  _set: case_messages_set_input
+
+  """filter the rows which have to be updated"""
+  where: case_messages_bool_exp!
+}
+
+"""aggregate var_pop on columns"""
+type case_messages_var_pop_fields {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: Float
+  case_cases: Float
+  id: Float
+}
+
+"""
+order by var_pop() on columns of table "case_messages"
+"""
+input case_messages_var_pop_order_by {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: order_by
+  case_cases: order_by
+  id: order_by
+}
+
+"""aggregate var_samp on columns"""
+type case_messages_var_samp_fields {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: Float
+  case_cases: Float
+  id: Float
+}
+
+"""
+order by var_samp() on columns of table "case_messages"
+"""
+input case_messages_var_samp_order_by {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: order_by
+  case_cases: order_by
+  id: order_by
+}
+
+"""aggregate variance on columns"""
+type case_messages_variance_fields {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: Float
+  case_cases: Float
+  id: Float
+}
+
+"""
+order by variance() on columns of table "case_messages"
+"""
+input case_messages_variance_order_by {
+  """
+  Business entity id (case_managers / intended_parents / surrogate_mothers); NULL for admin
+  """
+  author_entity_id: order_by
+  case_cases: order_by
+  id: order_by
+}
+
+"""
 columns and relationships of "cases"
 """
 type cases {
+  """Soft archive timestamp; NULL means active"""
+  archived_at: timestamptz
+
+  """An array relationship"""
+  case_case_managers(
+    """distinct select on columns"""
+    distinct_on: [case_case_managers_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [case_case_managers_order_by!]
+
+    """filter the rows returned"""
+    where: case_case_managers_bool_exp
+  ): [case_case_managers!]!
+
+  """An aggregate relationship"""
+  case_case_managers_aggregate(
+    """distinct select on columns"""
+    distinct_on: [case_case_managers_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [case_case_managers_order_by!]
+
+    """filter the rows returned"""
+    where: case_case_managers_bool_exp
+  ): case_case_managers_aggregate!
+
+  """An array relationship"""
+  case_gc_histories(
+    """distinct select on columns"""
+    distinct_on: [case_gc_history_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [case_gc_history_order_by!]
+
+    """filter the rows returned"""
+    where: case_gc_history_bool_exp
+  ): [case_gc_history!]!
+
+  """An aggregate relationship"""
+  case_gc_histories_aggregate(
+    """distinct select on columns"""
+    distinct_on: [case_gc_history_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [case_gc_history_order_by!]
+
+    """filter the rows returned"""
+    where: case_gc_history_bool_exp
+  ): case_gc_history_aggregate!
+
   """An object relationship"""
   case_manager: case_managers
 
   """分配的案例经理，新版"""
   case_manager_case_managers: bigint
+
+  """An array relationship"""
+  case_messages(
+    """distinct select on columns"""
+    distinct_on: [case_messages_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [case_messages_order_by!]
+
+    """filter the rows returned"""
+    where: case_messages_bool_exp
+  ): [case_messages!]!
+
+  """An aggregate relationship"""
+  case_messages_aggregate(
+    """distinct select on columns"""
+    distinct_on: [case_messages_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [case_messages_order_by!]
+
+    """filter the rows returned"""
+    where: case_messages_bool_exp
+  ): case_messages_aggregate!
 
   """An array relationship"""
   cases_files(
@@ -1716,8 +3550,15 @@ input cases_bool_exp {
   _and: [cases_bool_exp!]
   _not: cases_bool_exp
   _or: [cases_bool_exp!]
+  archived_at: timestamptz_comparison_exp
+  case_case_managers: case_case_managers_bool_exp
+  case_case_managers_aggregate: case_case_managers_aggregate_bool_exp
+  case_gc_histories: case_gc_history_bool_exp
+  case_gc_histories_aggregate: case_gc_history_aggregate_bool_exp
   case_manager: case_managers_bool_exp
   case_manager_case_managers: bigint_comparison_exp
+  case_messages: case_messages_bool_exp
+  case_messages_aggregate: case_messages_aggregate_bool_exp
   cases_files: cases_files_bool_exp
   cases_files_aggregate: cases_files_aggregate_bool_exp
   client_manager: client_managers_bool_exp
@@ -1749,19 +3590,9 @@ unique or primary key constraints on table "cases"
 """
 enum cases_constraint {
   """
-  unique or primary key constraint on columns "intended_parent_intended_parents"
-  """
-  cases_intended_parent_intended_parents_key
-
-  """
   unique or primary key constraint on columns "id"
   """
   cases_pkey
-
-  """
-  unique or primary key constraint on columns "surrogate_mother_surrogate_mothers"
-  """
-  cases_surrogate_mother_surrogate_mothers_key
 }
 
 """案子的相关文件"""
@@ -1793,6 +3624,9 @@ type cases_files {
   journey_journeys: bigint
   note: String
   updated_at: timestamptz!
+
+  """all=client visible; manager=internal only"""
+  visibility: String
 }
 
 """
@@ -1899,6 +3733,7 @@ input cases_files_bool_exp {
   journey_journeys: bigint_comparison_exp
   note: String_comparison_exp
   updated_at: timestamptz_comparison_exp
+  visibility: String_comparison_exp
 }
 
 """
@@ -1950,6 +3785,9 @@ input cases_files_insert_input {
   journey_journeys: bigint
   note: String
   updated_at: timestamptz
+
+  """all=client visible; manager=internal only"""
+  visibility: String
 }
 
 """aggregate max on columns"""
@@ -1975,6 +3813,9 @@ type cases_files_max_fields {
   journey_journeys: bigint
   note: String
   updated_at: timestamptz
+
+  """all=client visible; manager=internal only"""
+  visibility: String
 }
 
 """
@@ -2002,6 +3843,9 @@ input cases_files_max_order_by {
   journey_journeys: order_by
   note: order_by
   updated_at: order_by
+
+  """all=client visible; manager=internal only"""
+  visibility: order_by
 }
 
 """aggregate min on columns"""
@@ -2027,6 +3871,9 @@ type cases_files_min_fields {
   journey_journeys: bigint
   note: String
   updated_at: timestamptz
+
+  """all=client visible; manager=internal only"""
+  visibility: String
 }
 
 """
@@ -2054,6 +3901,9 @@ input cases_files_min_order_by {
   journey_journeys: order_by
   note: order_by
   updated_at: order_by
+
+  """all=client visible; manager=internal only"""
+  visibility: order_by
 }
 
 """
@@ -2090,6 +3940,7 @@ input cases_files_order_by {
   journey_journeys: order_by
   note: order_by
   updated_at: order_by
+  visibility: order_by
 }
 
 """primary key columns input for table: cases_files"""
@@ -2130,6 +3981,9 @@ enum cases_files_select_column {
 
   """column name"""
   updated_at
+
+  """column name"""
+  visibility
 }
 
 """
@@ -2157,6 +4011,9 @@ input cases_files_set_input {
   journey_journeys: bigint
   note: String
   updated_at: timestamptz
+
+  """all=client visible; manager=internal only"""
+  visibility: String
 }
 
 """aggregate stddev on columns"""
@@ -2259,6 +4116,9 @@ input cases_files_stream_cursor_value_input {
   journey_journeys: bigint
   note: String
   updated_at: timestamptz
+
+  """all=client visible; manager=internal only"""
+  visibility: String
 }
 
 """aggregate sum on columns"""
@@ -2316,6 +4176,9 @@ enum cases_files_update_column {
 
   """column name"""
   updated_at
+
+  """column name"""
+  visibility
 }
 
 input cases_files_updates {
@@ -2423,10 +4286,15 @@ input cases_inc_input {
 input type for inserting data into table "cases"
 """
 input cases_insert_input {
+  """Soft archive timestamp; NULL means active"""
+  archived_at: timestamptz
+  case_case_managers: case_case_managers_arr_rel_insert_input
+  case_gc_histories: case_gc_history_arr_rel_insert_input
   case_manager: case_managers_obj_rel_insert_input
 
   """分配的案例经理，新版"""
   case_manager_case_managers: bigint
+  case_messages: case_messages_arr_rel_insert_input
   cases_files: cases_files_arr_rel_insert_input
   client_manager: client_managers_obj_rel_insert_input
 
@@ -2464,6 +4332,9 @@ input cases_insert_input {
 
 """aggregate max on columns"""
 type cases_max_fields {
+  """Soft archive timestamp; NULL means active"""
+  archived_at: timestamptz
+
   """分配的案例经理，新版"""
   case_manager_case_managers: bigint
 
@@ -2493,6 +4364,9 @@ type cases_max_fields {
 order by max() on columns of table "cases"
 """
 input cases_max_order_by {
+  """Soft archive timestamp; NULL means active"""
+  archived_at: order_by
+
   """分配的案例经理，新版"""
   case_manager_case_managers: order_by
 
@@ -2520,6 +4394,9 @@ input cases_max_order_by {
 
 """aggregate min on columns"""
 type cases_min_fields {
+  """Soft archive timestamp; NULL means active"""
+  archived_at: timestamptz
+
   """分配的案例经理，新版"""
   case_manager_case_managers: bigint
 
@@ -2549,6 +4426,9 @@ type cases_min_fields {
 order by min() on columns of table "cases"
 """
 input cases_min_order_by {
+  """Soft archive timestamp; NULL means active"""
+  archived_at: order_by
+
   """分配的案例经理，新版"""
   case_manager_case_managers: order_by
 
@@ -2606,8 +4486,12 @@ input cases_on_conflict {
 
 """Ordering options when selecting data from "cases"."""
 input cases_order_by {
+  archived_at: order_by
+  case_case_managers_aggregate: case_case_managers_aggregate_order_by
+  case_gc_histories_aggregate: case_gc_history_aggregate_order_by
   case_manager: case_managers_order_by
   case_manager_case_managers: order_by
+  case_messages_aggregate: case_messages_aggregate_order_by
   cases_files_aggregate: cases_files_aggregate_order_by
   client_manager: client_managers_order_by
   client_manager_client_managers: order_by
@@ -2638,6 +4522,9 @@ input cases_pk_columns_input {
 select columns of table "cases"
 """
 enum cases_select_column {
+  """column name"""
+  archived_at
+
   """column name"""
   case_manager_case_managers
 
@@ -2676,6 +4563,9 @@ enum cases_select_column {
 input type for updating data in table "cases"
 """
 input cases_set_input {
+  """Soft archive timestamp; NULL means active"""
+  archived_at: timestamptz
+
   """分配的案例经理，新版"""
   case_manager_case_managers: bigint
 
@@ -2855,6 +4745,9 @@ input cases_stream_cursor_input {
 
 """Initial value of the column from where the streaming should start"""
 input cases_stream_cursor_value_input {
+  """Soft archive timestamp; NULL means active"""
+  archived_at: timestamptz
+
   """分配的案例经理，新版"""
   case_manager_case_managers: bigint
 
@@ -2933,6 +4826,9 @@ input cases_sum_order_by {
 update columns of table "cases"
 """
 enum cases_update_column {
+  """column name"""
+  archived_at
+
   """column name"""
   case_manager_case_managers
 
@@ -3654,6 +5550,9 @@ type intended_parents {
   ): jsonb
   created_at: timestamptz!
 
+  """Soft delete timestamp; NULL means active. Data retained permanently."""
+  deleted_at: timestamptz
+
   """弃用，准父母邮箱，作为登录的邮箱"""
   email: String!
 
@@ -3707,7 +5606,7 @@ type intended_parents {
   profile_data(
     """JSON select path"""
     path: String
-  ): json!
+  ): jsonb!
 
   """弃用，项目意向"""
   program_interests(
@@ -3794,6 +5693,9 @@ input intended_parents_append_input {
   """弃用，家庭资料"""
   family_profile: jsonb
 
+  """简介数据，新版使用"""
+  profile_data: jsonb
+
   """弃用，项目意向"""
   program_interests: jsonb
 
@@ -3844,13 +5746,14 @@ input intended_parents_bool_exp {
   cases_aggregate: cases_aggregate_bool_exp
   contact_information: jsonb_comparison_exp
   created_at: timestamptz_comparison_exp
+  deleted_at: timestamptz_comparison_exp
   email: String_comparison_exp
   family_profile: jsonb_comparison_exp
   id: bigint_comparison_exp
   password: String_comparison_exp
   post_comments: post_comments_bool_exp
   post_comments_aggregate: post_comments_aggregate_bool_exp
-  profile_data: json_comparison_exp
+  profile_data: jsonb_comparison_exp
   program_interests: jsonb_comparison_exp
   referral: jsonb_comparison_exp
   trust_account_balance: numeric_comparison_exp
@@ -3892,6 +5795,9 @@ input intended_parents_delete_at_path_input {
   """弃用，家庭资料"""
   family_profile: [String!]
 
+  """简介数据，新版使用"""
+  profile_data: [String!]
+
   """弃用，项目意向"""
   program_interests: [String!]
 
@@ -3912,6 +5818,9 @@ input intended_parents_delete_elem_input {
   """弃用，家庭资料"""
   family_profile: Int
 
+  """简介数据，新版使用"""
+  profile_data: Int
+
   """弃用，项目意向"""
   program_interests: Int
 
@@ -3931,6 +5840,9 @@ input intended_parents_delete_key_input {
 
   """弃用，家庭资料"""
   family_profile: String
+
+  """简介数据，新版使用"""
+  profile_data: String
 
   """弃用，项目意向"""
   program_interests: String
@@ -3963,6 +5875,9 @@ input intended_parents_insert_input {
   contact_information: jsonb
   created_at: timestamptz
 
+  """Soft delete timestamp; NULL means active. Data retained permanently."""
+  deleted_at: timestamptz
+
   """弃用，准父母邮箱，作为登录的邮箱"""
   email: String
 
@@ -3975,7 +5890,7 @@ input intended_parents_insert_input {
   post_comments: post_comments_arr_rel_insert_input
 
   """简介数据，新版使用"""
-  profile_data: json
+  profile_data: jsonb
 
   """弃用，项目意向"""
   program_interests: jsonb
@@ -3993,6 +5908,9 @@ input intended_parents_insert_input {
 """aggregate max on columns"""
 type intended_parents_max_fields {
   created_at: timestamptz
+
+  """Soft delete timestamp; NULL means active. Data retained permanently."""
+  deleted_at: timestamptz
 
   """弃用，准父母邮箱，作为登录的邮箱"""
   email: String
@@ -4013,6 +5931,9 @@ order by max() on columns of table "intended_parents"
 input intended_parents_max_order_by {
   created_at: order_by
 
+  """Soft delete timestamp; NULL means active. Data retained permanently."""
+  deleted_at: order_by
+
   """弃用，准父母邮箱，作为登录的邮箱"""
   email: order_by
   id: order_by
@@ -4029,6 +5950,9 @@ input intended_parents_max_order_by {
 """aggregate min on columns"""
 type intended_parents_min_fields {
   created_at: timestamptz
+
+  """Soft delete timestamp; NULL means active. Data retained permanently."""
+  deleted_at: timestamptz
 
   """弃用，准父母邮箱，作为登录的邮箱"""
   email: String
@@ -4048,6 +5972,9 @@ order by min() on columns of table "intended_parents"
 """
 input intended_parents_min_order_by {
   created_at: order_by
+
+  """Soft delete timestamp; NULL means active. Data retained permanently."""
+  deleted_at: order_by
 
   """弃用，准父母邮箱，作为登录的邮箱"""
   email: order_by
@@ -4099,6 +6026,7 @@ input intended_parents_order_by {
   cases_aggregate: cases_aggregate_order_by
   contact_information: order_by
   created_at: order_by
+  deleted_at: order_by
   email: order_by
   family_profile: order_by
   id: order_by
@@ -4129,6 +6057,9 @@ input intended_parents_prepend_input {
   """弃用，家庭资料"""
   family_profile: jsonb
 
+  """简介数据，新版使用"""
+  profile_data: jsonb
+
   """弃用，项目意向"""
   program_interests: jsonb
 
@@ -4148,6 +6079,9 @@ enum intended_parents_select_column {
 
   """column name"""
   created_at
+
+  """column name"""
+  deleted_at
 
   """column name"""
   email
@@ -4191,6 +6125,9 @@ input intended_parents_set_input {
   contact_information: jsonb
   created_at: timestamptz
 
+  """Soft delete timestamp; NULL means active. Data retained permanently."""
+  deleted_at: timestamptz
+
   """弃用，准父母邮箱，作为登录的邮箱"""
   email: String
 
@@ -4202,7 +6139,7 @@ input intended_parents_set_input {
   password: String
 
   """简介数据，新版使用"""
-  profile_data: json
+  profile_data: jsonb
 
   """弃用，项目意向"""
   program_interests: jsonb
@@ -4296,6 +6233,9 @@ input intended_parents_stream_cursor_value_input {
   contact_information: jsonb
   created_at: timestamptz
 
+  """Soft delete timestamp; NULL means active. Data retained permanently."""
+  deleted_at: timestamptz
+
   """弃用，准父母邮箱，作为登录的邮箱"""
   email: String
 
@@ -4307,7 +6247,7 @@ input intended_parents_stream_cursor_value_input {
   password: String
 
   """简介数据，新版使用"""
-  profile_data: json
+  profile_data: jsonb
 
   """弃用，项目意向"""
   program_interests: jsonb
@@ -4353,6 +6293,9 @@ enum intended_parents_update_column {
 
   """column name"""
   created_at
+
+  """column name"""
+  deleted_at
 
   """column name"""
   email
@@ -6012,6 +7955,32 @@ type mutation_root {
   delete_blogs_by_pk(id: bigint!): blogs
 
   """
+  delete data from the table: "case_case_managers"
+  """
+  delete_case_case_managers(
+    """filter the rows which have to be deleted"""
+    where: case_case_managers_bool_exp!
+  ): case_case_managers_mutation_response
+
+  """
+  delete single row from the table: "case_case_managers"
+  """
+  delete_case_case_managers_by_pk(id: bigint!): case_case_managers
+
+  """
+  delete data from the table: "case_gc_history"
+  """
+  delete_case_gc_history(
+    """filter the rows which have to be deleted"""
+    where: case_gc_history_bool_exp!
+  ): case_gc_history_mutation_response
+
+  """
+  delete single row from the table: "case_gc_history"
+  """
+  delete_case_gc_history_by_pk(id: bigint!): case_gc_history
+
+  """
   delete data from the table: "case_managers"
   """
   delete_case_managers(
@@ -6023,6 +7992,19 @@ type mutation_root {
   delete single row from the table: "case_managers"
   """
   delete_case_managers_by_pk(id: bigint!): case_managers
+
+  """
+  delete data from the table: "case_messages"
+  """
+  delete_case_messages(
+    """filter the rows which have to be deleted"""
+    where: case_messages_bool_exp!
+  ): case_messages_mutation_response
+
+  """
+  delete single row from the table: "case_messages"
+  """
+  delete_case_messages_by_pk(id: bigint!): case_messages
 
   """
   delete data from the table: "cases"
@@ -6225,6 +8207,50 @@ type mutation_root {
   ): blogs
 
   """
+  insert data into the table: "case_case_managers"
+  """
+  insert_case_case_managers(
+    """the rows to be inserted"""
+    objects: [case_case_managers_insert_input!]!
+
+    """upsert condition"""
+    on_conflict: case_case_managers_on_conflict
+  ): case_case_managers_mutation_response
+
+  """
+  insert a single row into the table: "case_case_managers"
+  """
+  insert_case_case_managers_one(
+    """the row to be inserted"""
+    object: case_case_managers_insert_input!
+
+    """upsert condition"""
+    on_conflict: case_case_managers_on_conflict
+  ): case_case_managers
+
+  """
+  insert data into the table: "case_gc_history"
+  """
+  insert_case_gc_history(
+    """the rows to be inserted"""
+    objects: [case_gc_history_insert_input!]!
+
+    """upsert condition"""
+    on_conflict: case_gc_history_on_conflict
+  ): case_gc_history_mutation_response
+
+  """
+  insert a single row into the table: "case_gc_history"
+  """
+  insert_case_gc_history_one(
+    """the row to be inserted"""
+    object: case_gc_history_insert_input!
+
+    """upsert condition"""
+    on_conflict: case_gc_history_on_conflict
+  ): case_gc_history
+
+  """
   insert data into the table: "case_managers"
   """
   insert_case_managers(
@@ -6245,6 +8271,28 @@ type mutation_root {
     """upsert condition"""
     on_conflict: case_managers_on_conflict
   ): case_managers
+
+  """
+  insert data into the table: "case_messages"
+  """
+  insert_case_messages(
+    """the rows to be inserted"""
+    objects: [case_messages_insert_input!]!
+
+    """upsert condition"""
+    on_conflict: case_messages_on_conflict
+  ): case_messages_mutation_response
+
+  """
+  insert a single row into the table: "case_messages"
+  """
+  insert_case_messages_one(
+    """the row to be inserted"""
+    object: case_messages_insert_input!
+
+    """upsert condition"""
+    on_conflict: case_messages_on_conflict
+  ): case_messages
 
   """
   insert data into the table: "cases"
@@ -6621,6 +8669,74 @@ type mutation_root {
   ): [blogs_mutation_response]
 
   """
+  update data of the table: "case_case_managers"
+  """
+  update_case_case_managers(
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: case_case_managers_inc_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: case_case_managers_set_input
+
+    """filter the rows which have to be updated"""
+    where: case_case_managers_bool_exp!
+  ): case_case_managers_mutation_response
+
+  """
+  update single row of the table: "case_case_managers"
+  """
+  update_case_case_managers_by_pk(
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: case_case_managers_inc_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: case_case_managers_set_input
+    pk_columns: case_case_managers_pk_columns_input!
+  ): case_case_managers
+
+  """
+  update multiples rows of table: "case_case_managers"
+  """
+  update_case_case_managers_many(
+    """updates to execute, in order"""
+    updates: [case_case_managers_updates!]!
+  ): [case_case_managers_mutation_response]
+
+  """
+  update data of the table: "case_gc_history"
+  """
+  update_case_gc_history(
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: case_gc_history_inc_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: case_gc_history_set_input
+
+    """filter the rows which have to be updated"""
+    where: case_gc_history_bool_exp!
+  ): case_gc_history_mutation_response
+
+  """
+  update single row of the table: "case_gc_history"
+  """
+  update_case_gc_history_by_pk(
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: case_gc_history_inc_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: case_gc_history_set_input
+    pk_columns: case_gc_history_pk_columns_input!
+  ): case_gc_history
+
+  """
+  update multiples rows of table: "case_gc_history"
+  """
+  update_case_gc_history_many(
+    """updates to execute, in order"""
+    updates: [case_gc_history_updates!]!
+  ): [case_gc_history_mutation_response]
+
+  """
   update data of the table: "case_managers"
   """
   update_case_managers(
@@ -6653,6 +8769,40 @@ type mutation_root {
     """updates to execute, in order"""
     updates: [case_managers_updates!]!
   ): [case_managers_mutation_response]
+
+  """
+  update data of the table: "case_messages"
+  """
+  update_case_messages(
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: case_messages_inc_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: case_messages_set_input
+
+    """filter the rows which have to be updated"""
+    where: case_messages_bool_exp!
+  ): case_messages_mutation_response
+
+  """
+  update single row of the table: "case_messages"
+  """
+  update_case_messages_by_pk(
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: case_messages_inc_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: case_messages_set_input
+    pk_columns: case_messages_pk_columns_input!
+  ): case_messages
+
+  """
+  update multiples rows of table: "case_messages"
+  """
+  update_case_messages_many(
+    """updates to execute, in order"""
+    updates: [case_messages_updates!]!
+  ): [case_messages_mutation_response]
 
   """
   update data of the table: "cases"
@@ -8594,6 +10744,90 @@ type query_root {
   blogs_by_pk(id: bigint!): blogs
 
   """An array relationship"""
+  case_case_managers(
+    """distinct select on columns"""
+    distinct_on: [case_case_managers_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [case_case_managers_order_by!]
+
+    """filter the rows returned"""
+    where: case_case_managers_bool_exp
+  ): [case_case_managers!]!
+
+  """An aggregate relationship"""
+  case_case_managers_aggregate(
+    """distinct select on columns"""
+    distinct_on: [case_case_managers_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [case_case_managers_order_by!]
+
+    """filter the rows returned"""
+    where: case_case_managers_bool_exp
+  ): case_case_managers_aggregate!
+
+  """
+  fetch data from the table: "case_case_managers" using primary key columns
+  """
+  case_case_managers_by_pk(id: bigint!): case_case_managers
+
+  """
+  fetch data from the table: "case_gc_history"
+  """
+  case_gc_history(
+    """distinct select on columns"""
+    distinct_on: [case_gc_history_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [case_gc_history_order_by!]
+
+    """filter the rows returned"""
+    where: case_gc_history_bool_exp
+  ): [case_gc_history!]!
+
+  """
+  fetch aggregated fields from the table: "case_gc_history"
+  """
+  case_gc_history_aggregate(
+    """distinct select on columns"""
+    distinct_on: [case_gc_history_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [case_gc_history_order_by!]
+
+    """filter the rows returned"""
+    where: case_gc_history_bool_exp
+  ): case_gc_history_aggregate!
+
+  """fetch data from the table: "case_gc_history" using primary key columns"""
+  case_gc_history_by_pk(id: bigint!): case_gc_history
+
+  """An array relationship"""
   case_managers(
     """distinct select on columns"""
     distinct_on: [case_managers_select_column!]
@@ -8631,6 +10865,45 @@ type query_root {
 
   """fetch data from the table: "case_managers" using primary key columns"""
   case_managers_by_pk(id: bigint!): case_managers
+
+  """An array relationship"""
+  case_messages(
+    """distinct select on columns"""
+    distinct_on: [case_messages_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [case_messages_order_by!]
+
+    """filter the rows returned"""
+    where: case_messages_bool_exp
+  ): [case_messages!]!
+
+  """An aggregate relationship"""
+  case_messages_aggregate(
+    """distinct select on columns"""
+    distinct_on: [case_messages_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [case_messages_order_by!]
+
+    """filter the rows returned"""
+    where: case_messages_bool_exp
+  ): case_messages_aggregate!
+
+  """fetch data from the table: "case_messages" using primary key columns"""
+  case_messages_by_pk(id: bigint!): case_messages
 
   """An array relationship"""
   cases(
@@ -9231,6 +11504,118 @@ type subscription_root {
   ): [blogs!]!
 
   """An array relationship"""
+  case_case_managers(
+    """distinct select on columns"""
+    distinct_on: [case_case_managers_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [case_case_managers_order_by!]
+
+    """filter the rows returned"""
+    where: case_case_managers_bool_exp
+  ): [case_case_managers!]!
+
+  """An aggregate relationship"""
+  case_case_managers_aggregate(
+    """distinct select on columns"""
+    distinct_on: [case_case_managers_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [case_case_managers_order_by!]
+
+    """filter the rows returned"""
+    where: case_case_managers_bool_exp
+  ): case_case_managers_aggregate!
+
+  """
+  fetch data from the table: "case_case_managers" using primary key columns
+  """
+  case_case_managers_by_pk(id: bigint!): case_case_managers
+
+  """
+  fetch data from the table in a streaming manner: "case_case_managers"
+  """
+  case_case_managers_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [case_case_managers_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: case_case_managers_bool_exp
+  ): [case_case_managers!]!
+
+  """
+  fetch data from the table: "case_gc_history"
+  """
+  case_gc_history(
+    """distinct select on columns"""
+    distinct_on: [case_gc_history_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [case_gc_history_order_by!]
+
+    """filter the rows returned"""
+    where: case_gc_history_bool_exp
+  ): [case_gc_history!]!
+
+  """
+  fetch aggregated fields from the table: "case_gc_history"
+  """
+  case_gc_history_aggregate(
+    """distinct select on columns"""
+    distinct_on: [case_gc_history_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [case_gc_history_order_by!]
+
+    """filter the rows returned"""
+    where: case_gc_history_bool_exp
+  ): case_gc_history_aggregate!
+
+  """fetch data from the table: "case_gc_history" using primary key columns"""
+  case_gc_history_by_pk(id: bigint!): case_gc_history
+
+  """
+  fetch data from the table in a streaming manner: "case_gc_history"
+  """
+  case_gc_history_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [case_gc_history_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: case_gc_history_bool_exp
+  ): [case_gc_history!]!
+
+  """An array relationship"""
   case_managers(
     """distinct select on columns"""
     distinct_on: [case_managers_select_column!]
@@ -9282,6 +11667,59 @@ type subscription_root {
     """filter the rows returned"""
     where: case_managers_bool_exp
   ): [case_managers!]!
+
+  """An array relationship"""
+  case_messages(
+    """distinct select on columns"""
+    distinct_on: [case_messages_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [case_messages_order_by!]
+
+    """filter the rows returned"""
+    where: case_messages_bool_exp
+  ): [case_messages!]!
+
+  """An aggregate relationship"""
+  case_messages_aggregate(
+    """distinct select on columns"""
+    distinct_on: [case_messages_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [case_messages_order_by!]
+
+    """filter the rows returned"""
+    where: case_messages_bool_exp
+  ): case_messages_aggregate!
+
+  """fetch data from the table: "case_messages" using primary key columns"""
+  case_messages_by_pk(id: bigint!): case_messages
+
+  """
+  fetch data from the table in a streaming manner: "case_messages"
+  """
+  case_messages_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [case_messages_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: case_messages_bool_exp
+  ): [case_messages!]!
 
   """An array relationship"""
   cases(
@@ -9988,6 +12426,9 @@ type surrogate_mothers {
   ): jsonb
   created_at: timestamptz!
 
+  """Soft delete timestamp; NULL means active. Data retained permanently."""
+  deleted_at: timestamptz
+
   """弃用，登录的邮箱"""
   email: String!
 
@@ -10047,7 +12488,7 @@ type surrogate_mothers {
   profile_data(
     """JSON select path"""
     path: String
-  ): json!
+  ): jsonb!
   updated_at: timestamptz!
 
   """
@@ -10130,6 +12571,9 @@ input surrogate_mothers_append_input {
   """弃用，准生育与健康经历"""
   pregnancy_and_health: jsonb
 
+  """新版使用"""
+  profile_data: jsonb
+
   """
   弃用，上传的图片，至少两张 array-jsonb，如：[{"name":"a.png","url":"https://test.com/a.png"}]
   """
@@ -10173,6 +12617,7 @@ input surrogate_mothers_bool_exp {
   cases_aggregate: cases_aggregate_bool_exp
   contact_information: jsonb_comparison_exp
   created_at: timestamptz_comparison_exp
+  deleted_at: timestamptz_comparison_exp
   email: String_comparison_exp
   gestational_surrogacy_interview: jsonb_comparison_exp
   id: bigint_comparison_exp
@@ -10180,7 +12625,7 @@ input surrogate_mothers_bool_exp {
   post_comments: post_comments_bool_exp
   post_comments_aggregate: post_comments_aggregate_bool_exp
   pregnancy_and_health: jsonb_comparison_exp
-  profile_data: json_comparison_exp
+  profile_data: jsonb_comparison_exp
   updated_at: timestamptz_comparison_exp
   upload_photos: jsonb_comparison_exp
   user: users_bool_exp
@@ -10223,6 +12668,9 @@ input surrogate_mothers_delete_at_path_input {
   """弃用，准生育与健康经历"""
   pregnancy_and_health: [String!]
 
+  """新版使用"""
+  profile_data: [String!]
+
   """
   弃用，上传的图片，至少两张 array-jsonb，如：[{"name":"a.png","url":"https://test.com/a.png"}]
   """
@@ -10245,6 +12693,9 @@ input surrogate_mothers_delete_elem_input {
   """弃用，准生育与健康经历"""
   pregnancy_and_health: Int
 
+  """新版使用"""
+  profile_data: Int
+
   """
   弃用，上传的图片，至少两张 array-jsonb，如：[{"name":"a.png","url":"https://test.com/a.png"}]
   """
@@ -10266,6 +12717,9 @@ input surrogate_mothers_delete_key_input {
 
   """弃用，准生育与健康经历"""
   pregnancy_and_health: String
+
+  """新版使用"""
+  profile_data: String
 
   """
   弃用，上传的图片，至少两张 array-jsonb，如：[{"name":"a.png","url":"https://test.com/a.png"}]
@@ -10294,6 +12748,9 @@ input surrogate_mothers_insert_input {
   contact_information: jsonb
   created_at: timestamptz
 
+  """Soft delete timestamp; NULL means active. Data retained permanently."""
+  deleted_at: timestamptz
+
   """弃用，登录的邮箱"""
   email: String
 
@@ -10309,7 +12766,7 @@ input surrogate_mothers_insert_input {
   pregnancy_and_health: jsonb
 
   """新版使用"""
-  profile_data: json
+  profile_data: jsonb
   updated_at: timestamptz
 
   """
@@ -10323,6 +12780,9 @@ input surrogate_mothers_insert_input {
 """aggregate max on columns"""
 type surrogate_mothers_max_fields {
   created_at: timestamptz
+
+  """Soft delete timestamp; NULL means active. Data retained permanently."""
+  deleted_at: timestamptz
 
   """弃用，登录的邮箱"""
   email: String
@@ -10340,6 +12800,9 @@ order by max() on columns of table "surrogate_mothers"
 input surrogate_mothers_max_order_by {
   created_at: order_by
 
+  """Soft delete timestamp; NULL means active. Data retained permanently."""
+  deleted_at: order_by
+
   """弃用，登录的邮箱"""
   email: order_by
   id: order_by
@@ -10353,6 +12816,9 @@ input surrogate_mothers_max_order_by {
 """aggregate min on columns"""
 type surrogate_mothers_min_fields {
   created_at: timestamptz
+
+  """Soft delete timestamp; NULL means active. Data retained permanently."""
+  deleted_at: timestamptz
 
   """弃用，登录的邮箱"""
   email: String
@@ -10369,6 +12835,9 @@ order by min() on columns of table "surrogate_mothers"
 """
 input surrogate_mothers_min_order_by {
   created_at: order_by
+
+  """Soft delete timestamp; NULL means active. Data retained permanently."""
+  deleted_at: order_by
 
   """弃用，登录的邮箱"""
   email: order_by
@@ -10417,6 +12886,7 @@ input surrogate_mothers_order_by {
   cases_aggregate: cases_aggregate_order_by
   contact_information: order_by
   created_at: order_by
+  deleted_at: order_by
   email: order_by
   gestational_surrogacy_interview: order_by
   id: order_by
@@ -10449,6 +12919,9 @@ input surrogate_mothers_prepend_input {
   """弃用，准生育与健康经历"""
   pregnancy_and_health: jsonb
 
+  """新版使用"""
+  profile_data: jsonb
+
   """
   弃用，上传的图片，至少两张 array-jsonb，如：[{"name":"a.png","url":"https://test.com/a.png"}]
   """
@@ -10467,6 +12940,9 @@ enum surrogate_mothers_select_column {
 
   """column name"""
   created_at
+
+  """column name"""
+  deleted_at
 
   """column name"""
   email
@@ -10507,6 +12983,9 @@ input surrogate_mothers_set_input {
   contact_information: jsonb
   created_at: timestamptz
 
+  """Soft delete timestamp; NULL means active. Data retained permanently."""
+  deleted_at: timestamptz
+
   """弃用，登录的邮箱"""
   email: String
 
@@ -10521,7 +13000,7 @@ input surrogate_mothers_set_input {
   pregnancy_and_health: jsonb
 
   """新版使用"""
-  profile_data: json
+  profile_data: jsonb
   updated_at: timestamptz
 
   """
@@ -10593,6 +13072,9 @@ input surrogate_mothers_stream_cursor_value_input {
   contact_information: jsonb
   created_at: timestamptz
 
+  """Soft delete timestamp; NULL means active. Data retained permanently."""
+  deleted_at: timestamptz
+
   """弃用，登录的邮箱"""
   email: String
 
@@ -10607,7 +13089,7 @@ input surrogate_mothers_stream_cursor_value_input {
   pregnancy_and_health: jsonb
 
   """新版使用"""
-  profile_data: json
+  profile_data: jsonb
   updated_at: timestamptz
 
   """
@@ -10643,6 +13125,9 @@ enum surrogate_mothers_update_column {
 
   """column name"""
   created_at
+
+  """column name"""
+  deleted_at
 
   """column name"""
   email
@@ -10794,6 +13279,9 @@ type trust_account_balance_changes {
 
   """谁可见选项： 1.all（所有人可见） 2.manager（只有客户经理和管理员可见）"""
   visibility: String
+
+  """Payment voucher / receipt file URL (Qiniu); no FK"""
+  voucher_url: String
 }
 
 """
@@ -10912,6 +13400,7 @@ input trust_account_balance_changes_bool_exp {
   remark: String_comparison_exp
   updated_at: timestamptz_comparison_exp
   visibility: String_comparison_exp
+  voucher_url: String_comparison_exp
 }
 
 """
@@ -10973,6 +13462,9 @@ input trust_account_balance_changes_insert_input {
 
   """谁可见选项： 1.all（所有人可见） 2.manager（只有客户经理和管理员可见）"""
   visibility: String
+
+  """Payment voucher / receipt file URL (Qiniu); no FK"""
+  voucher_url: String
 }
 
 """aggregate max on columns"""
@@ -11003,6 +13495,9 @@ type trust_account_balance_changes_max_fields {
 
   """谁可见选项： 1.all（所有人可见） 2.manager（只有客户经理和管理员可见）"""
   visibility: String
+
+  """Payment voucher / receipt file URL (Qiniu); no FK"""
+  voucher_url: String
 }
 
 """
@@ -11035,6 +13530,9 @@ input trust_account_balance_changes_max_order_by {
 
   """谁可见选项： 1.all（所有人可见） 2.manager（只有客户经理和管理员可见）"""
   visibility: order_by
+
+  """Payment voucher / receipt file URL (Qiniu); no FK"""
+  voucher_url: order_by
 }
 
 """aggregate min on columns"""
@@ -11065,6 +13563,9 @@ type trust_account_balance_changes_min_fields {
 
   """谁可见选项： 1.all（所有人可见） 2.manager（只有客户经理和管理员可见）"""
   visibility: String
+
+  """Payment voucher / receipt file URL (Qiniu); no FK"""
+  voucher_url: String
 }
 
 """
@@ -11097,6 +13598,9 @@ input trust_account_balance_changes_min_order_by {
 
   """谁可见选项： 1.all（所有人可见） 2.manager（只有客户经理和管理员可见）"""
   visibility: order_by
+
+  """Payment voucher / receipt file URL (Qiniu); no FK"""
+  voucher_url: order_by
 }
 
 """
@@ -11135,6 +13639,7 @@ input trust_account_balance_changes_order_by {
   remark: order_by
   updated_at: order_by
   visibility: order_by
+  voucher_url: order_by
 }
 
 """primary key columns input for table: trust_account_balance_changes"""
@@ -11178,6 +13683,9 @@ enum trust_account_balance_changes_select_column {
 
   """column name"""
   visibility
+
+  """column name"""
+  voucher_url
 }
 
 """
@@ -11210,6 +13718,9 @@ input trust_account_balance_changes_set_input {
 
   """谁可见选项： 1.all（所有人可见） 2.manager（只有客户经理和管理员可见）"""
   visibility: String
+
+  """Payment voucher / receipt file URL (Qiniu); no FK"""
+  voucher_url: String
 }
 
 """aggregate stddev on columns"""
@@ -11353,6 +13864,9 @@ input trust_account_balance_changes_stream_cursor_value_input {
 
   """谁可见选项： 1.all（所有人可见） 2.manager（只有客户经理和管理员可见）"""
   visibility: String
+
+  """Payment voucher / receipt file URL (Qiniu); no FK"""
+  voucher_url: String
 }
 
 """aggregate sum on columns"""
@@ -11425,6 +13939,9 @@ enum trust_account_balance_changes_update_column {
 
   """column name"""
   visibility
+
+  """column name"""
+  voucher_url
 }
 
 input trust_account_balance_changes_updates {

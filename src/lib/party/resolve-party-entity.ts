@@ -4,7 +4,10 @@ export type PartyKind = "intended_parent" | "surrogate_mother";
 
 const RESOLVE_IP = `
   query ResolveIpEntity($uid: bigint!) {
-    intended_parents(where: { user_users: { _eq: $uid } }, limit: 1) {
+    intended_parents(
+      where: { user_users: { _eq: $uid }, deleted_at: { _is_null: true } }
+      limit: 1
+    ) {
       id
     }
   }
@@ -12,7 +15,10 @@ const RESOLVE_IP = `
 
 const RESOLVE_SM = `
   query ResolveSmEntity($uid: bigint!) {
-    surrogate_mothers(where: { user_users: { _eq: $uid } }, limit: 1) {
+    surrogate_mothers(
+      where: { user_users: { _eq: $uid }, deleted_at: { _is_null: true } }
+      limit: 1
+    ) {
       id
     }
   }

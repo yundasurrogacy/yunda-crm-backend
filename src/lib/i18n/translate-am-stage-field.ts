@@ -75,6 +75,13 @@ const exactZh: Record<string, string> = {
   "Delivery Date": "分娩日期",
   "Delivery Method": "分娩方式",
   "Birth Weight": "小孩体重",
+  "Baby 1 Birth Weight": "宝宝1体重",
+  "Baby 1 Sex/Gender": "宝宝1性别",
+  "Baby 1 Complications (if any)": "宝宝1有无并发症",
+  "Baby 2 Birth Weight": "宝宝2体重",
+  "Baby 2 Sex/Gender": "宝宝2性别",
+  "Baby 2 Complications (if any)": "宝宝2有无并发症",
+  "Pregnancy Type (Singleton/Twins)": "单胎/双胎",
   "Sex/Gender": "性别",
   "Gestational Age at Delivery": "妊娠周数",
   "Complications (if any)": "有无并发症",
@@ -88,6 +95,8 @@ const exactZh: Record<string, string> = {
   "Psychologist Email": "心理医生邮箱",
   "Psychological Clearance Complete": "心理评估通过日期",
   "Medical Clearance Complete": "医疗筛查通过日期",
+  "Medical Records Approval Date": "医疗报告审核通过日期",
+  "Medical Screening Appointment Date": "医学筛查预约日期",
 };
 
 const phraseZh: Array<[RegExp, string]> = [

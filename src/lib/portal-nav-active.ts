@@ -15,6 +15,12 @@ export function isPortalNavActive(pathname: string, href: string): boolean {
   if (h === "/case_manager/my-cases") {
     return p.startsWith("/case_manager/my-cases");
   }
+  if (h === "/case_manager/parties/intended-parents") {
+    return p.startsWith("/case_manager/parties/intended-parents");
+  }
+  if (h === "/case_manager/parties/surrogates") {
+    return p.startsWith("/case_manager/parties/surrogates");
+  }
 
   if (h === "/intended_parent") {
     return p === "/intended_parent" || (p.startsWith("/intended_parent/") && !p.startsWith("/intended_parent/my-cases") && !p.startsWith("/intended_parent/cases"));
@@ -23,10 +29,19 @@ export function isPortalNavActive(pathname: string, href: string): boolean {
     return p.startsWith("/intended_parent/my-cases") || p.startsWith("/intended_parent/cases");
   }
   if (h === "/surrogate_mother") {
-    return p === "/surrogate_mother" || (p.startsWith("/surrogate_mother/") && !p.startsWith("/surrogate_mother/my-cases") && !p.startsWith("/surrogate_mother/cases"));
+    return (
+      p === "/surrogate_mother" ||
+      (p.startsWith("/surrogate_mother/") &&
+        !p.startsWith("/surrogate_mother/my-cases") &&
+        !p.startsWith("/surrogate_mother/cases") &&
+        !p.startsWith("/surrogate_mother/profile"))
+    );
   }
   if (h === "/surrogate_mother/my-cases") {
     return p.startsWith("/surrogate_mother/my-cases") || p.startsWith("/surrogate_mother/cases");
+  }
+  if (h === "/surrogate_mother/profile") {
+    return p.startsWith("/surrogate_mother/profile");
   }
 
   return p === h || p.startsWith(`${h}/`);

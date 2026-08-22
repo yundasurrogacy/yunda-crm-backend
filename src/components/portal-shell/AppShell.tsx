@@ -8,6 +8,8 @@ import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import type { PortalNavItem } from "@/config/portal-nav";
 import { isPortalNavActive } from "@/lib/portal-nav-active";
+import type { PortalId } from "@/types/portal";
+import { ConfirmDialogProvider } from "@/components/ui/ConfirmDialog";
 import { PortalSwitcherFooter } from "./PortalSwitcherFooter";
 
 /** 对齐 yunda-admin-system CommonSidebar / CommonHeader 的壳层色块 */
@@ -19,11 +21,14 @@ export const CRM_SIDEBAR_STORAGE_KEY = "yunda_crm_sidebar_open";
 export function AppShell({
   sidebarTitleKey,
   navItems,
+  shell,
   centerSlot,
   children,
 }: {
   sidebarTitleKey: string;
   navItems: readonly PortalNavItem[];
+  /** 侧栏账号条：管理端 / 业务端口 */
+  shell: "admin" | PortalId;
   /** 顶栏居中（如 AM 的 YUNDA） */
   centerSlot?: ReactNode;
   children: React.ReactNode;
@@ -70,6 +75,7 @@ export function AppShell({
   }, [pathname]);
 
   return (
+    <ConfirmDialogProvider>
     <div className="flex max-h-screen min-h-screen flex-col overflow-hidden bg-main-bg">
       {/* 顶栏同色值见 yunda-admin-system src/components/common-header.tsx style.background */}
       <header
@@ -134,7 +140,7 @@ export function AppShell({
                 })}
               </nav>
               <div className="shrink-0 px-4 pb-4 md:px-4 md:pb-5">
-                <PortalSwitcherFooter />
+                <PortalSwitcherFooter shell={shell} />
               </div>
             </>
           ) : null}
@@ -143,5 +149,6 @@ export function AppShell({
         <main className="relative min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-main-bg p-5 md:p-8">{children}</main>
       </div>
     </div>
+    </ConfirmDialogProvider>
   );
 }

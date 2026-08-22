@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CANONICAL_CASE_STAGES } from "@/constants/case-stages";
+import { EntitySearchSelect } from "@/components/ui/EntitySearchSelect";
 
 type Option = { id: string; label: string };
 
@@ -49,7 +50,7 @@ export function AdminCreateCaseForm() {
           ...prev,
           caseManagerId: json.caseManagers?.[0]?.id ?? "",
           intendedParentId: json.intendedParents?.[0]?.id ?? "",
-          surrogateId: json.surrogates?.[0]?.id ?? "",
+          surrogateId: "",
         }));
       } catch {
         if (!cancelled) {
@@ -79,9 +80,7 @@ export function AdminCreateCaseForm() {
       const json = (await res.json()) as { id?: string; error?: string; detail?: string };
       if (!res.ok) {
         setMsgIsError(true);
-        if (json.error === "intended_parent_has_case") {
-          setMsg(t("admin_case.error_unique_intended_parent"));
-        } else if (json.error === "surrogate_has_case") {
+        if (json.error === "surrogate_has_case") {
           setMsg(t("admin_case.error_unique_surrogate"));
         } else if (json.detail) {
           setMsg(`${t("admin_case.error_create_detail_prefix")}${json.detail}`);
@@ -108,21 +107,37 @@ export function AdminCreateCaseForm() {
       <form className="mt-4 space-y-4" onSubmit={onSubmit}>
         <label className="block">
           <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-sage-600">{t("admin_case.case_manager")}</span>
-          <select className="w-full rounded-md border border-sage-300 bg-white px-3 py-2 text-sm" value={form.caseManagerId} onChange={(e) => setForm((p) => ({ ...p, caseManagerId: e.target.value }))}>
-            {caseManagers.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
-          </select>
+          <EntitySearchSelect
+            options={caseManagers}
+            value={form.caseManagerId}
+            onChange={(id) => setForm((p) => ({ ...p, caseManagerId: id }))}
+            placeholder={t("entity_search.placeholder")}
+            disabled={loading || saving}
+            allowEmpty={false}
+          />
         </label>
         <label className="block">
           <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-sage-600">{t("admin_case.intended_parent")}</span>
-          <select className="w-full rounded-md border border-sage-300 bg-white px-3 py-2 text-sm" value={form.intendedParentId} onChange={(e) => setForm((p) => ({ ...p, intendedParentId: e.target.value }))}>
-            {intendedParents.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
-          </select>
+          <EntitySearchSelect
+            options={intendedParents}
+            value={form.intendedParentId}
+            onChange={(id) => setForm((p) => ({ ...p, intendedParentId: id }))}
+            placeholder={t("entity_search.placeholder")}
+            disabled={loading || saving}
+            allowEmpty={false}
+          />
         </label>
         <label className="block">
           <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-sage-600">{t("admin_case.surrogate")}</span>
-          <select className="w-full rounded-md border border-sage-300 bg-white px-3 py-2 text-sm" value={form.surrogateId} onChange={(e) => setForm((p) => ({ ...p, surrogateId: e.target.value }))}>
-            {surrogates.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
-          </select>
+          <EntitySearchSelect
+            options={surrogates}
+            value={form.surrogateId}
+            onChange={(id) => setForm((p) => ({ ...p, surrogateId: id }))}
+            placeholder={t("entity_search.placeholder")}
+            emptyLabel={t("admin_case.surrogate_optional")}
+            allowEmpty
+            disabled={loading || saving}
+          />
         </label>
         <label className="block">
           <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-sage-600">{t("admin_case.initial_stage")}</span>
@@ -134,7 +149,7 @@ export function AdminCreateCaseForm() {
           <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-sage-600">{t("admin_case.trust_balance")}</span>
           <input className="w-full rounded-md border border-sage-300 bg-white px-3 py-2 text-sm" value={form.trustAccountBalance} onChange={(e) => setForm((p) => ({ ...p, trustAccountBalance: e.target.value }))} />
         </label>
-        <button type="submit" disabled={saving || loading} className="rounded-md bg-brand-brown px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+        <button type="submit" disabled={saving || loading || !form.caseManagerId || !form.intendedParentId} className="rounded-md bg-brand-brown px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
           {saving ? t("admin_case.creating") : t("admin_case.create_submit")}
         </button>
       </form>

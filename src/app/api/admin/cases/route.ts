@@ -13,14 +13,8 @@ import { fetchSurrogatesAvailableForMatch } from "@/lib/case-manager/match-gc";
 const ADMIN_SCOPE = "admin_all" satisfies CasesListScope;
 
 /** 解析 Hasura / Postgres 唯一约束错误，便于前端展示明确原因 */
-function classifyCaseInsertError(message: string): "intended_parent_has_case" | "surrogate_has_case" | "unknown" {
+function classifyCaseInsertError(message: string): "surrogate_has_case" | "unknown" {
   const m = message.toLowerCase();
-  if (
-    m.includes("cases_intended_parent_intended_parents") ||
-    (m.includes("intended_parent") && m.includes("unique"))
-  ) {
-    return "intended_parent_has_case";
-  }
   if (
     m.includes("cases_surrogate_mother_surrogate_mothers") ||
     (m.includes("surrogate_mother") && m.includes("unique"))
@@ -32,18 +26,18 @@ function classifyCaseInsertError(message: string): "intended_parent_has_case" | 
 
 const OPTIONS_QUERY = `
   query AdminCaseOptions {
-    case_managers(order_by: { id: asc }, limit: 500) {
+    case_managers(where: { deleted_at: { _is_null: true } }, order_by: { id: asc }, limit: 500) {
       id
       user {
         email
       }
     }
-    intended_parents(order_by: { id: asc }, limit: 500) {
+    intended_parents(where: { deleted_at: { _is_null: true } }, order_by: { id: asc }, limit: 500) {
       id
       email
       profile_data
     }
-    surrogate_mothers(order_by: { id: asc }, limit: 500) {
+    surrogate_mothers(where: { deleted_at: { _is_null: true } }, order_by: { id: asc }, limit: 500) {
       id
       email
       profile_data
@@ -55,7 +49,7 @@ const CREATE_CASE_MUTATION = `
   mutation AdminCreateCase(
     $caseManagerId: bigint!
     $intendedParentId: bigint!
-    $surrogateId: bigint!
+    $surrogateId: bigint
     $processStatus: String!
     $trustAccountBalance: numeric!
     $data: json!
@@ -68,6 +62,9 @@ const CREATE_CASE_MUTATION = `
         process_status: $processStatus
         trust_account_balance: $trustAccountBalance
         data: $data
+        case_case_managers: {
+          data: [{ case_manager_case_managers: $caseManagerId }]
+        }
       }
     ) {
       id
@@ -128,12 +125,10 @@ export async function GET(req: Request) {
   }
 
   const stageRaw = searchParams.get("stage");
-  const allStagesScope = stageRaw === "all";
-  let stage = stageRaw ?? CANONICAL_CASE_STAGES[0];
-  if (allStagesScope) {
-    stage = "all";
-  } else if (!isCanonicalCaseStage(stage)) {
-    stage = CANONICAL_CASE_STAGES[0];
+  const allStagesScope = stageRaw === "all" || stageRaw == null || stageRaw === "";
+  let stage: CanonicalCaseStage | "all" = "all";
+  if (!allStagesScope) {
+    stage = isCanonicalCaseStage(stageRaw) ? stageRaw : "all";
   }
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
   const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get("pageSize") ?? "10", 10) || 10));
@@ -144,12 +139,13 @@ export async function GET(req: Request) {
     caseManagerId: searchParams.get("caseManagerId") ?? undefined,
     intendedParentId: searchParams.get("intendedParentId") ?? undefined,
     surrogateId: searchParams.get("surrogateId") ?? undefined,
+    includeArchived: searchParams.get("includeArchived") === "1",
   };
   try {
-    if (skipCounts || allStagesScope) {
+    if (skipCounts) {
       const list = await fetchCasesPage(
         session,
-        stage as CanonicalCaseStage | "all",
+        stage,
         page,
         pageSize,
         filters,
@@ -158,8 +154,8 @@ export async function GET(req: Request) {
       return NextResponse.json({ stage, counts: null, ...list, page, pageSize });
     }
     const [counts, list] = await Promise.all([
-      fetchStageCounts(session, ADMIN_SCOPE),
-      fetchCasesPage(session, stage as CanonicalCaseStage, page, pageSize, filters, ADMIN_SCOPE),
+      fetchStageCounts(session, ADMIN_SCOPE, null, filters.includeArchived),
+      fetchCasesPage(session, stage, page, pageSize, filters, ADMIN_SCOPE),
     ]);
     return NextResponse.json({ stage, counts, ...list, page, pageSize });
   } catch {
@@ -170,7 +166,7 @@ export async function GET(req: Request) {
 type CreateCaseBody = {
   caseManagerId: string;
   intendedParentId: string;
-  surrogateId: string;
+  surrogateId?: string | null;
   processStatus: string;
   trustAccountBalance: string;
 };
@@ -188,8 +184,12 @@ export async function POST(req: Request) {
   }
   const caseManagerId = parseId(body.caseManagerId);
   const intendedParentId = parseId(body.intendedParentId);
-  const surrogateId = parseId(body.surrogateId);
-  if (!caseManagerId || !intendedParentId || !surrogateId) {
+  const surrogateRaw = typeof body.surrogateId === "string" ? body.surrogateId.trim() : "";
+  const surrogateId = surrogateRaw ? parseId(surrogateRaw) : null;
+  if (surrogateRaw && !surrogateId) {
+    return NextResponse.json({ error: "bad_ids" }, { status: 400 });
+  }
+  if (!caseManagerId || !intendedParentId) {
     return NextResponse.json({ error: "bad_ids" }, { status: 400 });
   }
   if (!isCanonicalCaseStage(body.processStatus)) {
@@ -220,9 +220,6 @@ export async function POST(req: Request) {
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     const kind = classifyCaseInsertError(message);
-    if (kind === "intended_parent_has_case") {
-      return NextResponse.json({ error: "intended_parent_has_case", detail: message }, { status: 409 });
-    }
     if (kind === "surrogate_has_case") {
       return NextResponse.json({ error: "surrogate_has_case", detail: message }, { status: 409 });
     }

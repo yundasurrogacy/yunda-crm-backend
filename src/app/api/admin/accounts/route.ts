@@ -3,6 +3,11 @@ import { NextResponse } from "next/server";
 import { getClient } from "@/config-lib/graphql-client";
 import { md5PasswordHexLower } from "@/lib/auth/password";
 import { getServerSession } from "@/lib/auth/session-cookie";
+import { fetchCaseManagerCaseloads } from "@/lib/admin/case-manager-caseload";
+import { createCaseManagerEntity } from "@/lib/admin/create-case-manager-entity";
+import { createPartyEntity } from "@/lib/party/create-party-entity";
+import { mergeActiveWhere } from "@/lib/soft-delete/entity-soft-delete";
+import type { EntityKind } from "@/lib/admin/entity-profile";
 
 type AccountKind = "case_manager" | "intended_parent" | "surrogate_mother";
 
@@ -11,6 +16,8 @@ const LIST_CASE_MANAGERS = `
     case_managers_aggregate(where: $where) { aggregate { count } }
     case_managers(where: $where, limit: $limit, offset: $offset, order_by: { id: desc }) {
       id
+      email
+      deleted_at
       user { id email role }
     }
   }
@@ -22,6 +29,7 @@ const LIST_INTENDED_PARENTS = `
     intended_parents(where: $where, limit: $limit, offset: $offset, order_by: { id: desc }) {
       id
       email
+      deleted_at
       user { id email role }
     }
   }
@@ -33,6 +41,7 @@ const LIST_SURROGATES = `
     surrogate_mothers(where: $where, limit: $limit, offset: $offset, order_by: { id: desc }) {
       id
       email
+      deleted_at
       user { id email role }
     }
   }
@@ -58,7 +67,10 @@ function parseId(raw: unknown): string | null {
 /** 列表筛选：邮箱模糊匹配；纯数字时同时按业务表 id 精确匹配（便于搜未绑用户的行）。 */
 function searchWhereCaseManagers(q: string): Record<string, unknown> {
   if (!q) return {};
-  const parts: Record<string, unknown>[] = [{ user: { email: { _ilike: `%${q}%` } } }];
+  const parts: Record<string, unknown>[] = [
+    { email: { _ilike: `%${q}%` } },
+    { user: { email: { _ilike: `%${q}%` } } },
+  ];
   if (/^\d+$/u.test(q)) parts.push({ id: { _eq: q } });
   return { _or: parts };
 }
@@ -82,6 +94,7 @@ export async function GET(req: Request) {
   const kind = parseKind(searchParams.get("kind"));
   if (!kind) return NextResponse.json({ error: "bad_kind" }, { status: 400 });
   const q = (searchParams.get("q") ?? "").trim();
+  const includeDeleted = searchParams.get("includeDeleted") === "1";
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
   const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get("pageSize") ?? "10", 10) || 10));
   const limit = pageSize;
@@ -89,17 +102,30 @@ export async function GET(req: Request) {
   try {
     const client = getClient();
     if (kind === "case_manager") {
-      const where = searchWhereCaseManagers(q);
+      const where = includeDeleted
+        ? searchWhereCaseManagers(q)
+        : mergeActiveWhere(searchWhereCaseManagers(q));
       const data = await client.execute<{
         case_managers_aggregate: { aggregate: { count: number } | null };
-        case_managers: { id: string | number; user: { id: string | number; email: string; role: string } | null }[];
+        case_managers: {
+          id: string | number;
+          email: string | null;
+          deleted_at: string | null;
+          user: { id: string | number; email: string; role: string } | null;
+        }[];
       }>({ query: LIST_CASE_MANAGERS, variables: { where, limit, offset } });
+      const rowsBase = (data.case_managers ?? []).map((r) => ({
+        entityId: String(r.id),
+        userId: r.user ? String(r.user.id) : null,
+        email: r.user?.email ?? r.email ?? "",
+        role: r.user?.role ?? "",
+        deleted_at: r.deleted_at ?? null,
+      }));
+      const caseloads = await fetchCaseManagerCaseloads(rowsBase.map((r) => r.entityId));
       return NextResponse.json({
-        rows: (data.case_managers ?? []).map((r) => ({
-          entityId: String(r.id),
-          userId: r.user ? String(r.user.id) : null,
-          email: r.user?.email ?? "",
-          role: r.user?.role ?? "",
+        rows: rowsBase.map((r) => ({
+          ...r,
+          caseCount: caseloads[r.entityId] ?? 0,
         })),
         total: data.case_managers_aggregate?.aggregate?.count ?? 0,
         page,
@@ -107,12 +133,15 @@ export async function GET(req: Request) {
       });
     }
     if (kind === "intended_parent") {
-      const where = searchWhereIpOrSm(q);
+      const where = includeDeleted
+        ? searchWhereIpOrSm(q)
+        : mergeActiveWhere(searchWhereIpOrSm(q));
       const data = await client.execute<{
         intended_parents_aggregate: { aggregate: { count: number } | null };
         intended_parents: {
           id: string | number;
           email: string | null;
+          deleted_at: string | null;
           user: { id: string | number; email: string; role: string } | null;
         }[];
       }>({ query: LIST_INTENDED_PARENTS, variables: { where, limit, offset } });
@@ -122,18 +151,22 @@ export async function GET(req: Request) {
           userId: r.user ? String(r.user.id) : null,
           email: r.user?.email ?? r.email ?? "",
           role: r.user?.role ?? "",
+          deleted_at: r.deleted_at ?? null,
         })),
         total: data.intended_parents_aggregate?.aggregate?.count ?? 0,
         page,
         pageSize,
       });
     }
-    const where = searchWhereIpOrSm(q);
+    const where = includeDeleted
+      ? searchWhereIpOrSm(q)
+      : mergeActiveWhere(searchWhereIpOrSm(q));
     const data = await client.execute<{
       surrogate_mothers_aggregate: { aggregate: { count: number } | null };
       surrogate_mothers: {
         id: string | number;
         email: string | null;
+        deleted_at: string | null;
         user: { id: string | number; email: string; role: string } | null;
       }[];
     }>({ query: LIST_SURROGATES, variables: { where, limit, offset } });
@@ -143,6 +176,7 @@ export async function GET(req: Request) {
         userId: r.user ? String(r.user.id) : null,
         email: r.user?.email ?? r.email ?? "",
         role: r.user?.role ?? "",
+        deleted_at: r.deleted_at ?? null,
       })),
       total: data.surrogate_mothers_aggregate?.aggregate?.count ?? 0,
       page,
@@ -159,6 +193,50 @@ type PatchBody = {
   role?: string;
   password?: string;
 };
+
+type PostBody = {
+  kind?: unknown;
+  email?: unknown;
+  displayName?: unknown;
+};
+
+/** 直接建 CM/IP/GC 业务主体（可不绑登录账号） */
+export async function POST(req: Request) {
+  const session = await getServerSession();
+  if (!session || session.role !== "admin") {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+  let body: PostBody;
+  try {
+    body = (await req.json()) as PostBody;
+  } catch {
+    return NextResponse.json({ error: "bad_json" }, { status: 400 });
+  }
+  const kindRaw = typeof body.kind === "string" ? body.kind : "";
+  if (kindRaw === "case_manager") {
+    const email = typeof body.email === "string" ? body.email : "";
+    const result = await createCaseManagerEntity(email);
+    if (!result.ok) {
+      const status =
+        result.error === "bad_email" ? 400 : result.error === "email_taken" ? 409 : 500;
+      return NextResponse.json({ error: result.error }, { status });
+    }
+    return NextResponse.json({ ok: true, id: result.id });
+  }
+  if (kindRaw !== "intended_parent" && kindRaw !== "surrogate_mother") {
+    return NextResponse.json({ error: "bad_kind" }, { status: 400 });
+  }
+  const kind = kindRaw as EntityKind;
+  const email = typeof body.email === "string" ? body.email : "";
+  const displayName = typeof body.displayName === "string" ? body.displayName : undefined;
+  const result = await createPartyEntity({ kind, email, displayName });
+  if (!result.ok) {
+    const status =
+      result.error === "bad_email" ? 400 : result.error === "email_taken" ? 409 : 500;
+    return NextResponse.json({ error: result.error }, { status });
+  }
+  return NextResponse.json({ ok: true, id: result.id });
+}
 
 export async function PATCH(req: Request) {
   const session = await getServerSession();

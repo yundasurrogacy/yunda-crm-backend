@@ -6,9 +6,13 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { AmCaseDetail } from "@/lib/case-manager/fetch-case-detail";
 import { translateProcessStatus } from "@/lib/i18n/translate-process-status";
+import { AdminCaseManagersPanel } from "@/components/admin/AdminCaseManagersPanel";
 import { BindSurrogateToCase } from "@/components/case-manager/BindSurrogateToCase";
 import { CaseEntityProfileCard } from "@/components/case-manager/CaseEntityProfileCard";
 import { CaseManagerAmWorkspacePanel } from "@/components/case-manager/CaseManagerAmWorkspacePanel";
+import { CaseFilesPanel } from "@/components/case-manager/CaseFilesPanel";
+import { CaseP1OpsPanel } from "@/components/case-manager/CaseP1OpsPanel";
+import { CaseTrustLedgerPanel } from "@/components/case-manager/CaseTrustLedgerPanel";
 import { GC_PROFILE_SECTIONS } from "@/constants/gc-profile-schema";
 import { IP_PROFILE_SECTIONS } from "@/constants/ip-profile-schema";
 
@@ -46,11 +50,14 @@ export function CaseManagerCaseDetail({
   caseId,
   apiPathBase = "/api/case-manager/cases",
   backHref = "/case_manager/my-cases",
+  casesPageBase = "/case_manager/cases",
   partyProfileMode = "case_manager",
 }: {
   caseId: string;
   apiPathBase?: string;
   backHref?: string;
+  /** 阶段切换 URL 前缀（含 `/cases` 段） */
+  casesPageBase?: string;
   /** 档案编辑页：案例经理仅可改其负责案例的 GC/IP；管理端走 admin 账号页 */
   partyProfileMode?: "case_manager" | "admin";
 }) {
@@ -61,6 +68,7 @@ export function CaseManagerCaseDetail({
   const [data, setData] = useState<AmCaseDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [errorKey, setErrorKey] = useState<string | null>(null);
+  const [gcOpsTick, setGcOpsTick] = useState(0);
 
   const reloadDetail = useCallback(async () => {
     try {
@@ -72,6 +80,18 @@ export function CaseManagerCaseDetail({
       /* keep current */
     }
   }, [apiPathBase, caseId]);
+
+  const onGcBound = useCallback(() => {
+    setGcOpsTick((n) => n + 1);
+    void reloadDetail();
+  }, [reloadDetail]);
+
+  const onTrustBalanceUpdated = useCallback((balance: string) => {
+    setData((prev) => {
+      if (!prev || prev.trust_account_balance === balance) return prev;
+      return { ...prev, trust_account_balance: balance };
+    });
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -134,6 +154,10 @@ export function CaseManagerCaseDetail({
 
       {!loading && data ? (
         <>
+          {partyProfileMode === "admin" ? (
+            <AdminCaseManagersPanel caseId={caseId} />
+          ) : null}
+
           <div className="grid gap-4 lg:grid-cols-2">
             <div className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
               {data.surrogate.id ? (
@@ -148,6 +172,7 @@ export function CaseManagerCaseDetail({
                   emptyMessage={t("case_detail.profile_empty_gc")}
                   manageHref={partyManageHref(partyProfileMode, "surrogate_mother", data.surrogate.id, caseId)}
                   manageLabel={t("case_detail.manage_profile")}
+                  showPhotos
                 />
               ) : (
                 <>
@@ -158,10 +183,19 @@ export function CaseManagerCaseDetail({
                   <BindSurrogateToCase
                     caseId={caseId}
                     apiCasesBase={apiPathBase}
-                    onBound={() => void reloadDetail()}
+                    onBound={onGcBound}
                   />
                 </>
               )}
+              {data.surrogate.id ? (
+                <BindSurrogateToCase
+                  caseId={caseId}
+                  apiCasesBase={apiPathBase}
+                  mode="replace"
+                  excludeSurrogateId={data.surrogate.id}
+                  onBound={onGcBound}
+                />
+              ) : null}
             </div>
             <CaseEntityProfileCard
               title={t("case_detail.section_intended_parents")}
@@ -176,7 +210,30 @@ export function CaseManagerCaseDetail({
             />
           </div>
 
-          <CaseManagerAmWorkspacePanel caseId={caseId} detail={data} onDetailUpdated={setData} />
+          <CaseManagerAmWorkspacePanel
+            caseId={caseId}
+            detail={data}
+            onDetailUpdated={setData}
+            apiPathBase={apiPathBase}
+            casesPageBase={casesPageBase}
+          />
+
+          <CaseTrustLedgerPanel
+            caseId={caseId}
+            apiPathBase={apiPathBase}
+            currentBalance={data.trust_account_balance}
+            onBalanceUpdated={onTrustBalanceUpdated}
+          />
+
+          <CaseFilesPanel caseId={caseId} apiPathBase={apiPathBase} />
+
+          <CaseP1OpsPanel
+            caseId={caseId}
+            apiPathBase={apiPathBase}
+            detail={data}
+            onDetailUpdated={setData}
+            refreshTick={gcOpsTick}
+          />
 
           <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm backdrop-blur-[1px] md:p-6">
             <h2 className="crm-font-display mb-4 text-lg font-semibold text-brand-brown">{t("case_detail.section_summary")}</h2>
@@ -208,20 +265,22 @@ export function CaseManagerCaseDetail({
             </dl>
           </section>
 
-          <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
-            <h2 className="crm-font-display mb-4 text-lg font-semibold text-brand-brown">{t("case_detail.section_team")}</h2>
-            <dl className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <dt className="text-xs font-semibold uppercase tracking-wide text-sage-600">{t("case_detail.field_case_manager")}</dt>
-                <dd className="mt-1 text-sm">
-                  {data.case_manager?.email ?? "—"}
-                  {data.case_manager?.user_id ? (
-                    <span className="ml-2 rounded bg-sage-100 px-1.5 py-0.5 text-[11px] text-sage-700">#{data.case_manager.user_id}</span>
-                  ) : null}
-                </dd>
-              </div>
-            </dl>
-          </section>
+          {partyProfileMode !== "admin" ? (
+            <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
+              <h2 className="crm-font-display mb-4 text-lg font-semibold text-brand-brown">{t("case_detail.section_team")}</h2>
+              <dl className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-sage-600">{t("case_detail.field_case_manager")}</dt>
+                  <dd className="mt-1 text-sm">
+                    {data.case_manager?.email ?? "—"}
+                    {data.case_manager?.user_id ? (
+                      <span className="ml-2 rounded bg-sage-100 px-1.5 py-0.5 text-[11px] text-sage-700">#{data.case_manager.user_id}</span>
+                    ) : null}
+                  </dd>
+                </div>
+              </dl>
+            </section>
+          ) : null}
         </>
       ) : null}
     </div>

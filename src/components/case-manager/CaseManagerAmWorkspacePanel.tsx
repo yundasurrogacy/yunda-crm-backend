@@ -15,14 +15,23 @@ import { listIncompleteFieldDefs } from "@/lib/case-manager/stage-completion";
 import type { AmStageFieldDef } from "@/constants/am-stage-fields-types";
 import type { AmCaseDetail } from "@/lib/case-manager/fetch-case-detail";
 import { isAmStageFileUploadField } from "@/lib/case-manager/am-stage-file-field";
-import { isStageComplete, mergeStageFields } from "@/lib/case-manager/am-workspace-model";
+import { isAmStageFieldRequired } from "@/lib/case-manager/am-stage-field-required";
+import {
+  isAmStageFieldVisible,
+  mergeStageFields,
+} from "@/lib/case-manager/am-workspace-model";
 import { translateAmStageFieldLabel } from "@/lib/i18n/translate-am-stage-field";
 import { translateProcessStatus } from "@/lib/i18n/translate-process-status";
+import { isValidMmDdYyyy, maskMmDdYyyyInput, normalizeToMmDdYyyy } from "@/lib/case-manager/mm-dd-yyyy";
 
 type Props = {
   caseId: string;
   detail: AmCaseDetail;
   onDetailUpdated: (d: AmCaseDetail) => void;
+  /** 默认 CM；Admin 详情页传入 `/api/admin/cases` */
+  apiPathBase?: string;
+  /** 阶段切换用的页面路径前缀，默认 `/case_manager/cases` */
+  casesPageBase?: string;
 };
 
 function fieldInputClass(disabled: boolean) {
@@ -59,14 +68,46 @@ function FieldControl({
   }
   const common = { disabled, className: fieldInputClass(disabled) };
   const t = def.type.trim();
+  if (t === "Select" && def.options && def.options.length > 0) {
+    return (
+      <select {...common} value={value} onChange={(e) => onChange(e.target.value)}>
+        <option value="">—</option>
+        {def.options.map((opt) => (
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
+        ))}
+      </select>
+    );
+  }
   if (t === "Long text") {
     return (
       <textarea {...common} rows={4} value={value} onChange={(e) => onChange(e.target.value)} />
     );
   }
   if (t === "Date") {
+    const invalid = value.trim() !== "" && !isValidMmDdYyyy(value.trim());
     return (
-      <input type="text" inputMode="numeric" {...common} placeholder="YYYY-MM-DD" value={value} onChange={(e) => onChange(e.target.value)} />
+      <div>
+        <input
+          type="text"
+          inputMode="numeric"
+          autoComplete="off"
+          {...common}
+          className={[fieldInputClass(disabled), invalid ? "border-amber-500 focus:border-amber-600 focus:ring-amber-600" : ""].join(" ")}
+          placeholder="MM-DD-YYYY"
+          value={value}
+          onChange={(e) => onChange(maskMmDdYyyyInput(e.target.value))}
+          onBlur={() => {
+            const n = normalizeToMmDdYyyy(value);
+            if (n !== value) onChange(n);
+          }}
+          aria-invalid={invalid}
+        />
+        {invalid ? (
+          <p className="mt-1 text-[11px] text-amber-800">MM-DD-YYYY</p>
+        ) : null}
+      </div>
     );
   }
   if (t === "Email") {
@@ -79,10 +120,32 @@ function FieldControl({
       <input type="tel" autoComplete="off" {...common} value={value} onChange={(e) => onChange(e.target.value)} />
     );
   }
+  if (/\bCurrency\b/i.test(t)) {
+    return (
+      <div className="relative">
+        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-sage-500">$</span>
+        <input
+          type="text"
+          inputMode="decimal"
+          autoComplete="off"
+          {...common}
+          className={`${fieldInputClass(disabled)} pl-7`}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      </div>
+    );
+  }
   return <input type="text" autoComplete="off" {...common} value={value} onChange={(e) => onChange(e.target.value)} />;
 }
 
-function CaseManagerAmWorkspacePanelInner({ caseId, detail, onDetailUpdated }: Props) {
+function CaseManagerAmWorkspacePanelInner({
+  caseId,
+  detail,
+  onDetailUpdated,
+  apiPathBase = "/api/case-manager/cases",
+  casesPageBase = "/case_manager/cases",
+}: Props) {
   const { t } = useTranslation("portal");
   const { t: tStage } = useTranslation("caseStage");
   const { i18n } = useTranslation();
@@ -119,9 +182,9 @@ function CaseManagerAmWorkspacePanelInner({ caseId, detail, onDetailUpdated }: P
     (stage: string) => {
       const q = new URLSearchParams(searchParams.toString());
       q.set("phase", stage);
-      router.replace(`/case_manager/cases/${encodeURIComponent(caseId)}?${q.toString()}`, { scroll: false });
+      router.replace(`${casesPageBase}/${encodeURIComponent(caseId)}?${q.toString()}`, { scroll: false });
     },
-    [caseId, router, searchParams],
+    [caseId, casesPageBase, router, searchParams],
   );
 
   const isFuture = selectedIdx > curIdxForLock;
@@ -139,16 +202,18 @@ function CaseManagerAmWorkspacePanelInner({ caseId, detail, onDetailUpdated }: P
   }, [detail.stage_data, processStatus, selectedStage, patchForCurrentStage]);
 
   const canAdvanceFromDraft =
-    isCanonicalCaseStage(processStatus) &&
-    selectedStage === processStatus &&
-    isStageComplete(processStatus, mergedForAdvanceCheck, getFieldsForStage(processStatus));
+    isCanonicalCaseStage(processStatus) && selectedStage === processStatus;
 
   const incompleteForCurrentStage = useMemo(() => {
     if (!isCanonicalCaseStage(processStatus) || selectedStage !== processStatus) return [];
     return listIncompleteFieldDefs(processStatus, mergedForAdvanceCheck);
   }, [processStatus, selectedStage, mergedForAdvanceCheck]);
 
-  const selectedComplete = isStageComplete(selectedStage, detail.stage_data, fieldDefs);
+  const selectedVisibleFilled = useMemo(() => {
+    const visible = fieldDefs.filter((f) => isAmStageFieldVisible(f, form));
+    if (visible.length === 0) return true;
+    return visible.every((f) => String(form[f.key] ?? "").trim() !== "");
+  }, [fieldDefs, form]);
 
   const buildPatch = () => {
     const patch: Record<string, string> = {};
@@ -158,7 +223,7 @@ function CaseManagerAmWorkspacePanelInner({ caseId, detail, onDetailUpdated }: P
 
   const patchDetail = async (body: Record<string, unknown>) => {
     setErrorKey(null);
-    const res = await fetch(`/api/case-manager/cases/${encodeURIComponent(caseId)}`, {
+    const res = await fetch(`${apiPathBase}/${encodeURIComponent(caseId)}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -259,8 +324,7 @@ function CaseManagerAmWorkspacePanelInner({ caseId, detail, onDetailUpdated }: P
             {CANONICAL_CASE_STAGES.map((stage, i) => {
               const pastOrCurrent = i <= curIdxForLock;
               const active = stage === selectedStage;
-              const defs = getFieldsForStage(stage);
-              const done = isStageComplete(stage, detail.stage_data, defs);
+              const done = i < curIdxForLock;
               return (
                 <li key={stage}>
                   <button
@@ -300,21 +364,41 @@ function CaseManagerAmWorkspacePanelInner({ caseId, detail, onDetailUpdated }: P
                 {t("case_detail.am_workspace.badge_locked")}
               </span>
             ) : null}
-            {selectedComplete ? (
+            {selectedVisibleFilled ? (
               <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-900">
                 {t("case_detail.am_workspace.badge_complete")}
               </span>
-            ) : null}
+            ) : (
+              <span className="rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-900">
+                {t("case_detail.am_workspace.badge_partial")}
+              </span>
+            )}
           </div>
 
           <div className="space-y-4">
             {fieldDefs.length === 0 ? (
               <p className="text-sm text-sage-600">{t("case_detail.am_workspace.empty_fields")}</p>
             ) : (
-              fieldDefs.map((def) => (
+              fieldDefs
+                .filter((def) => isAmStageFieldVisible(def, form))
+                .map((def) => (
                 <div key={def.key}>
                   <label htmlFor={`am-${caseId}-${def.key}`} className="block text-xs font-semibold uppercase tracking-wide text-sage-600">
                     {translateAmStageFieldLabel(def, i18n.language)}
+                    {isAmStageFieldRequired(def) ? (
+                      <span className="ml-1 text-red-600" aria-hidden>
+                        *
+                      </span>
+                    ) : (
+                      <span className="ml-1 font-normal normal-case text-sage-500">
+                        ({t("case_detail.am_workspace.optional")})
+                      </span>
+                    )}
+                    {def.internalOnly ? (
+                      <span className="ml-2 rounded bg-sage-100 px-1.5 py-0.5 text-[10px] font-semibold normal-case tracking-normal text-sage-700">
+                        {t("case_detail.am_workspace.badge_internal")}
+                      </span>
+                    ) : null}
                   </label>
                   <div className="mt-1">
                     <FieldControl
@@ -346,39 +430,32 @@ function CaseManagerAmWorkspacePanelInner({ caseId, detail, onDetailUpdated }: P
                 selectedStage !== processStatus ||
                 !canEdit ||
                 saving ||
-                advancing ||
-                !canAdvanceFromDraft
+                advancing
               }
               onClick={() => void onAdvance()}
-              title={!canAdvanceFromDraft ? t("case_detail.am_workspace.next_hint_incomplete") : undefined}
+              title={t("case_detail.am_workspace.next_hint_incomplete")}
               className="ami-ui rounded-md border border-brand-brown bg-brand-brown px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {advancing ? t("case_detail.am_workspace.advancing") : t("case_detail.am_workspace.next_stage")}
             </button>
           </div>
 
-          {!canAdvanceFromDraft && isCanonicalCaseStage(processStatus) && selectedStage === processStatus ? (
-            <div className="space-y-2 text-xs text-sage-600">
-              <p>{t("case_detail.am_workspace.next_hint_incomplete")}</p>
-              {incompleteForCurrentStage.length > 0 ? (
-                <>
-                  <p className="font-medium text-amber-900">
-                    {t("case_detail.workflow.missing_fields_hint", {
-                      total: getFieldsForStage(processStatus).length,
-                      count: incompleteForCurrentStage.length,
-                    })}
-                  </p>
-                  <ul className="list-inside list-disc text-sage-700">
-                    {incompleteForCurrentStage.slice(0, 12).map((f) => (
-                      <li key={f.key}>{translateAmStageFieldLabel(f, i18n.language)}</li>
-                    ))}
-                  </ul>
-                  {incompleteForCurrentStage.length > 12 ? (
-                    <p className="text-sage-500">…</p>
-                  ) : null}
-                  <p className="text-sage-500">{t("case_detail.workflow.scroll_more_fields")}</p>
-                </>
-              ) : null}
+          {canAdvanceFromDraft && !selectedVisibleFilled ? (
+            <p className="text-xs text-sage-600">{t("case_detail.am_workspace.next_hint_incomplete")}</p>
+          ) : null}
+          {incompleteForCurrentStage.length > 0 ? (
+            <div className="space-y-2 text-xs text-amber-900">
+              <p className="font-medium">
+                {t("case_detail.workflow.missing_fields_hint", {
+                  total: getFieldsForStage(processStatus).filter(isAmStageFieldRequired).length,
+                  count: incompleteForCurrentStage.length,
+                })}
+              </p>
+              <ul className="list-inside list-disc">
+                {incompleteForCurrentStage.slice(0, 12).map((f) => (
+                  <li key={f.key}>{translateAmStageFieldLabel(f, i18n.language)}</li>
+                ))}
+              </ul>
             </div>
           ) : null}
         </div>

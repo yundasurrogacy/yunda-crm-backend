@@ -1,5 +1,6 @@
 import { STAGE_DATA_LEGACY_KEYS, STAGE_FIELD_LEGACY_KEYS, type CanonicalCaseStage } from "@/constants/case-stages";
 import type { AmStageFieldDef } from "@/constants/am-stage-fields-types";
+import { isAmStageFieldRequired } from "@/lib/case-manager/am-stage-field-required";
 
 /** 各阶段表单；与 `cases.data` 根级字段一致：`v` + `byStage` */
 export type AmWorkspacePayload = {
@@ -88,12 +89,23 @@ export function mergeStageFields(
   };
 }
 
+/** 按 showWhen 判断字段在当前阶段取值下是否可见 */
+export function isAmStageFieldVisible(
+  def: AmStageFieldDef,
+  row: Record<string, string>,
+): boolean {
+  if (!def.showWhen) return true;
+  const v = String(row[def.showWhen.key] ?? "").trim();
+  return def.showWhen.values.includes(v);
+}
+
 export function isStageComplete(
   stage: string,
   payload: AmWorkspacePayload,
   fields: AmStageFieldDef[],
 ): boolean {
-  if (fields.length === 0) return true;
   const row = payload.byStage[stage as CanonicalCaseStage] ?? {};
-  return fields.every((f) => String(row[f.key] ?? "").trim() !== "");
+  const required = fields.filter((f) => isAmStageFieldVisible(f, row) && isAmStageFieldRequired(f));
+  if (required.length === 0) return true;
+  return required.every((f) => String(row[f.key] ?? "").trim() !== "");
 }

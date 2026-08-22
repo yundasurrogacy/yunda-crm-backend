@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { getClient } from "@/config-lib/graphql-client";
 import { caseManagerCanAccessCase } from "@/lib/case-manager/case-access";
-import { matchGcToCase } from "@/lib/case-manager/match-gc";
+import { setCaseArchived } from "@/lib/case-manager/case-archive";
+import { linkCaseManagerToCase, setPrimaryAndLinkCaseManagers } from "@/lib/case-manager/case-case-managers";
+import { failCurrentCycleAndStartNew } from "@/lib/case-manager/case-cycle-actions";
+import { matchGcToCase, replaceGcOnCase } from "@/lib/case-manager/match-gc";
 import { resolveCaseManagerEntityId } from "@/lib/case-manager/fetch-dashboard-data";
 import { getServerSession } from "@/lib/auth/session-cookie";
 
@@ -16,21 +19,13 @@ const CASE_OWNER_QUERY = `
   }
 `;
 
-const ASSIGN_MANAGER_MUTATION = `
-  mutation CmAssignCaseManager($id: bigint!, $cmId: bigint!) {
-    update_cases_by_pk(
-      pk_columns: { id: $id }
-      _set: { case_manager_case_managers: $cmId }
-    ) {
-      id
-      case_manager_case_managers
-    }
-  }
-`;
-
 type ActionBody =
   | { action: "assign_case_manager" }
-  | { action: "match_gc"; surrogateId: string };
+  | { action: "match_gc"; surrogateId: string }
+  | { action: "replace_gc"; surrogateId: string }
+  | { action: "archive" }
+  | { action: "unarchive" }
+  | { action: "fail_cycle"; note?: string };
 
 function parseCaseId(raw: string): string | null {
   const t = raw.trim();
@@ -54,21 +49,73 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
     return NextResponse.json({ error: "bad_json" }, { status: 400 });
   }
 
-  if (body.action === "match_gc") {
+  if (body.action === "match_gc" || body.action === "replace_gc") {
     const access = await caseManagerCanAccessCase(session, caseId);
     if (!access.allowed) {
       return NextResponse.json({ error: "not_found" }, { status: 404 });
     }
-    if (access.hasSurrogate) {
+    if (body.action === "match_gc" && access.hasSurrogate) {
       return NextResponse.json({ error: "already_matched_gc" }, { status: 409 });
     }
-    const result = await matchGcToCase(caseId, body.surrogateId ?? "");
+    if (body.action === "replace_gc" && !access.hasSurrogate) {
+      return NextResponse.json({ error: "no_gc_to_replace" }, { status: 400 });
+    }
+    const cmId =
+      body.action === "replace_gc" ? await resolveCaseManagerEntityId(session) : null;
+    const result =
+      body.action === "replace_gc"
+        ? await replaceGcOnCase(caseId, body.surrogateId ?? "", {
+            byRole: "case_manager",
+            byEntityId: cmId,
+            byLabel: session.email?.trim() || null,
+          })
+        : await matchGcToCase(caseId, body.surrogateId ?? "");
     if (!result.ok) {
       const status =
-        result.error === "surrogate_has_case" || result.error === "already_matched_gc" ? 409 : 400;
+        result.error === "surrogate_has_case" ||
+        result.error === "already_matched_gc" ||
+        result.error === "same_surrogate"
+          ? 409
+          : result.error === "not_found"
+            ? 404
+            : 400;
       return NextResponse.json({ error: result.error }, { status });
     }
     return NextResponse.json({ ok: true });
+  }
+
+  if (body.action === "archive" || body.action === "unarchive") {
+    const access = await caseManagerCanAccessCase(session, caseId);
+    if (!access.allowed) {
+      return NextResponse.json({ error: "not_found" }, { status: 404 });
+    }
+    const result = await setCaseArchived(
+      session,
+      caseId,
+      "case_manager_api",
+      body.action === "archive",
+    );
+    if (!result.ok) {
+      return NextResponse.json({ error: result.error }, { status: result.error === "not_found" ? 404 : 503 });
+    }
+    return NextResponse.json({ ok: true, archived: body.action === "archive" });
+  }
+
+  if (body.action === "fail_cycle") {
+    const access = await caseManagerCanAccessCase(session, caseId);
+    if (!access.allowed) {
+      return NextResponse.json({ error: "not_found" }, { status: 404 });
+    }
+    const result = await failCurrentCycleAndStartNew(
+      session,
+      caseId,
+      "case_manager_api",
+      typeof body.note === "string" ? body.note : undefined,
+    );
+    if (!result.ok) {
+      return NextResponse.json({ error: result.error }, { status: result.error === "not_found" ? 404 : 503 });
+    }
+    return NextResponse.json(result);
   }
 
   const client = getClient();
@@ -91,17 +138,15 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
     if (String(row.created_by ?? "") !== String(session.userId)) {
       return NextResponse.json({ error: "forbidden_not_creator" }, { status: 403 });
     }
-    if (row.case_manager_case_managers != null) {
-      return NextResponse.json({ error: "already_assigned" }, { status: 409 });
-    }
     const cmId = await resolveCaseManagerEntityId(session);
     if (!cmId) {
       return NextResponse.json({ error: "case_manager_not_bound" }, { status: 403 });
     }
-    await client.execute({
-      query: ASSIGN_MANAGER_MUTATION,
-      variables: { id: caseId, cmId },
-    });
+    if (row.case_manager_case_managers == null) {
+      await setPrimaryAndLinkCaseManagers([caseId], cmId);
+    } else {
+      await linkCaseManagerToCase(caseId, cmId);
+    }
     return NextResponse.json({ ok: true });
   }
 

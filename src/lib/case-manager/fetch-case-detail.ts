@@ -2,11 +2,14 @@ import { getClient } from "@/config-lib/graphql-client";
 import { resolveCaseManagerEntityId } from "@/lib/case-manager/fetch-dashboard-data";
 import { partyCasesWhere } from "@/lib/party/fetch-party-cases";
 import { resolvePartyEntityId, type PartyKind } from "@/lib/party/resolve-party-entity";
+import { redactCaseDetailForParty } from "@/lib/party/redact-case-detail-for-party";
 import type { CrmSession } from "@/types/portal";
 import type { AmWorkspacePayload } from "@/lib/case-manager/am-workspace-model";
 import { workspaceFromCaseData } from "@/lib/case-manager/am-workspace-model";
 import { resolveProcessStatusForWorkflow } from "@/lib/case-manager/process-status";
 import { intendedParentDisplay, surrogateDisplayName } from "@/lib/case-manager/display-names";
+import { parseCyclesFromCaseData } from "@/lib/case-manager/case-cycles";
+import { caseManagerAccessOrClauses } from "@/lib/case-manager/case-manager-access";
 
 const CASE_DETAIL_QUERY = `
   query AmCaseDetail($where: cases_bool_exp!) {
@@ -14,6 +17,7 @@ const CASE_DETAIL_QUERY = `
       id
       process_status
       trust_account_balance
+      archived_at
       created_at
       updated_at
       data
@@ -65,12 +69,10 @@ export function caseDetailWhere(
   }
   const cmId = resolvedCaseManagerEntityId?.trim();
   const uid = sessionUserId?.trim();
-  if (!cmId && !uid) {
+  const accessOr = caseManagerAccessOrClauses(cmId, uid);
+  if (accessOr.length === 0) {
     return { _and: [idClause, { id: { _eq: "0" } }] };
   }
-  const accessOr: Record<string, unknown>[] = [];
-  if (cmId) accessOr.push({ case_manager_case_managers: { _eq: cmId } });
-  if (uid) accessOr.push({ created_by: { _eq: uid } });
   return {
     _and: [idClause, { _or: accessOr }],
   };
@@ -80,6 +82,7 @@ export type AmCaseDetail = {
   id: string;
   process_status: string | null;
   trust_account_balance: string;
+  archived_at: string | null;
   created_at: string;
   updated_at: string;
   surrogate: {
@@ -97,6 +100,17 @@ export type AmCaseDetail = {
   case_manager: { email: string; user_id: string } | null;
   /** 各阶段表单；与 DB `cases.data` 根级的 `v`、`byStage` 一致 */
   stage_data: AmWorkspacePayload;
+  /** 周期列表（存于 cases.data.cycles） */
+  cycles: CaseCycleRecord[];
+  current_cycle_id: string | null;
+};
+
+export type CaseCycleRecord = {
+  id: string;
+  status: "active" | "failed" | "completed";
+  started_at: string;
+  ended_at?: string;
+  note?: string;
 };
 
 export async function fetchCaseDetail(
@@ -133,6 +147,7 @@ export async function fetchCaseDetail(
       id: string | number;
       process_status: string | null;
       trust_account_balance: string | number;
+      archived_at: string | null;
       created_at: string;
       updated_at: string;
       data: unknown;
@@ -172,11 +187,13 @@ export async function fetchCaseDetail(
 
   const stageData = workspaceFromCaseData(row.data);
   const process_status = resolveProcessStatusForWorkflow(row.process_status);
+  const { cycles, current_cycle_id } = parseCyclesFromCaseData(row.data);
 
-  return {
+  const detail: AmCaseDetail = {
     id: String(row.id),
     process_status,
     trust_account_balance: trust,
+    archived_at: row.archived_at ?? null,
     created_at: row.created_at,
     updated_at: row.updated_at,
     surrogate: {
@@ -203,5 +220,12 @@ export async function fetchCaseDetail(
     },
     case_manager: cm?.email ? { email: cm.email, user_id: String(cm.id) } : null,
     stage_data: stageData,
+    cycles,
+    current_cycle_id,
   };
+
+  if (options.mode === "intended_parent_api" || options.mode === "surrogate_mother_api") {
+    return redactCaseDetailForParty(detail);
+  }
+  return detail;
 }

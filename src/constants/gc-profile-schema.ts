@@ -2,10 +2,18 @@
  * 字段定义来源：修改/新版yunda-crm/CRM GC Profile.docx
  * 全部写入 surrogate_mothers.profile_data。
  */
+export type ProfileFieldOption = {
+  value: string;
+  labelEn: string;
+  labelZh: string;
+};
+
 export type ProfileFieldDef = {
   key: string;
   labelEn: string;
   labelZh: string;
+  /** 有选项时 UI 渲染为下拉，存 value */
+  options?: ProfileFieldOption[];
 };
 
 export type ProfileSectionDef = {
@@ -14,6 +22,34 @@ export type ProfileSectionDef = {
   titleZh: string;
   fields: ProfileFieldDef[];
 };
+
+const YES_NO: ProfileFieldOption[] = [
+  { value: "Yes", labelEn: "Yes", labelZh: "是" },
+  { value: "No", labelEn: "No", labelZh: "否" },
+];
+
+const MATCHING_STATUS: ProfileFieldOption[] = [
+  { value: "GC Matching", labelEn: "GC Matching", labelZh: "GC 匹配中" },
+  { value: "GC Pre-Screening", labelEn: "GC Pre-Screening", labelZh: "GC 初步筛查" },
+  {
+    value: "Contracts & Trust Pending",
+    labelEn: "Contracts & Trust Pending",
+    labelZh: "合同签署与信托待办",
+  },
+  { value: "Medical Screening", labelEn: "Medical Screening", labelZh: "医学筛查" },
+  { value: "Legal Clearance", labelEn: "Legal Clearance", labelZh: "法律许可" },
+];
+
+const TRANSFER_STATUS: ProfileFieldOption[] = [
+  { value: "IVF Cycle Started", labelEn: "IVF Cycle Started", labelZh: "试管婴儿周期开始" },
+  { value: "Heartbeat Confirmed", labelEn: "Heartbeat Confirmed", labelZh: "胎心确认" },
+  { value: "IVF Cycle Ended", labelEn: "IVF Cycle Ended", labelZh: "IVF 周期结束" },
+  {
+    value: "Third Trimester / Delivery Completed",
+    labelEn: "Third Trimester / Delivery Completed",
+    labelZh: "妊娠晚期（第三孕期）/ 分娩完成",
+  },
+];
 
 export const GC_PROFILE_SECTIONS: ProfileSectionDef[] = [
   {
@@ -78,10 +114,29 @@ export const GC_PROFILE_SECTIONS: ProfileSectionDef[] = [
     titleEn: "Surrogacy Preferences",
     titleZh: "代孕偏好",
     fields: [
-      { key: "contact_preference_with_ips", labelEn: "Contact Preference with IPs", labelZh: "与准父母沟通偏好" },
-      { key: "open_to_lgbtq", labelEn: "Open to LGBTQ+", labelZh: "是否接受 LGBTQ+ 家庭" },
-      { key: "open_to_international_ips", labelEn: "Open to International IPs", labelZh: "是否接受国际 IP" },
-      { key: "open_to_twins", labelEn: "Open to Twins", labelZh: "是否接受双胎" },
+      {
+        key: "contact_preference_with_ips",
+        labelEn: "Contact Preference with IPs",
+        labelZh: "与准父母沟通偏好",
+      },
+      {
+        key: "open_to_lgbtq",
+        labelEn: "Open to LGBTQ+",
+        labelZh: "是否接受 LGBTQ+ 家庭",
+        options: YES_NO,
+      },
+      {
+        key: "open_to_international_ips",
+        labelEn: "Open to International IPs",
+        labelZh: "是否接受国际 IP",
+        options: YES_NO,
+      },
+      {
+        key: "open_to_twins",
+        labelEn: "Open to Twins",
+        labelZh: "是否接受双胎",
+        options: YES_NO,
+      },
     ],
   },
   {
@@ -90,11 +145,31 @@ export const GC_PROFILE_SECTIONS: ProfileSectionDef[] = [
     titleZh: "内部流程",
     fields: [
       { key: "medical_records_status", labelEn: "Medical Records Status", labelZh: "MR 状态" },
-      { key: "ob_clearance", labelEn: "OB Clearance", labelZh: "OB 批准" },
-      { key: "psych_clearance", labelEn: "Psych Clearance", labelZh: "心理批准" },
+      {
+        key: "ob_clearance",
+        labelEn: "OB Clearance",
+        labelZh: "OB 批准",
+        options: YES_NO,
+      },
+      {
+        key: "psych_clearance",
+        labelEn: "Psych Clearance",
+        labelZh: "心理批准",
+        options: YES_NO,
+      },
       { key: "potential_concerns", labelEn: "Potential Concerns", labelZh: "需关注点" },
-      { key: "matching_status", labelEn: "Matching Status", labelZh: "匹配状态" },
-      { key: "transfer_status", labelEn: "Transfer Status", labelZh: "移植状态" },
+      {
+        key: "matching_status",
+        labelEn: "Matching Status",
+        labelZh: "匹配状态",
+        options: MATCHING_STATUS,
+      },
+      {
+        key: "transfer_status",
+        labelEn: "Transfer Status",
+        labelZh: "移植状态",
+        options: TRANSFER_STATUS,
+      },
     ],
   },
 ];

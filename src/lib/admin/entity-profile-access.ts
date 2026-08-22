@@ -1,13 +1,27 @@
-import { getClient } from "@/config-lib/graphql-client";
 import { resolveCaseManagerEntityId } from "@/lib/case-manager/fetch-dashboard-data";
 import type { EntityKind } from "@/lib/admin/entity-profile";
+import { caseManagerAccessOrClauses } from "@/lib/case-manager/case-manager-access";
+import { readCreatedByCmId } from "@/lib/party/create-party-entity";
 import type { CrmSession } from "@/types/portal";
+import { getClient } from "@/config-lib/graphql-client";
 
 const PARTY_ACCESS_QUERY = `
   query CmPartyAccess($where: cases_bool_exp!) {
     cases(where: $where, limit: 1) {
       id
     }
+  }
+`;
+
+const IP_META_QUERY = `
+  query CmIpMeta($id: bigint!) {
+    intended_parents_by_pk(id: $id) { id profile_data }
+  }
+`;
+
+const SM_META_QUERY = `
+  query CmSmMeta($id: bigint!) {
+    surrogate_mothers_by_pk(id: $id) { id profile_data }
   }
 `;
 
@@ -23,14 +37,7 @@ export function caseManagerPartyAccessWhere(
       ? { intended_parent_intended_parents: { _eq: entityId } }
       : { surrogate_mother_surrogate_mothers: { _eq: entityId } };
 
-  const accessOr: Record<string, unknown>[] = [];
-  const cmId = resolvedCaseManagerEntityId?.trim();
-  const uid = sessionUserId?.trim();
-  if (cmId) accessOr.push({ case_manager_case_managers: { _eq: cmId } });
-  if (uid) {
-    accessOr.push({ created_by: { _eq: uid } });
-    accessOr.push({ case_manager: { user_users: { _eq: uid } } });
-  }
+  const accessOr = caseManagerAccessOrClauses(resolvedCaseManagerEntityId, sessionUserId);
   if (accessOr.length === 0) {
     return { _and: [partyClause, { id: { _eq: "0" } }] };
   }
@@ -53,5 +60,18 @@ export async function caseManagerCanAccessParty(
       where: caseManagerPartyAccessWhere(kind, entityIdRaw, cmId, session.userId),
     },
   });
-  return (data.cases?.length ?? 0) > 0;
+  if ((data.cases?.length ?? 0) > 0) return true;
+
+  // 自己建档、尚未绑到案例的主体
+  if (!cmId) return false;
+  if (kind === "intended_parent") {
+    const row = await client.execute<{
+      intended_parents_by_pk: { profile_data: unknown } | null;
+    }>({ query: IP_META_QUERY, variables: { id: entityIdRaw } });
+    return readCreatedByCmId(row.intended_parents_by_pk?.profile_data) === cmId;
+  }
+  const row = await client.execute<{
+    surrogate_mothers_by_pk: { profile_data: unknown } | null;
+  }>({ query: SM_META_QUERY, variables: { id: entityIdRaw } });
+  return readCreatedByCmId(row.surrogate_mothers_by_pk?.profile_data) === cmId;
 }

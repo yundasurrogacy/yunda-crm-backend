@@ -11,7 +11,7 @@ export default function CaseManagerIntendedParentProfilePage() {
   const backHref =
     returnTo && (returnTo.startsWith("/case_manager") || returnTo.startsWith("/admin"))
       ? returnTo
-      : "/case_manager/my-cases";
+      : "/case_manager/parties/intended-parents";
 
   return (
     <EntityProfilePage

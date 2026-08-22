@@ -13,6 +13,7 @@ const USER_PK = `
 `;
 
 function parseId(raw: unknown): string | null {
+  if (typeof raw === "number" && Number.isFinite(raw)) return String(Math.trunc(raw));
   if (typeof raw !== "string") return null;
   const t = raw.trim();
   return /^\d+$/u.test(t) ? t : null;
@@ -23,7 +24,7 @@ function parseKind(raw: unknown): BindRoleKind | null {
   return null;
 }
 
-type Body = { userId: string; kind: BindRoleKind };
+type Body = { userId?: unknown; kind?: unknown; entityId?: unknown; createNew?: unknown };
 
 export async function POST(req: Request) {
   const session = await getServerSession();
@@ -38,8 +39,13 @@ export async function POST(req: Request) {
   }
   const userId = parseId(body.userId);
   const kind = parseKind(body.kind);
+  const entityId = parseId(body.entityId);
+  const createNew = body.createNew === true || body.createNew === "1";
   if (!userId || !kind) {
     return NextResponse.json({ error: "bad_request" }, { status: 400 });
+  }
+  if (!createNew && !entityId) {
+    return NextResponse.json({ error: "pick_entity_or_create" }, { status: 400 });
   }
   try {
     const client = getClient();
@@ -51,13 +57,22 @@ export async function POST(req: Request) {
     if (!row) {
       return NextResponse.json({ error: "user_not_found" }, { status: 404 });
     }
-    const r = await bindUserToBusinessRole(client, userId, kind, row.email);
+    const r = await bindUserToBusinessRole(client, userId, kind, row.email, {
+      entityId: createNew ? undefined : (entityId ?? undefined),
+    });
     if (!r.ok) {
-      return NextResponse.json({ error: r.message }, { status: 500 });
+      const status =
+        r.message === "user_bound_elsewhere"
+          ? 409
+          : r.message === "entity_not_found" || r.message === "user_not_found"
+            ? 404
+            : 500;
+      return NextResponse.json({ error: r.message }, { status });
     }
     return NextResponse.json({
       entityId: r.entityId,
       alreadyLinked: r.alreadyLinked,
+      reclaimed: r.reclaimed,
     });
   } catch {
     return NextResponse.json({ error: "bind_failed" }, { status: 500 });

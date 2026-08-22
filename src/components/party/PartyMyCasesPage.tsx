@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { PartyCaseRow } from "@/lib/party/fetch-party-cases";
 import { translateProcessStatus } from "@/lib/i18n/translate-process-status";
@@ -17,6 +17,15 @@ function formatDt(iso: string | null, lng: string) {
   } catch {
     return iso;
   }
+}
+
+function formatMoney(raw: string, lng: string) {
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return `$${raw}`;
+  return new Intl.NumberFormat(lng.toLowerCase().startsWith("zh") ? "zh-CN" : "en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(n);
 }
 
 export function PartyMyCasesPage({
@@ -36,8 +45,17 @@ export function PartyMyCasesPage({
   const [loading, setLoading] = useState(true);
   const [errorKey, setErrorKey] = useState<string | null>(null);
 
+  const showTrust = party === "intended_parent";
   const counterpartLabel =
     party === "intended_parent" ? t("party_cases.col_surrogate") : t("party_cases.col_intended_parent");
+
+  const trustTotal = useMemo(() => {
+    if (!showTrust) return null;
+    return rows.reduce((sum, r) => {
+      const n = Number(r.trust_account_balance);
+      return sum + (Number.isFinite(n) ? n : 0);
+    }, 0);
+  }, [rows, showTrust]);
 
   useEffect(() => {
     let cancelled = false;
@@ -72,12 +90,26 @@ export function PartyMyCasesPage({
     };
   }, [apiBase]);
 
+  const colSpan = showTrust ? 7 : 6;
+
   return (
     <div className="ami-ui crm-font-ui space-y-6 text-sage-900">
       <div>
         <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">{t("party_cases.page_title")}</h1>
         <p className="mt-1 text-sm text-sage-700">{t("party_cases.page_intro")}</p>
       </div>
+
+      {showTrust && !loading && !errorKey && rows.length > 0 ? (
+        <div className="rounded-xl border border-sage-200/80 bg-white/50 px-4 py-3 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-sage-600">
+            {t("party_cases.trust_total_label")}
+          </p>
+          <p className="mt-1 text-lg font-semibold tabular-nums text-sage-900">
+            {formatMoney(String(Math.round((trustTotal ?? 0) * 100) / 100), i18n.language)}
+          </p>
+          <p className="mt-0.5 text-xs text-sage-600">{t("party_cases.trust_total_hint")}</p>
+        </div>
+      ) : null}
 
       {loading ? <p className="text-sm text-sage-600">{tCommon("loading")}</p> : null}
       {errorKey ? <p className="text-sm text-red-700">{t(errorKey)}</p> : null}
@@ -90,6 +122,7 @@ export function PartyMyCasesPage({
                 <th className="px-4 py-3">{t("party_cases.col_case_id")}</th>
                 <th className="px-4 py-3">{counterpartLabel}</th>
                 <th className="px-4 py-3">{t("party_cases.col_stage")}</th>
+                {showTrust ? <th className="px-4 py-3">{t("party_cases.col_trust")}</th> : null}
                 <th className="px-4 py-3">{t("party_cases.col_case_manager")}</th>
                 <th className="px-4 py-3">{t("party_cases.col_updated")}</th>
                 <th className="px-4 py-3">{t("party_cases.col_action")}</th>
@@ -98,7 +131,7 @@ export function PartyMyCasesPage({
             <tbody className="text-sage-900">
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-10 text-center text-sage-600">
+                  <td colSpan={colSpan} className="px-4 py-10 text-center text-sage-600">
                     {t("party_cases.empty")}
                   </td>
                 </tr>
@@ -112,6 +145,11 @@ export function PartyMyCasesPage({
                         {translateProcessStatus(row.process_status ?? "", tStage) || row.process_status || "—"}
                       </span>
                     </td>
+                    {showTrust ? (
+                      <td className="px-4 py-3 tabular-nums font-medium text-sage-900">
+                        {formatMoney(row.trust_account_balance, i18n.language)}
+                      </td>
+                    ) : null}
                     <td className="px-4 py-3 text-sage-700">{row.caseManagerEmail || "—"}</td>
                     <td className="px-4 py-3 text-xs text-sage-700">
                       {formatDt(row.updated_at, i18n.language)}

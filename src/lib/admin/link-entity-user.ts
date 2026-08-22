@@ -36,8 +36,11 @@ const DUP_SM = `
 `;
 
 const UPDATE_CM = `
-  mutation AdminLinkCaseManager($id: bigint!, $uid: bigint!) {
-    update_case_managers_by_pk(pk_columns: { id: $id }, _set: { user_users: $uid }) {
+  mutation AdminLinkCaseManager($id: bigint!, $uid: bigint!, $email: String!) {
+    update_case_managers_by_pk(
+      pk_columns: { id: $id }
+      _set: { user_users: $uid, email: $email }
+    ) {
       id
     }
   }
@@ -103,7 +106,7 @@ export async function linkEntityToUser(
 
       const upd = await client.execute<{ update_case_managers_by_pk: { id: string | number } | null }>({
         query: UPDATE_CM,
-        variables: { id: entityId, uid: userId },
+        variables: { id: entityId, uid: userId, email: syncEmail },
       });
       if (!upd.update_case_managers_by_pk) return { ok: false, code: "entity_not_found" };
       return { ok: true };

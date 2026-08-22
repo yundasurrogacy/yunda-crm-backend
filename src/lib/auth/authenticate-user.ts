@@ -20,9 +20,9 @@ const LOGIN_QUERY = `
       email
       password
       role
-      case_managers(limit: 1) { id }
-      intended_parents(limit: 1) { id }
-      surrogate_mothers(limit: 1) { id }
+      case_managers(where: { deleted_at: { _is_null: true } }, limit: 1) { id }
+      intended_parents(where: { deleted_at: { _is_null: true } }, limit: 1) { id }
+      surrogate_mothers(where: { deleted_at: { _is_null: true } }, limit: 1) { id }
     }
   }
 `;

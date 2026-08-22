@@ -8,6 +8,10 @@ import {
 } from "@/constants/case-stages";
 import { intendedParentDisplay, surrogateDisplayName } from "@/lib/case-manager/display-names";
 import { resolveProcessStatusForWorkflow } from "@/lib/case-manager/process-status";
+import {
+  caseManagerAccessOrClauses,
+  caseManagerFilterClause,
+} from "@/lib/case-manager/case-manager-access";
 
 const CASES_LIST_QUERY = `
   query AmDashboardCases(
@@ -29,6 +33,7 @@ const CASES_LIST_QUERY = `
       id
       process_status
       updated_at
+      archived_at
       created_by
       case_manager_case_managers
       intended_parent_intended_parents
@@ -64,6 +69,7 @@ export type AmCaseRow = {
   id: string;
   process_status: string | null;
   updated_at: string | null;
+  archived_at: string | null;
   createdByUserId: string | null;
   caseManagerId: string | null;
   caseManagerEmail: string | null;
@@ -80,6 +86,8 @@ export type CasesQueryFilters = {
   caseManagerId?: string;
   intendedParentId?: string;
   surrogateId?: string;
+  /** 默认 false：列表排除已软归档案例 */
+  includeArchived?: boolean;
 };
 
 /** 案例经理端 API：全部（创建∪负责）/ 我负责 / 我创建；管理端列表用 `admin_all`。 */
@@ -91,7 +99,10 @@ export type CasesListScope =
 
 const RESOLVE_CM_FOR_USER = `
   query ResolveCaseManagerEntityForUser($uid: bigint!) {
-    case_managers(where: { user_users: { _eq: $uid } }, limit: 1) {
+    case_managers(
+      where: { user_users: { _eq: $uid }, deleted_at: { _is_null: true } }
+      limit: 1
+    ) {
       id
     }
   }
@@ -124,14 +135,10 @@ function scopeClauseForList(
   if (scope === "case_manager_assigned") {
     const cmId = resolvedCaseManagerEntityId?.trim();
     if (!cmId) return { id: { _eq: "0" } };
-    return { case_manager_case_managers: { _eq: cmId } };
+    return caseManagerFilterClause(cmId);
   }
-  /** case_manager_all：我创建的 ∪ 我负责的 */
-  const or: Record<string, unknown>[] = [];
-  const uid = sessionUserId?.trim();
-  const cmId = resolvedCaseManagerEntityId?.trim();
-  if (uid) or.push({ created_by: { _eq: uid } });
-  if (cmId) or.push({ case_manager_case_managers: { _eq: cmId } });
+  /** case_manager_all：我创建的 ∪ 我负责的（主 FK 或 M2M） */
+  const or = caseManagerAccessOrClauses(resolvedCaseManagerEntityId, sessionUserId);
   if (or.length === 0) return { id: { _eq: "0" } };
   return { _or: or };
 }
@@ -155,9 +162,19 @@ function buildQueryClauses(filters: CasesQueryFilters): Record<string, unknown>[
       clauses.push({ process_status: { _eq: filters.processStatus.trim() } });
     }
   }
-  const caseManagerId = cleanId(filters.caseManagerId);
-  if (caseManagerId) {
-    clauses.push({ case_manager_case_managers: { _eq: caseManagerId } });
+  const cmRaw = filters.caseManagerId?.trim();
+  if (cmRaw === "unassigned") {
+    clauses.push({
+      _and: [
+        { case_manager_case_managers: { _is_null: true } },
+        { _not: { case_case_managers: {} } },
+      ],
+    });
+  } else {
+    const caseManagerId = cleanId(cmRaw);
+    if (caseManagerId) {
+      clauses.push(caseManagerFilterClause(caseManagerId));
+    }
   }
   const intendedParentId = cleanId(filters.intendedParentId);
   if (intendedParentId) {
@@ -177,7 +194,7 @@ function buildQueryClauses(filters: CasesQueryFilters): Record<string, unknown>[
     const qId = cleanId(q);
     if (qId) {
       or.push({ id: { _eq: qId } });
-      or.push({ case_manager_case_managers: { _eq: qId } });
+      or.push(caseManagerFilterClause(qId));
       or.push({ intended_parent_intended_parents: { _eq: qId } });
       or.push({ surrogate_mother_surrogate_mothers: { _eq: qId } });
     }
@@ -198,6 +215,9 @@ export function buildCasesWhere(
     clauses.push(scope);
   }
   clauses.push(...buildQueryClauses(filters));
+  if (!filters.includeArchived) {
+    clauses.push({ archived_at: { _is_null: true } });
+  }
   if (clauses.length === 0) return {};
   if (clauses.length === 1) return clauses[0]!;
   return { _and: clauses };
@@ -207,11 +227,17 @@ export async function fetchStageCounts(
   session: CrmSession,
   listScope: CasesListScope,
   resolvedCaseManagerEntityId?: string | null,
+  includeArchived = false,
 ): Promise<Record<CanonicalCaseStage, number>> {
   const client = getClient();
   const entries = await Promise.all(
     CANONICAL_CASE_STAGES.map(async (stage) => {
-      const where = buildCasesWhere({ stage }, listScope, resolvedCaseManagerEntityId, session.userId);
+      const where = buildCasesWhere(
+        { stage, includeArchived },
+        listScope,
+        resolvedCaseManagerEntityId,
+        session.userId,
+      );
       const data = await client.execute<{
         cases_aggregate: { aggregate: { count: number } | null };
       }>({
@@ -251,6 +277,7 @@ export async function fetchCasesPage(
       id: string | number;
       process_status: string | null;
       updated_at: string | null;
+      archived_at: string | null;
       created_by: string | number | null;
       case_manager_case_managers: string | number | null;
       intended_parent_intended_parents: string | number | null;
@@ -280,6 +307,7 @@ export async function fetchCasesPage(
     id: String(c.id),
     process_status: resolveProcessStatusForWorkflow(c.process_status),
     updated_at: c.updated_at ?? null,
+    archived_at: c.archived_at ?? null,
     createdByUserId: c.created_by == null ? null : String(c.created_by),
     caseManagerId: c.case_manager_case_managers == null ? null : String(c.case_manager_case_managers),
     caseManagerEmail: c.case_manager?.user?.email?.trim() || null,

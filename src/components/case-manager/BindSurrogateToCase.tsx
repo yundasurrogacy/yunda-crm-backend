@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { EntitySearchSelect } from "@/components/ui/EntitySearchSelect";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 
 type Option = { id: string; label: string };
 
@@ -9,13 +11,20 @@ export function BindSurrogateToCase({
   caseId,
   apiCasesBase,
   onBound,
+  mode = "match",
+  excludeSurrogateId,
 }: {
   caseId: string;
   /** `/api/case-manager/cases` 或 `/api/admin/cases` */
   apiCasesBase: string;
   onBound: () => void;
+  /** match=首次绑定；replace=换绑（旧 GC 立刻失权） */
+  mode?: "match" | "replace";
+  /** 换绑时排除当前已绑定的代孕母 */
+  excludeSurrogateId?: string | null;
 }) {
   const { t } = useTranslation("portal");
+  const confirm = useConfirm();
   const [options, setOptions] = useState<Option[]>([]);
   const [selectedId, setSelectedId] = useState("");
   const [loadingOptions, setLoadingOptions] = useState(true);
@@ -28,13 +37,15 @@ export function BindSurrogateToCase({
       const res = await fetch(`${apiCasesBase}?options=gc`);
       if (!res.ok) throw new Error("load");
       const json = (await res.json()) as { surrogates?: Option[] };
-      setOptions(json.surrogates ?? []);
+      const exclude = excludeSurrogateId?.trim() ?? "";
+      const list = (json.surrogates ?? []).filter((o) => !exclude || o.id !== exclude);
+      setOptions(list);
     } catch {
       setOptions([]);
     } finally {
       setLoadingOptions(false);
     }
-  }, [apiCasesBase]);
+  }, [apiCasesBase, excludeSurrogateId]);
 
   useEffect(() => {
     void loadOptions();
@@ -42,56 +53,73 @@ export function BindSurrogateToCase({
 
   async function handleBind() {
     if (!selectedId.trim()) return;
+    if (mode === "replace") {
+      const ok = await confirm({
+        message: t("case_detail.replace_gc_confirm"),
+        danger: true,
+      });
+      if (!ok) return;
+    }
     setSubmitting(true);
     setErrorKey(null);
     try {
       const res = await fetch(`${apiCasesBase}/${encodeURIComponent(caseId)}/actions`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "match_gc", surrogateId: selectedId.trim() }),
+        body: JSON.stringify({
+          action: mode === "replace" ? "replace_gc" : "match_gc",
+          surrogateId: selectedId.trim(),
+        }),
       });
       const json = (await res.json().catch(() => ({}))) as { error?: string };
       if (res.status === 409 && json.error === "surrogate_has_case") {
         setErrorKey("case_detail.bind_gc_error_taken");
         return;
       }
+      if (res.status === 409 && json.error === "same_surrogate") {
+        setErrorKey("case_detail.replace_gc_error_same");
+        return;
+      }
       if (!res.ok) {
-        setErrorKey("case_detail.bind_gc_error");
+        setErrorKey(mode === "replace" ? "case_detail.replace_gc_error" : "case_detail.bind_gc_error");
         return;
       }
       onBound();
     } catch {
-      setErrorKey("case_detail.bind_gc_error");
+      setErrorKey(mode === "replace" ? "case_detail.replace_gc_error" : "case_detail.bind_gc_error");
     } finally {
       setSubmitting(false);
     }
   }
 
+  const titleKey = mode === "replace" ? "case_detail.replace_gc_title" : "case_detail.bind_gc_title";
+  const introKey = mode === "replace" ? "case_detail.replace_gc_intro" : "case_detail.bind_gc_intro";
+  const confirmKey =
+    mode === "replace" ? "case_detail.replace_gc_submit" : "case_detail.bind_gc_confirm";
+  const submittingKey =
+    mode === "replace" ? "case_detail.replace_gc_submitting" : "case_detail.bind_gc_submitting";
+
   return (
     <div className="mt-3 rounded-lg border border-dashed border-sage-300/90 bg-sage-50/60 p-4">
-      <p className="text-sm font-medium text-sage-800">{t("case_detail.bind_gc_title")}</p>
-      <p className="mt-1 text-xs text-sage-600">{t("case_detail.bind_gc_intro")}</p>
+      <p className="text-sm font-medium text-sage-800">{t(titleKey)}</p>
+      <p className="mt-1 text-xs text-sage-600">{t(introKey)}</p>
       <div className="mt-3 flex flex-wrap items-end gap-2">
         <div className="min-w-[12rem] flex-1">
-          <label className="sr-only" htmlFor={`bind-gc-${caseId}`}>
+          <label className="sr-only" htmlFor={`bind-gc-${mode}-${caseId}`}>
             {t("case_detail.bind_gc_pick")}
           </label>
-          <select
-            id={`bind-gc-${caseId}`}
+          <EntitySearchSelect
+            id={`bind-gc-${mode}-${caseId}`}
+            options={options}
             value={selectedId}
-            onChange={(e) => setSelectedId(e.target.value)}
+            onChange={setSelectedId}
             disabled={loadingOptions || submitting}
-            className="crm-font-ui block w-full rounded-md border border-sage-300 bg-white px-3 py-2 text-sm text-sage-900"
-          >
-            <option value="">
-              {loadingOptions ? t("case_detail.bind_gc_loading") : t("case_detail.bind_gc_pick")}
-            </option>
-            {options.map((o) => (
-              <option key={o.id} value={o.id}>
-                {o.label}
-              </option>
-            ))}
-          </select>
+            placeholder={
+              loadingOptions ? t("case_detail.bind_gc_loading") : t("case_detail.bind_gc_search_ph")
+            }
+            emptyLabel={t("case_detail.bind_gc_pick")}
+            allowEmpty
+          />
         </div>
         <button
           type="button"
@@ -99,7 +127,7 @@ export function BindSurrogateToCase({
           onClick={() => void handleBind()}
           className="rounded-md bg-brand-brown px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-95 disabled:opacity-50"
         >
-          {submitting ? t("case_detail.bind_gc_submitting") : t("case_detail.bind_gc_confirm")}
+          {submitting ? t(submittingKey) : t(confirmKey)}
         </button>
       </div>
       {!loadingOptions && options.length === 0 ? (

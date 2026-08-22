@@ -42,7 +42,7 @@ export function PortalChrome({
     ) : null;
 
   return (
-    <AppShell sidebarTitleKey={headingKey} navItems={nav} centerSlot={centerSlot}>
+    <AppShell sidebarTitleKey={headingKey} navItems={nav} shell={role} centerSlot={centerSlot}>
       {children}
     </AppShell>
   );

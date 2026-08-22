@@ -5,7 +5,7 @@ import { AppShell } from "./AppShell";
 
 export function AdminChrome({ children }: { children: React.ReactNode }) {
   return (
-    <AppShell sidebarTitleKey="heading.admin_shell" navItems={adminNav}>
+    <AppShell sidebarTitleKey="heading.admin_shell" navItems={adminNav} shell="admin">
       {children}
     </AppShell>
   );

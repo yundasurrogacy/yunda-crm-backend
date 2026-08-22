@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { CANONICAL_CASE_STAGES, isCanonicalCaseStage, type CanonicalCaseStage } from "@/constants/case-stages";
+import { isCanonicalCaseStage, type CanonicalCaseStage } from "@/constants/case-stages";
 import {
   fetchCasesPage,
   fetchStageCounts,
@@ -17,14 +17,10 @@ export async function GET(req: Request) {
 
   const { searchParams } = new URL(req.url);
   const stageRaw = searchParams.get("stage");
-  const allStagesScope = stageRaw === "all";
-  let stage =
-    stageRaw ??
-    CANONICAL_CASE_STAGES[0];
-  if (allStagesScope) {
-    stage = "all";
-  } else if (!isCanonicalCaseStage(stage)) {
-    stage = CANONICAL_CASE_STAGES[0];
+  const allStagesScope = stageRaw === "all" || stageRaw == null || stageRaw === "";
+  let stage: CanonicalCaseStage | "all" = "all";
+  if (!allStagesScope) {
+    stage = isCanonicalCaseStage(stageRaw) ? stageRaw : "all";
   }
 
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
@@ -34,8 +30,8 @@ export async function GET(req: Request) {
   const listScope: CasesListScope = (() => {
     if (scopeRaw === "created") return "case_manager_created";
     if (scopeRaw === "assigned") return "case_manager_assigned";
-    if (scopeRaw === "all" || allStagesScope) return "case_manager_all";
-    return "case_manager_assigned";
+    // 默认（含工作台阶段卡片）：我创建 ∪ 我负责，避免漏案
+    return "case_manager_all";
   })();
   const filters = {
     q: searchParams.get("q") ?? undefined,
@@ -43,15 +39,17 @@ export async function GET(req: Request) {
     caseManagerId: searchParams.get("caseManagerId") ?? undefined,
     intendedParentId: searchParams.get("intendedParentId") ?? undefined,
     surrogateId: searchParams.get("surrogateId") ?? undefined,
+    includeArchived: searchParams.get("includeArchived") === "1",
   };
 
   const resolvedCmId = await resolveCaseManagerEntityId(session);
+  const listStage: CanonicalCaseStage | "all" = stage === "all" ? "all" : stage;
 
   try {
     if (skipCounts) {
       const list = await fetchCasesPage(
         session,
-        stage as CanonicalCaseStage | "all",
+        listStage,
         page,
         pageSize,
         filters,
@@ -59,29 +57,20 @@ export async function GET(req: Request) {
         resolvedCmId,
       );
       return NextResponse.json({
-        stage,
+        stage: listStage,
         counts: null,
         ...list,
         page,
         pageSize,
       });
     }
-    if (allStagesScope) {
-      const list = await fetchCasesPage(session, "all", page, pageSize, filters, listScope, resolvedCmId);
-      return NextResponse.json({
-        stage: "all",
-        counts: null,
-        ...list,
-        page,
-        pageSize,
-      });
-    }
+
     const [counts, list] = await Promise.all([
-      fetchStageCounts(session, listScope, resolvedCmId),
-      fetchCasesPage(session, stage as CanonicalCaseStage, page, pageSize, filters, listScope, resolvedCmId),
+      fetchStageCounts(session, listScope, resolvedCmId, filters.includeArchived),
+      fetchCasesPage(session, listStage, page, pageSize, filters, listScope, resolvedCmId),
     ]);
     return NextResponse.json({
-      stage,
+      stage: listStage,
       counts,
       ...list,
       page,

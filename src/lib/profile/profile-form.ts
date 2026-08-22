@@ -9,6 +9,8 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
 export function buildProfileFormValues(
   sections: ProfileSectionDef[],
   sources: unknown[],
+  /** schema 外的自由键（如 GC 照片），一并写入表单以免保存后丢失回显 */
+  extraKeys: readonly string[] = [],
 ): Record<string, string> {
   const flat = flattenProfileSources(...sources);
   const out: Record<string, string> = {};
@@ -16,6 +18,14 @@ export function buildProfileFormValues(
     for (const field of section.fields) {
       out[field.key] = resolveProfileFieldValue(flat, field);
     }
+  }
+  for (const key of extraKeys) {
+    const v = flat[key];
+    if (typeof v === "string") out[key] = v;
+    else if (v == null) out[key] = "";
+    else if (Array.isArray(v)) {
+      out[key] = v.map((x) => (typeof x === "string" ? x : "")).filter(Boolean).join("\n");
+    } else out[key] = String(v);
   }
   return out;
 }

@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
+import { EntitySearchSelect } from "@/components/ui/EntitySearchSelect";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { AM_STAGE_ICON_COMPONENTS } from "@/constants/am-stage-icons";
 import { CANONICAL_CASE_STAGES, isCanonicalCaseStage, type CanonicalCaseStage } from "@/constants/case-stages";
 import type { AmCaseRow } from "@/lib/case-manager/fetch-dashboard-data";
@@ -34,10 +36,11 @@ type DashboardPayload = {
   pageSize: number;
 };
 
-function readStageFromSearch(sp: URLSearchParams | null): CanonicalCaseStage {
+function readStageFromSearch(sp: URLSearchParams | null): CanonicalCaseStage | "all" {
   const raw = sp?.get("stage");
+  if (raw === "all") return "all";
   if (raw && isCanonicalCaseStage(raw)) return raw;
-  return CANONICAL_CASE_STAGES[0];
+  return "all";
 }
 
 function readTextParam(sp: URLSearchParams | null, key: string): string {
@@ -77,6 +80,7 @@ export function CaseManagerAmDashboard({
   headerExtra?: ReactNode;
 }) {
   const { t, i18n } = useTranslation("portal");
+  const confirm = useConfirm();
   const { t: tCommon } = useTranslation("common");
   const { t: tStage } = useTranslation("caseStage");
   const router = useRouter();
@@ -85,7 +89,7 @@ export function CaseManagerAmDashboard({
 
   const isMyCases = variant === "myCases";
 
-  const [stage, setStage] = useState<CanonicalCaseStage>(() =>
+  const [stage, setStage] = useState<CanonicalCaseStage | "all">(() =>
     readStageFromSearch(searchParams),
   );
   const [page, setPage] = useState(Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1));
@@ -97,6 +101,8 @@ export function CaseManagerAmDashboard({
   );
   const [surrogateId, setSurrogateId] = useState(() => readTextParam(searchParams, "surrogateId"));
   const [qInput, setQInput] = useState(() => readTextParam(searchParams, "q"));
+  const [includeArchived, setIncludeArchived] = useState(false);
+  const [archiveBusyId, setArchiveBusyId] = useState<string | null>(null);
   const [data, setData] = useState<DashboardPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [errorKey, setErrorKey] = useState<string | null>(null);
@@ -107,10 +113,14 @@ export function CaseManagerAmDashboard({
   const [gcOptions, setGcOptions] = useState<SelectOption[]>([]);
   const [gcAssignTarget, setGcAssignTarget] = useState<string | null>(null);
   const [gcAssignValue, setGcAssignValue] = useState("");
+  const [selectedCaseIds, setSelectedCaseIds] = useState<string[]>([]);
+  const [reassignCmId, setReassignCmId] = useState("");
+  const [reassigning, setReassigning] = useState(false);
+  const [reassignMsg, setReassignMsg] = useState<string | null>(null);
 
   const syncUrl = useCallback(
     (
-      nextStage: CanonicalCaseStage,
+      nextStage: CanonicalCaseStage | "all",
       nextPage: number,
       nextQ: string,
       nextProcessStatus: string,
@@ -244,7 +254,7 @@ export function CaseManagerAmDashboard({
     setLoading(true);
     setErrorKey(null);
     try {
-      const stageParam = isMyCases ? "all" : stage;
+      const stageParam = isMyCases || stage === "all" ? "all" : stage;
       const countsParam = variant === "full" ? "" : "&counts=0";
       const url = new URL(apiPath, window.location.origin);
       url.searchParams.set("stage", stageParam);
@@ -257,6 +267,7 @@ export function CaseManagerAmDashboard({
       if (caseManagerId.trim()) url.searchParams.set("caseManagerId", caseManagerId.trim());
       if (intendedParentId.trim()) url.searchParams.set("intendedParentId", intendedParentId.trim());
       if (surrogateId.trim()) url.searchParams.set("surrogateId", surrogateId.trim());
+      if (includeArchived) url.searchParams.set("includeArchived", "1");
       const res = await fetch(url.pathname + url.search);
       if (res.status === 401) {
         setErrorKey("am_dash.error_unauthorized");
@@ -287,6 +298,7 @@ export function CaseManagerAmDashboard({
     caseManagerId,
     intendedParentId,
     surrogateId,
+    includeArchived,
     apiPath,
   ]);
 
@@ -299,7 +311,7 @@ export function CaseManagerAmDashboard({
     return Math.max(1, Math.ceil(data.total / data.pageSize));
   }, [data]);
 
-  function onSelectStage(s: CanonicalCaseStage) {
+  function onSelectStage(s: CanonicalCaseStage | "all") {
     setStage(s);
     setProcessStatus("");
     setPage(1);
@@ -363,6 +375,32 @@ export function CaseManagerAmDashboard({
 
   const casesApiBase = headingMode === "admin" ? "/api/admin/cases" : "/api/case-manager/cases";
 
+  async function softDeleteCase(caseId: string, archived: boolean) {
+    if (archiveBusyId) return;
+    const ok = await confirm({
+      message: archived ? t("am_dash.soft_delete_confirm") : t("am_dash.restore_confirm"),
+      danger: archived,
+    });
+    if (!ok) return;
+    setArchiveBusyId(caseId);
+    try {
+      const res = await fetch(`${casesApiBase}/${encodeURIComponent(caseId)}/actions`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: archived ? "archive" : "unarchive" }),
+      });
+      if (!res.ok) {
+        setErrorKey("am_dash.error_soft_delete");
+        return;
+      }
+      await load();
+    } catch {
+      setErrorKey("am_dash.error_soft_delete");
+    } finally {
+      setArchiveBusyId(null);
+    }
+  }
+
   async function assignGc(caseId: string) {
     if (!gcAssignValue.trim()) return;
     await fetch(`${casesApiBase}/${caseId}/actions`, {
@@ -373,6 +411,44 @@ export function CaseManagerAmDashboard({
     setGcAssignTarget(null);
     setGcAssignValue("");
     await load();
+  }
+
+  const rowIds = useMemo(() => (data?.rows ?? []).map((r) => r.id), [data?.rows]);
+  const allSelected = rowIds.length > 0 && rowIds.every((id) => selectedCaseIds.includes(id));
+
+  function toggleSelectAll() {
+    setSelectedCaseIds(allSelected ? [] : rowIds);
+  }
+
+  function toggleSelectOne(id: string) {
+    setSelectedCaseIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  }
+
+  async function bulkReassign() {
+    if (headingMode !== "admin" || !reassignCmId || selectedCaseIds.length === 0 || reassigning) return;
+    setReassigning(true);
+    setReassignMsg(null);
+    try {
+      const res = await fetch("/api/admin/cases/reassign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ caseIds: selectedCaseIds, caseManagerId: reassignCmId }),
+      });
+      const json = (await res.json().catch(() => ({}))) as { affected?: number; error?: string };
+      if (!res.ok) {
+        setReassignMsg(t("am_dash.reassign_error"));
+        return;
+      }
+      setReassignMsg(t("am_dash.reassign_success", { count: json.affected ?? selectedCaseIds.length }));
+      setSelectedCaseIds([]);
+      await load();
+    } catch {
+      setReassignMsg(t("am_dash.reassign_error"));
+    } finally {
+      setReassigning(false);
+    }
   }
 
   return (
@@ -443,6 +519,28 @@ export function CaseManagerAmDashboard({
 
       {variant === "full" ? (
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+          {(() => {
+            const totalAll =
+              data?.counts &&
+              CANONICAL_CASE_STAGES.reduce((sum, s) => sum + (data.counts?.[s] ?? 0), 0);
+            return (
+              <button
+                type="button"
+                onClick={() => onSelectStage("all")}
+                className={`flex flex-col rounded-xl px-3 py-3 text-left transition hover:shadow md:px-4 md:py-4 ${CARD_ACCENT[0]} ${stage === "all" ? "ring-2 ring-brand-brown ring-offset-2 ring-offset-background" : ""}`}
+              >
+                <span className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-brown/80">
+                  {t("am_dash.stage_all_eyebrow")}
+                </span>
+                <span className="line-clamp-2 text-xs font-semibold leading-snug text-sage-900 md:text-[13px] crm-font-display">
+                  {t("am_dash.stage_all")}
+                </span>
+                <span className="mt-2 text-2xl font-bold tabular-nums text-sage-800">
+                  {typeof totalAll === "number" ? totalAll : "—"}
+                </span>
+              </button>
+            );
+          })()}
           {CANONICAL_CASE_STAGES.map((s, i) => {
             const count = data?.counts?.[s];
             const n = typeof count === "number" ? count : "—";
@@ -453,7 +551,7 @@ export function CaseManagerAmDashboard({
                 key={s}
                 type="button"
                 onClick={() => onSelectStage(s)}
-                className={`flex flex-col rounded-xl px-3 py-3 text-left transition hover:shadow md:px-4 md:py-4 ${CARD_ACCENT[i % CARD_ACCENT.length]} ${active ? "ring-2 ring-brand-brown ring-offset-2 ring-offset-background" : ""}`}
+                className={`flex flex-col rounded-xl px-3 py-3 text-left transition hover:shadow md:px-4 md:py-4 ${CARD_ACCENT[(i + 1) % CARD_ACCENT.length]} ${active ? "ring-2 ring-brand-brown ring-offset-2 ring-offset-background" : ""}`}
               >
                 <span className="mb-2 text-brand-brown/90">
                   <Icon className="h-6 w-6" aria-hidden strokeWidth={1.75} />
@@ -468,13 +566,38 @@ export function CaseManagerAmDashboard({
         </div>
       ) : null}
 
+      {variant === "stageList" ? (
+        <div className="mb-4">
+          <label className="flex max-w-sm flex-col gap-1 text-xs font-medium text-sage-700">
+            <span>{t("am_dash.filter_stage")}</span>
+            <select
+              value={stage}
+              onChange={(e) => {
+                const v = e.target.value;
+                onSelectStage(v === "all" || isCanonicalCaseStage(v) ? v : "all");
+              }}
+              className="rounded-md border border-sage-300 bg-white px-2 py-2 text-sm text-sage-900"
+            >
+              <option value="all">{t("am_dash.stage_all")}</option>
+              {CANONICAL_CASE_STAGES.map((s) => (
+                <option key={s} value={s}>
+                  {translateProcessStatus(s, tStage)}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      ) : null}
+
       <section className="rounded-xl border border-sage-200/80 bg-white/40 p-4 shadow-sm backdrop-blur-[1px] md:p-6">
         <div className="mb-4 space-y-3">
           {variant !== "myCases" ? (
             <p className="crm-font-display text-sm font-medium text-brand-brown md:text-base">
-              {t("am_dash.filter_heading", {
-                stage: translateProcessStatus(stage, tStage),
-              })}
+              {stage === "all"
+                ? t("am_dash.filter_heading_all")
+                : t("am_dash.filter_heading", {
+                    stage: translateProcessStatus(stage, tStage),
+                  })}
             </p>
           ) : (
             <p className="crm-font-display text-sm font-medium text-brand-brown md:text-base">
@@ -486,49 +609,37 @@ export function CaseManagerAmDashboard({
             {headingMode === "admin" && variant !== "myCases" ? (
               <label className="flex flex-col gap-1 text-xs font-medium text-sage-700">
                 <span>{t("am_dash.filter_case_manager")}</span>
-                <select
+                <EntitySearchSelect
+                  options={caseManagerOptions}
                   value={caseManagerId}
-                  onChange={(e) => setCaseManagerId(e.target.value)}
-                  className="rounded-md border border-sage-300 bg-white px-2 py-2 text-sm text-sage-900"
-                >
-                  <option value="">{t("am_dash.all_people")}</option>
-                  {caseManagerOptions.map((o) => (
-                    <option key={o.id} value={o.id}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
+                  onChange={setCaseManagerId}
+                  placeholder={t("entity_search.placeholder")}
+                  emptyLabel={t("am_dash.all_people")}
+                  allowEmpty
+                />
               </label>
             ) : null}
             <label className="flex flex-col gap-1 text-xs font-medium text-sage-700">
               <span>{t("am_dash.filter_intended_parent")}</span>
-              <select
+              <EntitySearchSelect
+                options={intendedParentOptions}
                 value={intendedParentId}
-                onChange={(e) => setIntendedParentId(e.target.value)}
-                className="rounded-md border border-sage-300 bg-white px-2 py-2 text-sm text-sage-900"
-              >
-                <option value="">{t("am_dash.all_people")}</option>
-                {intendedParentOptions.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
+                onChange={setIntendedParentId}
+                placeholder={t("entity_search.placeholder")}
+                emptyLabel={t("am_dash.all_people")}
+                allowEmpty
+              />
             </label>
             <label className="flex flex-col gap-1 text-xs font-medium text-sage-700">
               <span>{t("am_dash.filter_surrogate")}</span>
-              <select
+              <EntitySearchSelect
+                options={surrogateOptions}
                 value={surrogateId}
-                onChange={(e) => setSurrogateId(e.target.value)}
-                className="rounded-md border border-sage-300 bg-white px-2 py-2 text-sm text-sage-900"
-              >
-                <option value="">{t("am_dash.all_people")}</option>
-                {surrogateOptions.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
+                onChange={setSurrogateId}
+                placeholder={t("entity_search.placeholder")}
+                emptyLabel={t("am_dash.all_people")}
+                allowEmpty
+              />
             </label>
             {isMyCases ? (
               <label className="flex flex-col gap-1 text-xs font-medium text-sage-700">
@@ -549,7 +660,7 @@ export function CaseManagerAmDashboard({
             ) : null}
           </div>
 
-          <div className="grid gap-2 lg:grid-cols-[1fr_auto_auto]">
+          <div className="grid gap-2 lg:grid-cols-[1fr_auto_auto_auto]">
             <input
               value={qInput}
               onChange={(e) => setQInput(e.target.value)}
@@ -570,8 +681,47 @@ export function CaseManagerAmDashboard({
             >
               {t("am_dash.reset")}
             </button>
+            <label className="inline-flex items-center gap-2 self-center text-xs text-sage-700">
+              <input
+                type="checkbox"
+                checked={includeArchived}
+                onChange={(e) => {
+                  setIncludeArchived(e.target.checked);
+                  setPage(1);
+                }}
+              />
+              {t("am_dash.show_deleted")}
+            </label>
           </div>
         </div>
+
+        {headingMode === "admin" ? (
+          <div className="mb-4 flex flex-wrap items-end gap-2 rounded-md border border-sage-200 bg-sage-50/70 p-3">
+            <p className="w-full text-xs font-medium text-sage-700">
+              {t("am_dash.reassign_hint", { count: selectedCaseIds.length })}
+            </p>
+            <label className="flex min-w-[12rem] flex-1 flex-col gap-1 text-xs font-medium text-sage-700">
+              <span>{t("am_dash.reassign_to")}</span>
+              <EntitySearchSelect
+                options={caseManagerOptions}
+                value={reassignCmId}
+                onChange={setReassignCmId}
+                placeholder={t("entity_search.placeholder")}
+                emptyLabel={t("am_dash.pick_cm")}
+                allowEmpty
+              />
+            </label>
+            <button
+              type="button"
+              disabled={reassigning || selectedCaseIds.length === 0 || !reassignCmId}
+              onClick={() => void bulkReassign()}
+              className="rounded-md bg-brand-brown px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
+            >
+              {reassigning ? t("am_dash.reassigning") : t("am_dash.reassign_submit")}
+            </button>
+            {reassignMsg ? <p className="w-full text-xs text-sage-800">{reassignMsg}</p> : null}
+          </div>
+        ) : null}
 
         {errorKey ? (
           <p className="text-sm text-red-700">{t(errorKey)}</p>
@@ -583,29 +733,84 @@ export function CaseManagerAmDashboard({
               <table className="w-full min-w-[720px] border-collapse text-left text-sm">
                 <thead>
                   <tr className="border-b border-sage-200 bg-sage-100 text-xs font-semibold uppercase tracking-wide text-sage-700">
+                    {headingMode === "admin" ? (
+                      <th className="px-3 py-3">
+                        <input
+                          type="checkbox"
+                          checked={allSelected}
+                          onChange={toggleSelectAll}
+                          aria-label={t("am_dash.select_all")}
+                        />
+                      </th>
+                    ) : null}
                     <th className="px-4 py-3">{t("am_dash.col_case_id")}</th>
                     <th className="px-4 py-3">{t("am_dash.col_surrogate")}</th>
                     <th className="px-4 py-3">{t("am_dash.col_parents")}</th>
+                    {stage === "all" || isMyCases ? (
+                      <th className="px-4 py-3">{t("am_dash.col_stage")}</th>
+                    ) : null}
                     <th className="px-4 py-3">{t("am_dash.col_updated")}</th>
+                    <th className="px-4 py-3">{t("am_dash.col_status")}</th>
                     <th className="px-4 py-3">{t("am_dash.col_action")}</th>
                   </tr>
                 </thead>
                 <tbody className="text-sage-900">
                   {(data?.rows ?? []).length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-4 py-8 text-center text-sage-600">
+                      <td
+                        colSpan={
+                          (headingMode === "admin" ? 7 : 6) + (stage === "all" || isMyCases ? 1 : 0)
+                        }
+                        className="px-4 py-8 text-center text-sage-600"
+                      >
                         {t("am_dash.empty")}
                       </td>
                     </tr>
                   ) : (
                     (data?.rows ?? []).map((row) => {
+                      const isDeleted = Boolean(row.archived_at);
                       return (
-                        <tr key={row.id} className="border-b border-sage-100 hover:bg-sage-50/80">
+                        <tr
+                          key={row.id}
+                          className={[
+                            "border-b border-sage-100 hover:bg-sage-50/80",
+                            isDeleted ? "bg-sage-50/80 text-sage-500" : "",
+                          ].join(" ")}
+                        >
+                          {headingMode === "admin" ? (
+                            <td className="px-3 py-3">
+                              <input
+                                type="checkbox"
+                                checked={selectedCaseIds.includes(row.id)}
+                                onChange={() => toggleSelectOne(row.id)}
+                                aria-label={row.id}
+                                disabled={isDeleted}
+                              />
+                            </td>
+                          ) : null}
                           <td className="px-4 py-3 tabular-nums">{row.id}</td>
                           <td className="px-4 py-3">{row.surrogateName}</td>
                           <td className="px-4 py-3">{row.intendedParentName}</td>
+                          {stage === "all" || isMyCases ? (
+                            <td className="px-4 py-3 text-xs text-sage-800">
+                              {translateProcessStatus(row.process_status ?? "", tStage) ||
+                                row.process_status ||
+                                "—"}
+                            </td>
+                          ) : null}
                           <td className="px-4 py-3 text-xs text-sage-700">
                             {formatDt(row.updated_at, i18n.language)}
+                          </td>
+                          <td className="px-4 py-3">
+                            {isDeleted ? (
+                              <span className="rounded bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-800">
+                                {t("am_dash.status_deleted")}
+                              </span>
+                            ) : (
+                              <span className="rounded bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-800">
+                                {t("am_dash.status_active")}
+                              </span>
+                            )}
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex flex-wrap items-center gap-2">
@@ -615,7 +820,26 @@ export function CaseManagerAmDashboard({
                               >
                                 {t("am_dash.view_case")}
                               </Link>
-                              {isMyCases && myCaseScope === "created" && !row.caseManagerId ? (
+                              {isDeleted ? (
+                                <button
+                                  type="button"
+                                  disabled={archiveBusyId === row.id}
+                                  onClick={() => void softDeleteCase(row.id, false)}
+                                  className="inline-flex rounded-md border border-emerald-700 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-900 disabled:opacity-50"
+                                >
+                                  {t("am_dash.btn_restore")}
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  disabled={archiveBusyId === row.id}
+                                  onClick={() => void softDeleteCase(row.id, true)}
+                                  className="inline-flex rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-800 hover:bg-red-50 disabled:opacity-50"
+                                >
+                                  {t("am_dash.btn_soft_delete")}
+                                </button>
+                              )}
+                              {!isDeleted && isMyCases && myCaseScope === "created" && !row.caseManagerId ? (
                                 <button
                                   type="button"
                                   onClick={() => void assignCaseManagerToMe(row.id)}
@@ -624,25 +848,22 @@ export function CaseManagerAmDashboard({
                                   {t("am_dash.assign_case_manager_to_me")}
                                 </button>
                               ) : null}
-                              {!row.surrogateId ? (
+                              {!isDeleted && !row.surrogateId ? (
                                 gcAssignTarget === row.id ? (
-                                  <div className="inline-flex items-center gap-1">
-                                    <select
+                                  <div className="inline-flex min-w-[14rem] max-w-[20rem] items-center gap-1">
+                                    <EntitySearchSelect
+                                      className="min-w-0 flex-1"
+                                      options={gcOptions}
                                       value={gcAssignValue}
-                                      onChange={(e) => setGcAssignValue(e.target.value)}
-                                      className="rounded border border-sage-300 bg-white px-2 py-1 text-xs text-sage-900"
-                                    >
-                                      <option value="">{t("am_dash.pick_gc")}</option>
-                                      {gcOptions.map((o) => (
-                                        <option key={o.id} value={o.id}>
-                                          {o.label}
-                                        </option>
-                                      ))}
-                                    </select>
+                                      onChange={setGcAssignValue}
+                                      placeholder={t("entity_search.placeholder")}
+                                      emptyLabel={t("am_dash.pick_gc")}
+                                      allowEmpty
+                                    />
                                     <button
                                       type="button"
                                       onClick={() => void assignGc(row.id)}
-                                      className="rounded-md border border-sage-400 bg-white px-2 py-1 text-xs font-semibold text-sage-800 hover:bg-sage-50"
+                                      className="shrink-0 rounded-md border border-sage-400 bg-white px-2 py-1 text-xs font-semibold text-sage-800 hover:bg-sage-50"
                                     >
                                       {t("am_dash.confirm_gc_match")}
                                     </button>

@@ -10,6 +10,7 @@ const PARTY_CASES_QUERY = `
       process_status
       updated_at
       created_at
+      trust_account_balance
       case_manager {
         user {
           email
@@ -32,14 +33,17 @@ export type PartyCaseRow = {
   process_status: string | null;
   updated_at: string | null;
   created_at: string;
+  trust_account_balance: string;
   caseManagerEmail: string | null;
   counterpartName: string;
 };
 
 export function partyCasesWhere(kind: PartyKind, entityId: string): Record<string, unknown> {
-  return kind === "intended_parent"
-    ? { intended_parent_intended_parents: { _eq: entityId } }
-    : { surrogate_mother_surrogate_mothers: { _eq: entityId } };
+  const party =
+    kind === "intended_parent"
+      ? { intended_parent_intended_parents: { _eq: entityId } }
+      : { surrogate_mother_surrogate_mothers: { _eq: entityId } };
+  return { _and: [party, { archived_at: { _is_null: true } }] };
 }
 
 export async function fetchPartyCases(
@@ -53,6 +57,7 @@ export async function fetchPartyCases(
       process_status: string | null;
       updated_at: string | null;
       created_at: string;
+      trust_account_balance: string | number | null;
       case_manager: { user: { email: string | null } | null } | null;
       surrogate_mother: { profile_data: unknown; email: string | null } | null;
       intended_parent: { profile_data: unknown; email: string | null } | null;
@@ -67,6 +72,10 @@ export async function fetchPartyCases(
     process_status: resolveProcessStatusForWorkflow(c.process_status),
     updated_at: c.updated_at ?? null,
     created_at: c.created_at,
+    trust_account_balance:
+      typeof c.trust_account_balance === "number"
+        ? String(c.trust_account_balance)
+        : (c.trust_account_balance ?? "0").toString(),
     caseManagerEmail: c.case_manager?.user?.email?.trim() || null,
     counterpartName:
       kind === "intended_parent"

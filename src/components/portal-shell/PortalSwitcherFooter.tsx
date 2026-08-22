@@ -1,9 +1,32 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import type { SessionIdentity } from "@/lib/auth/fetch-session-identity";
+import type { PortalId } from "@/types/portal";
 
-export function PortalSwitcherFooter() {
+type Shell = "admin" | PortalId;
+
+export function PortalSwitcherFooter({ shell }: { shell: Shell }) {
   const { t } = useTranslation("portal");
+  const [identity, setIdentity] = useState<SessionIdentity | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/session/me?shell=${encodeURIComponent(shell)}`);
+        if (!res.ok) return;
+        const json = (await res.json()) as SessionIdentity;
+        if (!cancelled) setIdentity(json);
+      } catch {
+        /* ignore */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [shell]);
 
   async function switchPortal() {
     await fetch("/api/session", {
@@ -23,8 +46,51 @@ export function PortalSwitcherFooter() {
     window.location.href = "/login";
   }
 
+  const entityLabelKey =
+    identity?.entity?.kind === "case_manager"
+      ? "account_bar.entity_cm"
+      : identity?.entity?.kind === "intended_parent"
+        ? "account_bar.entity_ip"
+        : identity?.entity?.kind === "surrogate_mother"
+          ? "account_bar.entity_sm"
+          : null;
+
   return (
     <div className="flex flex-col gap-2 border-t border-sage-300 pt-4 text-xs text-sage-800">
+      {identity ? (
+        <div className="space-y-1.5 rounded-md bg-white/40 px-2 py-2 text-[11px] leading-snug text-sage-800">
+          <p className="font-semibold uppercase tracking-wide text-sage-600">
+            {t("account_bar.title")}
+          </p>
+          <p>
+            <span className="text-sage-600">{t("account_bar.login")}</span>
+            <span className="mt-0.5 block break-all font-medium text-sage-900">
+              {identity.userEmail || "—"}
+            </span>
+            <span className="text-sage-500">
+              {t("account_bar.user_meta", {
+                id: identity.userId,
+                role: identity.userRole,
+              })}
+            </span>
+          </p>
+          {shell !== "admin" ? (
+            identity.entity && entityLabelKey ? (
+              <p>
+                <span className="text-sage-600">{t(entityLabelKey)}</span>
+                <span className="mt-0.5 block break-all font-medium text-sage-900">
+                  {identity.entity.email || t("account_bar.no_entity_email")}
+                </span>
+                <span className="text-sage-500">
+                  {t("account_bar.entity_id", { id: identity.entity.id })}
+                </span>
+              </p>
+            ) : (
+              <p className="text-amber-900/90">{t("account_bar.entity_unbound")}</p>
+            )
+          ) : null}
+        </div>
+      ) : null}
       <button type="button" onClick={() => void switchPortal()} className="text-left underline">
         {t("switch_portal")}
       </button>

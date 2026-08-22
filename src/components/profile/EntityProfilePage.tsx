@@ -7,7 +7,10 @@ import { useTranslation } from "react-i18next";
 
 import type { AdminEntityProfileDetail } from "@/lib/admin/entity-profile";
 import type { EntityKind } from "@/lib/admin/entity-profile";
+import { GC_PROFILE_PHOTO_KEYS } from "@/lib/profile/gc-photos";
 import { buildProfileFormValues } from "@/lib/profile/profile-form";
+import { ProfileFieldControl } from "@/components/profile/ProfileFieldControl";
+import { ProfilePhotosView } from "@/components/profile/ProfilePhotosView";
 
 export function EntityProfilePage({
   kind,
@@ -51,13 +54,19 @@ export function EntityProfilePage({
       const json = (await res.json()) as AdminEntityProfileDetail;
       setDetail(json);
       setEmail(json.email ?? "");
-      setForm(buildProfileFormValues(json.sections, [json.profile_data]));
+      setForm(
+        buildProfileFormValues(
+          json.sections,
+          [json.profile_data],
+          kind === "surrogate_mother" ? GC_PROFILE_PHOTO_KEYS : [],
+        ),
+      );
     } catch {
       setMessage({ type: "err", text: t(`${i18nPrefix}.error_load`) });
     } finally {
       setLoading(false);
     }
-  }, [apiUrl, i18nPrefix, t]);
+  }, [apiUrl, i18nPrefix, kind, t]);
 
   useEffect(() => {
     void load();
@@ -77,7 +86,13 @@ export function EntityProfilePage({
       const json = (await res.json()) as { detail?: AdminEntityProfileDetail };
       if (json.detail) {
         setDetail(json.detail);
-        setForm(buildProfileFormValues(json.detail.sections, [json.detail.profile_data]));
+        setForm(
+          buildProfileFormValues(
+            json.detail.sections,
+            [json.detail.profile_data],
+            kind === "surrogate_mother" ? GC_PROFILE_PHOTO_KEYS : [],
+          ),
+        );
         setEmail(json.detail.email ?? "");
       }
       setMessage({ type: "ok", text: t(`${i18nPrefix}.saved`) });
@@ -164,19 +179,28 @@ export function EntityProfilePage({
                     <label className="text-xs font-semibold text-sage-700">
                       {zh ? field.labelZh : field.labelEn}
                     </label>
-                    <input
-                      type="text"
+                    <ProfileFieldControl
+                      field={field}
                       value={form[field.key] ?? ""}
-                      onChange={(e) =>
-                        setForm((prev) => ({ ...prev, [field.key]: e.target.value }))
-                      }
-                      className="mt-1 w-full rounded-md border border-sage-300 bg-white px-3 py-2 text-sm"
+                      onChange={(v) => setForm((prev) => ({ ...prev, [field.key]: v }))}
+                      zh={zh}
+                      disabled={saving}
                     />
                   </div>
                 ))}
               </div>
             </section>
           ))}
+
+          {kind === "surrogate_mother" ? (
+            <section className="rounded-xl border border-sage-200/80 bg-white/50 p-4 shadow-sm md:p-6">
+              <ProfilePhotosView
+                profileData={detail.profile_data}
+                className=""
+                emptyMessage={t("profile_photos.empty")}
+              />
+            </section>
+          ) : null}
 
           <div className="flex flex-wrap gap-3">
             <button

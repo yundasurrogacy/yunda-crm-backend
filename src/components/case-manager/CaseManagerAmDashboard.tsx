@@ -894,9 +894,9 @@ export function CaseManagerAmDashboard({
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-sage-700">
               <p className="min-w-0">
                 {t("am_dash.list_stats", {
-                  total: data.total,
-                  from: data.total === 0 ? 0 : (page - 1) * data.pageSize + 1,
-                  to: Math.min(page * data.pageSize, data.total),
+                  total: data?.total ?? 0,
+                  from: !data || data.total === 0 ? 0 : (page - 1) * data.pageSize + 1,
+                  to: data ? Math.min(page * data.pageSize, data.total) : 0,
                 })}
               </p>
               <div className="flex items-center gap-2">

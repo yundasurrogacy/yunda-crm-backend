@@ -209,7 +209,7 @@
   "admin_cm_workload": {
     "title": "案例经理工作量",
     "intro": "每位案例经理当前负责的活跃案例数（主负责 ∪ 共同负责，已去重；不含已软删案例）。未分配案例经理的案例单独列出，不会计入各经理合计。",
-    "summary": "已分配 {{assigned}} + 未分配 {{unassigned}} = 活跃合计 {{total}}（与下方「全部案例」一致）",
+    "summary": "活跃案例 {{total}}：已分配 {{assigned}}，未分配 {{unassigned}}（与下方「全部案例」一致）。各经理行内按人统计；同一案例多人负责时会分别计入，行数字相加可能大于「已分配」。",
     "unassigned_label": "未分配案例经理",
     "manage_link": "管理案例经理",
     "loading": "加载中…",
@@ -583,14 +583,14 @@
       "error_advance_conflict": "推进流程时只能编辑当前阶段，请切换到当前阶段后再试。",
       "error_stage_locked": "该阶段尚未开放，无法编辑。",
       "error_bad_request": "请求无效，请刷新页面后重试。",
-      "upload_pick": "选择文件（七牛直传）",
+      "upload_pick": "选择文件",
       "upload_uploading": "上传中 {{pct}}%",
-      "upload_error": "上传失败，请检查网络或联系管理员查看七牛配置。",
+      "upload_error": "上传失败，请检查网络或稍后重试；若持续失败请联系管理员。",
       "upload_unauthorized": "请先登录后再上传文件。",
       "open_file_url": "打开链接",
       "clear_file": "清除链接",
       "url_placeholder": "上传完成后自动填入，或可粘贴外链",
-      "url_hint": "直传走后端下发的上传地址与凭证，文件存放在配置的目录下；亦可手动填入已存在的文件链接。"
+      "url_hint": "点击上方按钮选择本地文件上传；也可直接粘贴已有的文件链接。"
     },
     "trust": {
       "section_title": "信托账户流水",

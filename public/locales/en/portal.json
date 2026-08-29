@@ -209,7 +209,7 @@
   "admin_cm_workload": {
     "title": "Case manager workload",
     "intro": "Active cases per case manager (primary ∪ co-assigned, deduped; excludes soft-deleted cases). Unassigned cases are listed separately and are not included in each manager’s total.",
-    "summary": "Assigned {{assigned}} + unassigned {{unassigned}} = active total {{total}} (matches “All cases” below)",
+    "summary": "Active cases {{total}}: assigned {{assigned}}, unassigned {{unassigned}} (matches “All cases” below). Per-manager counts can overlap when a case has multiple managers, so summing the table may exceed “assigned”.",
     "unassigned_label": "Unassigned (no case manager)",
     "manage_link": "Manage case managers",
     "loading": "Loading…",
@@ -583,14 +583,14 @@
       "error_advance_conflict": "When advancing, edits must target the current stage only. Switch back to the current stage.",
       "error_stage_locked": "That stage is not open yet.",
       "error_bad_request": "Invalid request. Refresh and try again.",
-      "upload_pick": "Choose file (Qiniu direct upload)",
+      "upload_pick": "Choose file",
       "upload_uploading": "Uploading {{pct}}%",
-      "upload_error": "Upload failed. Check your connection or verify Qiniu settings with an admin.",
+      "upload_error": "Upload failed. Check your connection and try again, or contact an admin if it keeps failing.",
       "upload_unauthorized": "Sign in before uploading.",
       "open_file_url": "Open link",
       "clear_file": "Clear link",
       "url_placeholder": "Filled after upload, or paste a URL",
-      "url_hint": "Files go to Qiniu via the portal-issued upload URL and credentials; you can paste an existing URL instead."
+      "url_hint": "Use the button above to upload a local file, or paste an existing file URL."
     },
     "trust": {
       "section_title": "Trust ledger",

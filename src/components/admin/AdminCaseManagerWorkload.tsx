@@ -51,16 +51,14 @@ export function AdminCaseManagerWorkload() {
 
   return (
     <section className="crm-card">
-      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-        <div>
-          <h2 className="crm-font-display text-lg font-semibold text-brand-brown">
-            {t("admin_cm_workload.title")}
-          </h2>
-          <p className="mt-1 text-sm text-sage-700">{t("admin_cm_workload.intro")}</p>
-        </div>
+      <div className="mb-4">
+        <h2 className="crm-font-display text-lg font-semibold text-brand-brown">
+          {t("admin_cm_workload.title")}
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-sage-700">{t("admin_cm_workload.intro")}</p>
         <Link
           href="/admin/accounts/case-managers"
-          className="text-xs font-semibold text-brand-brown underline"
+          className="mt-2 inline-block text-sm font-semibold text-brand-brown underline"
         >
           {t("admin_cm_workload.manage_link")}
         </Link>
@@ -71,7 +69,7 @@ export function AdminCaseManagerWorkload() {
 
       {!loading && !error ? (
         <>
-          <p className="mb-3 text-sm text-sage-800">
+          <p className="mb-3 text-sm leading-relaxed text-sage-800">
             {t("admin_cm_workload.summary", {
               assigned: assignedTotal,
               unassigned: unassignedCount,

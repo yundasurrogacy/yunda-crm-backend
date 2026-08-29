@@ -48,7 +48,8 @@ export async function GET() {
         caseCount: caseloads[m.entityId] ?? 0,
       }))
       .sort((a, b) => b.caseCount - a.caseCount || Number(a.entityId) - Number(b.entityId));
-    const assignedTotal = rows.reduce((sum, r) => sum + r.caseCount, 0);
+    /** 唯一「已分配」案例数 = 活跃总数 − 未分配；勿用各经理行合计（共同负责会重复计数） */
+    const assignedTotal = Math.max(0, totals.activeTotal - totals.unassignedCount);
     return NextResponse.json({
       rows,
       assignedTotal,

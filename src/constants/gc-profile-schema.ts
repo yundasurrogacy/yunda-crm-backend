@@ -1,5 +1,6 @@
 /**
  * 字段定义来源：修改/新版yunda-crm/CRM GC Profile.docx
+ * + 2026-08-30 客户反馈调整
  * 全部写入 surrogate_mothers.profile_data。
  */
 export type ProfileFieldOption = {
@@ -26,6 +27,18 @@ export type ProfileSectionDef = {
 const YES_NO: ProfileFieldOption[] = [
   { value: "Yes", labelEn: "Yes", labelZh: "是" },
   { value: "No", labelEn: "No", labelZh: "否" },
+];
+
+const CHILD_SEX: ProfileFieldOption[] = [
+  { value: "Female", labelEn: "Female", labelZh: "女" },
+  { value: "Male", labelEn: "Male", labelZh: "男" },
+  { value: "Other", labelEn: "Other / Unknown", labelZh: "其他 / 未知" },
+];
+
+const DELIVERY_METHOD: ProfileFieldOption[] = [
+  { value: "Vaginal", labelEn: "Vaginal", labelZh: "顺产" },
+  { value: "C-Section", labelEn: "C-Section", labelZh: "剖腹产" },
+  { value: "Other", labelEn: "Other", labelZh: "其他" },
 ];
 
 const MATCHING_STATUS: ProfileFieldOption[] = [
@@ -59,15 +72,13 @@ export const GC_PROFILE_SECTIONS: ProfileSectionDef[] = [
     fields: [
       { key: "previous_surrogacy", labelEn: "Previous Surrogacy", labelZh: "代孕史" },
       { key: "delivery_type", labelEn: "Delivery Type", labelZh: "分娩方式" },
-      { key: "preterm_history", labelEn: "Preterm History", labelZh: "早产史" },
+      {
+        key: "miscarriage_abortion_history",
+        labelEn: "Miscarriage / Abortion History",
+        labelZh: "流产堕胎历史",
+      },
       { key: "support_system", labelEn: "Support System", labelZh: "支持系统" },
-      { key: "schedule_flexibility", labelEn: "Schedule Flexibility", labelZh: "时间灵活度" },
-      { key: "match_readiness", labelEn: "Match Readiness", labelZh: "匹配准备度" },
-      { key: "response_speed", labelEn: "Response Speed", labelZh: "回复速度" },
-      { key: "communication_quality", labelEn: "Communication Quality", labelZh: "交流质量" },
       { key: "initial_impression", labelEn: "Initial Impression", labelZh: "初印象" },
-      { key: "estimated_matchability", labelEn: "Estimated Matchability", labelZh: "预估匹配率" },
-      { key: "priority_level", labelEn: "Priority Level", labelZh: "优先级" },
     ],
   },
   {
@@ -91,9 +102,47 @@ export const GC_PROFILE_SECTIONS: ProfileSectionDef[] = [
       { key: "educational_level", labelEn: "Educational Level", labelZh: "教育水平" },
       { key: "occupation", labelEn: "Occupation", labelZh: "职业" },
       { key: "base_compensation", labelEn: "Base Compensation", labelZh: "基础薪资" },
-      { key: "availability_to_proceed", labelEn: "Availability to Proceed", labelZh: "开始时间" },
       { key: "menstrual_cycle_day_1", labelEn: "Menstrual Cycle Day 1", labelZh: "生理期第一天" },
       { key: "gc_emergency_contact", labelEn: "GC Emergency Contact", labelZh: "GC 紧急联系人" },
+    ],
+  },
+  {
+    id: "birth_history",
+    titleEn: "Birth History",
+    titleZh: "生产信息",
+    fields: [
+      {
+        key: "birth_delivery_date",
+        labelEn: "Delivery Date",
+        labelZh: "生产日期",
+      },
+      {
+        key: "birth_gestational_weeks",
+        labelEn: "Gestational Weeks",
+        labelZh: "孕周",
+      },
+      {
+        key: "birth_weight",
+        labelEn: "Birth Weight",
+        labelZh: "出生体重",
+      },
+      {
+        key: "birth_child_sex",
+        labelEn: "Child Sex",
+        labelZh: "性别",
+        options: CHILD_SEX,
+      },
+      {
+        key: "birth_delivery_method",
+        labelEn: "Delivery Method",
+        labelZh: "生产方式",
+        options: DELIVERY_METHOD,
+      },
+      {
+        key: "birth_history_notes",
+        labelEn: "Additional Births / Notes",
+        labelZh: "其他生产记录 / 备注",
+      },
     ],
   },
   {
@@ -137,6 +186,18 @@ export const GC_PROFILE_SECTIONS: ProfileSectionDef[] = [
         labelZh: "是否接受双胎",
         options: YES_NO,
       },
+      {
+        key: "open_to_hiv_ips",
+        labelEn: "Open to IPs living with HIV",
+        labelZh: "是否接受和 HIV 携带者准父母合作",
+        options: YES_NO,
+      },
+      {
+        key: "open_to_hepb_ips",
+        labelEn: "Open to IPs living with Hepatitis B",
+        labelZh: "是否接受和 HepB 携带者准父母合作",
+        options: YES_NO,
+      },
     ],
   },
   {
@@ -146,9 +207,9 @@ export const GC_PROFILE_SECTIONS: ProfileSectionDef[] = [
     fields: [
       { key: "medical_records_status", labelEn: "Medical Records Status", labelZh: "MR 状态" },
       {
-        key: "ob_clearance",
-        labelEn: "OB Clearance",
-        labelZh: "OB 批准",
+        key: "background_check",
+        labelEn: "Background Check",
+        labelZh: "背景调查",
         options: YES_NO,
       },
       {
@@ -173,3 +234,9 @@ export const GC_PROFILE_SECTIONS: ProfileSectionDef[] = [
     ],
   },
 ];
+
+/** 旧字段 key → 新 key（读档时兼容） */
+export const GC_PROFILE_LEGACY_KEY_MAP: Record<string, string> = {
+  preterm_history: "miscarriage_abortion_history",
+  ob_clearance: "background_check",
+};

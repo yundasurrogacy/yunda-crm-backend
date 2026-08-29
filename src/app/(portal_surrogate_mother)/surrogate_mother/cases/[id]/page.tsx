@@ -11,6 +11,7 @@ export default function SurrogateMotherCaseDetailPage() {
       caseId={id}
       apiBase="/api/surrogate-mother/cases"
       listHref="/surrogate_mother/my-cases"
+      canPostMessages
     />
   );
 }

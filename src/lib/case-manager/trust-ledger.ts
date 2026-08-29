@@ -336,3 +336,94 @@ export async function listPartyVisibleTrustLedger(
     })),
   };
 }
+
+const UPDATE_TRUST_META = `
+  mutation UpdateTrustChangeMeta($id: bigint!, $changes: trust_account_balance_changes_set_input!) {
+    update_trust_account_balance_changes_by_pk(pk_columns: { id: $id }, _set: $changes) {
+      id
+    }
+  }
+`;
+
+const TRUST_ENTRY_BY_ID = `
+  query TrustEntryById($id: bigint!) {
+    trust_account_balance_changes_by_pk(id: $id) {
+      id
+      case_cases
+    }
+  }
+`;
+
+export type UpdateTrustMetaInput = {
+  entryId: string;
+  receiver?: string | null;
+  remark?: string | null;
+  voucher_url?: string | null;
+  visibility?: TrustVisibility;
+};
+
+/** 仅改元数据（收款人/可见性/备注/凭证），不改金额与类型，避免静默改账。 */
+export async function updateTrustLedgerMeta(
+  session: CrmSession,
+  caseIdRaw: string,
+  mode: WriteMode,
+  input: UpdateTrustMetaInput,
+): Promise<{ ok: true } | { ok: false; error: "not_found" | "bad_visibility" | "update_failed" }> {
+  if (!/^\d+$/u.test(caseIdRaw) || !/^\d+$/u.test(input.entryId)) {
+    return { ok: false, error: "not_found" };
+  }
+  if (input.visibility != null && !TRUST_VISIBILITIES.includes(input.visibility)) {
+    return { ok: false, error: "bad_visibility" };
+  }
+
+  const caseId = BigInt(caseIdRaw);
+  const where = await scopedWhere(session, caseId, mode);
+  const client = getClient();
+
+  const row = await client.execute<{
+    cases: { id: string | number }[];
+  }>({ query: CASE_TRUST_ROW, variables: { where } });
+  if (!row.cases?.[0]) return { ok: false, error: "not_found" };
+
+  const entry = await client.execute<{
+    trust_account_balance_changes_by_pk: {
+      id: string | number;
+      case_cases: string | number;
+    } | null;
+  }>({ query: TRUST_ENTRY_BY_ID, variables: { id: input.entryId } });
+
+  const found = entry.trust_account_balance_changes_by_pk;
+  if (!found || String(found.case_cases) !== caseIdRaw) {
+    return { ok: false, error: "not_found" };
+  }
+
+  const changes: Record<string, unknown> = {};
+  if (input.receiver !== undefined) {
+    changes.receiver = input.receiver?.trim() || null;
+  }
+  if (input.remark !== undefined) {
+    changes.remark = input.remark?.trim() || null;
+  }
+  if (input.voucher_url !== undefined) {
+    changes.voucher_url = input.voucher_url?.trim() || null;
+  }
+  if (input.visibility !== undefined) {
+    changes.visibility = input.visibility;
+  }
+  if (Object.keys(changes).length === 0) return { ok: true };
+
+  try {
+    const updated = await client.execute<{
+      update_trust_account_balance_changes_by_pk: { id: string | number } | null;
+    }>({
+      query: UPDATE_TRUST_META,
+      variables: { id: input.entryId, changes },
+    });
+    if (!updated.update_trust_account_balance_changes_by_pk) {
+      return { ok: false, error: "update_failed" };
+    }
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "update_failed" };
+  }
+}

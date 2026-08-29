@@ -1,4 +1,5 @@
 import type { ProfileFieldDef, ProfileSectionDef } from "@/constants/gc-profile-schema";
+import { GC_PROFILE_LEGACY_KEY_MAP } from "@/constants/gc-profile-schema";
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
   return v != null && typeof v === "object" && !Array.isArray(v);
@@ -56,7 +57,11 @@ export function resolveProfileFieldValue(
   flat: Record<string, unknown>,
   field: ProfileFieldDef,
 ): string {
-  const formatted = formatProfileValue(flat[field.key]);
+  let formatted = formatProfileValue(flat[field.key]);
+  if (!formatted) {
+    const legacy = Object.entries(GC_PROFILE_LEGACY_KEY_MAP).find(([, neu]) => neu === field.key)?.[0];
+    if (legacy) formatted = formatProfileValue(flat[legacy]);
+  }
   return formatted || "";
 }
 

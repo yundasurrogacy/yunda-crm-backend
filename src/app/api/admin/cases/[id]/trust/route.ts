@@ -4,6 +4,7 @@ import {
   listTrustLedger,
   TRUST_CHANGE_TYPES,
   TRUST_VISIBILITIES,
+  updateTrustLedgerMeta,
   type TrustChangeType,
   type TrustVisibility,
 } from "@/lib/case-manager/trust-ledger";
@@ -78,6 +79,62 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
     }
     const data = await listTrustLedger(session, id, "admin_api");
     return NextResponse.json({ ...data, wentNegative: result.wentNegative });
+  } catch {
+    return NextResponse.json({ error: "data_unavailable" }, { status: 503 });
+  }
+}
+
+type PatchBody = {
+  entryId?: unknown;
+  receiver?: unknown;
+  remark?: unknown;
+  voucher_url?: unknown;
+  visibility?: unknown;
+};
+
+export async function PATCH(req: Request, context: { params: Promise<{ id: string }> }) {
+  const session = await getServerSession();
+  if (!session || session.role !== "admin") {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+  const { id } = await context.params;
+
+  let body: PatchBody;
+  try {
+    body = (await req.json()) as PatchBody;
+  } catch {
+    return NextResponse.json({ error: "bad_json" }, { status: 400 });
+  }
+
+  const entryId = typeof body.entryId === "string" ? body.entryId.trim() : "";
+  if (!entryId) return NextResponse.json({ error: "bad_entry" }, { status: 400 });
+
+  const visibility =
+    body.visibility != null ? (String(body.visibility) as TrustVisibility) : undefined;
+  if (visibility != null && !TRUST_VISIBILITIES.includes(visibility)) {
+    return NextResponse.json({ error: "bad_visibility" }, { status: 400 });
+  }
+
+  try {
+    const result = await updateTrustLedgerMeta(session, id, "admin_api", {
+      entryId,
+      receiver: typeof body.receiver === "string" ? body.receiver : body.receiver === null ? null : undefined,
+      remark: typeof body.remark === "string" ? body.remark : body.remark === null ? null : undefined,
+      voucher_url:
+        typeof body.voucher_url === "string"
+          ? body.voucher_url
+          : body.voucher_url === null
+            ? null
+            : undefined,
+      visibility,
+    });
+    if (!result.ok) {
+      const status =
+        result.error === "not_found" ? 404 : result.error === "update_failed" ? 503 : 400;
+      return NextResponse.json({ error: result.error }, { status });
+    }
+    const data = await listTrustLedger(session, id, "admin_api");
+    return NextResponse.json(data);
   } catch {
     return NextResponse.json({ error: "data_unavailable" }, { status: 503 });
   }

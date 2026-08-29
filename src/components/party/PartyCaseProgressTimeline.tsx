@@ -1,21 +1,65 @@
 "use client";
 
-import { Check, Circle } from "lucide-react";
+import { Check, Circle, ExternalLink } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   CANONICAL_CASE_STAGES,
   canonicalStageIndex,
   isCanonicalCaseStage,
 } from "@/constants/case-stages";
+import type { CaseFileRow } from "@/lib/case-manager/case-files";
 import { translateProcessStatus } from "@/lib/i18n/translate-process-status";
 
-export function PartyCaseProgressTimeline({ processStatus }: { processStatus: string | null }) {
-  const { t } = useTranslation("portal");
+function formatDt(iso: string, lng: string) {
+  try {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    return lng.toLowerCase().startsWith("zh")
+      ? new Intl.DateTimeFormat("zh-CN", { dateStyle: "medium", timeStyle: "short" }).format(d)
+      : new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" }).format(d);
+  } catch {
+    return iso;
+  }
+}
+
+export function PartyCaseProgressTimeline({
+  processStatus,
+  caseId,
+  apiBase,
+}: {
+  processStatus: string | null;
+  caseId?: string;
+  apiBase?: string;
+}) {
+  const { t, i18n } = useTranslation("portal");
   const { t: tStage } = useTranslation("caseStage");
+  const [files, setFiles] = useState<CaseFileRow[]>([]);
+
+  useEffect(() => {
+    if (!caseId || !apiBase) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`${apiBase}/${encodeURIComponent(caseId)}/files`);
+        if (!res.ok) return;
+        const json = (await res.json()) as { files?: CaseFileRow[] };
+        if (!cancelled) setFiles(json.files ?? []);
+      } catch {
+        /* ignore */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [apiBase, caseId]);
 
   const curIdx = processStatus && isCanonicalCaseStage(processStatus) ? canonicalStageIndex(processStatus) : -1;
   const progressPct =
     curIdx >= 0 ? Math.round(((curIdx + 1) / CANONICAL_CASE_STAGES.length) * 100) : 0;
+
+  const categoryLabel = (cat: string) =>
+    t(`case_detail.files.category_${cat}`, { defaultValue: cat });
 
   return (
     <section className="crm-card">
@@ -81,6 +125,44 @@ export function PartyCaseProgressTimeline({ processStatus }: { processStatus: st
           );
         })}
       </ol>
+
+      {caseId && apiBase ? (
+        <div className="mt-5 border-t border-sage-200/80 pt-4">
+          <h3 className="mb-1 text-sm font-semibold text-sage-900">
+            {t("party_cases.progress_docs_title")}
+          </h3>
+          <p className="mb-3 text-xs text-sage-600">{t("party_cases.progress_docs_intro")}</p>
+          {files.length === 0 ? (
+            <p className="text-sm text-sage-600">{t("party_cases.progress_docs_empty")}</p>
+          ) : (
+            <ul className="space-y-2 text-sm">
+              {files.map((f) => (
+                <li
+                  key={f.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-sage-50/80 px-3 py-2"
+                >
+                  <div className="min-w-0">
+                    <p className="font-medium text-sage-900">{categoryLabel(f.category)}</p>
+                    {f.note ? <p className="text-xs text-sage-600">{f.note}</p> : null}
+                    <p className="text-xs text-sage-500">{formatDt(f.created_at, i18n.language)}</p>
+                  </div>
+                  {f.file_url ? (
+                    <a
+                      href={f.file_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-brand-brown underline"
+                    >
+                      {t("case_detail.open_file")}
+                      <ExternalLink className="h-3 w-3" aria-hidden strokeWidth={2} />
+                    </a>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ) : null}
     </section>
   );
 }

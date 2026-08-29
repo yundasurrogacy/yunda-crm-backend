@@ -6,6 +6,7 @@ import { getServerSession } from "@/lib/auth/session-cookie";
 import { fetchCaseManagerCaseloads } from "@/lib/admin/case-manager-caseload";
 import { createCaseManagerEntity } from "@/lib/admin/create-case-manager-entity";
 import { createPartyEntity } from "@/lib/party/create-party-entity";
+import { intendedParentDisplay, surrogateDisplayName } from "@/lib/case-manager/display-names";
 import { mergeActiveWhere } from "@/lib/soft-delete/entity-soft-delete";
 import type { EntityKind } from "@/lib/admin/entity-profile";
 
@@ -30,6 +31,7 @@ const LIST_INTENDED_PARENTS = `
       id
       email
       deleted_at
+      profile_data
       user { id email role }
     }
   }
@@ -42,6 +44,7 @@ const LIST_SURROGATES = `
       id
       email
       deleted_at
+      profile_data
       user { id email role }
     }
   }
@@ -142,17 +145,22 @@ export async function GET(req: Request) {
           id: string | number;
           email: string | null;
           deleted_at: string | null;
+          profile_data: unknown;
           user: { id: string | number; email: string; role: string } | null;
         }[];
       }>({ query: LIST_INTENDED_PARENTS, variables: { where, limit, offset } });
       return NextResponse.json({
-        rows: (data.intended_parents ?? []).map((r) => ({
-          entityId: String(r.id),
-          userId: r.user ? String(r.user.id) : null,
-          email: r.user?.email ?? r.email ?? "",
-          role: r.user?.role ?? "",
-          deleted_at: r.deleted_at ?? null,
-        })),
+        rows: (data.intended_parents ?? []).map((r) => {
+          const email = r.user?.email ?? r.email ?? "";
+          return {
+            entityId: String(r.id),
+            userId: r.user ? String(r.user.id) : null,
+            email,
+            displayName: intendedParentDisplay(r.profile_data, email) || "—",
+            role: r.user?.role ?? "",
+            deleted_at: r.deleted_at ?? null,
+          };
+        }),
         total: data.intended_parents_aggregate?.aggregate?.count ?? 0,
         page,
         pageSize,
@@ -167,17 +175,22 @@ export async function GET(req: Request) {
         id: string | number;
         email: string | null;
         deleted_at: string | null;
+        profile_data: unknown;
         user: { id: string | number; email: string; role: string } | null;
       }[];
     }>({ query: LIST_SURROGATES, variables: { where, limit, offset } });
     return NextResponse.json({
-      rows: (data.surrogate_mothers ?? []).map((r) => ({
-        entityId: String(r.id),
-        userId: r.user ? String(r.user.id) : null,
-        email: r.user?.email ?? r.email ?? "",
-        role: r.user?.role ?? "",
-        deleted_at: r.deleted_at ?? null,
-      })),
+      rows: (data.surrogate_mothers ?? []).map((r) => {
+        const email = r.user?.email ?? r.email ?? "";
+        return {
+          entityId: String(r.id),
+          userId: r.user ? String(r.user.id) : null,
+          email,
+          displayName: surrogateDisplayName(r.profile_data, email) || "—",
+          role: r.user?.role ?? "",
+          deleted_at: r.deleted_at ?? null,
+        };
+      }),
       total: data.surrogate_mothers_aggregate?.aggregate?.count ?? 0,
       page,
       pageSize,

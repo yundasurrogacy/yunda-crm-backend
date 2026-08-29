@@ -1,8 +1,13 @@
 import type { ProfileFieldDef, ProfileSectionDef } from "@/constants/gc-profile-schema";
-import { flattenProfileSources, resolveProfileFieldValue } from "@/lib/profile/display-profile";
+import { GC_PROFILE_LEGACY_KEY_MAP } from "@/constants/gc-profile-schema";
+import { flattenProfileSources, formatProfileValue } from "@/lib/profile/display-profile";
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
   return v != null && typeof v === "object" && !Array.isArray(v);
+}
+
+function legacyKeyFor(newKey: string): string | undefined {
+  return Object.entries(GC_PROFILE_LEGACY_KEY_MAP).find(([, neu]) => neu === newKey)?.[0];
 }
 
 /** 从合并后的数据源生成表单初始值（按 schema key） */
@@ -16,7 +21,12 @@ export function buildProfileFormValues(
   const out: Record<string, string> = {};
   for (const section of sections) {
     for (const field of section.fields) {
-      out[field.key] = resolveProfileFieldValue(flat, field);
+      let raw = formatProfileValue(flat[field.key]);
+      if (!raw) {
+        const legacy = legacyKeyFor(field.key);
+        if (legacy) raw = formatProfileValue(flat[legacy]);
+      }
+      out[field.key] = raw;
     }
   }
   for (const key of extraKeys) {
@@ -43,6 +53,8 @@ export function mergeProfileDataFromForm(
     const v = raw.trim();
     if (v) base[key] = v;
     else delete base[key];
+    const legacy = legacyKeyFor(key);
+    if (legacy) delete base[legacy];
   }
 
   return base;

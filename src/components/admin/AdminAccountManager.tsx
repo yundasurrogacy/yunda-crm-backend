@@ -12,6 +12,7 @@ type Row = {
   entityId: string;
   userId: string | null;
   email: string;
+  displayName?: string;
   deleted_at: string | null;
   caseCount?: number;
 };
@@ -66,9 +67,10 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
   const showProfileActions = kind === "intended_parent" || kind === "surrogate_mother";
   const canCreateEntity = true;
   const showCaseCount = kind === "case_manager";
+  const showDisplayName = kind === "intended_parent" || kind === "surrogate_mother";
   const detailBase =
     kind === "intended_parent" ? "/admin/accounts/intended-parents" : "/admin/accounts/surrogates";
-  const colspan = 6 + (showCaseCount ? 1 : 0);
+  const colspan = 6 + (showCaseCount ? 1 : 0) + (showDisplayName ? 1 : 0);
 
   async function onCreateEntity(e: React.FormEvent) {
     e.preventDefault();
@@ -245,6 +247,9 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
             <thead>
               <tr className="border-b border-sage-200 bg-sage-100 text-xs font-semibold uppercase tracking-wide text-sage-700">
                 <th className="px-4 py-3">{t("admin_accounts.col_entity_id")}</th>
+                {showDisplayName ? (
+                  <th className="px-4 py-3">{t("admin_accounts.col_name")}</th>
+                ) : null}
                 <th className="px-4 py-3">{t("admin_accounts.col_user_id")}</th>
                 <th className="px-4 py-3">{t("admin_accounts.col_email")}</th>
                 {showCaseCount ? (
@@ -280,6 +285,11 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
                       ].join(" ")}
                     >
                       <td className="px-4 py-3">{r.entityId}</td>
+                      {showDisplayName ? (
+                        <td className="px-4 py-3 font-medium text-sage-900">
+                          {r.displayName || "—"}
+                        </td>
+                      ) : null}
                       <td className="px-4 py-3">{r.userId ?? "—"}</td>
                       <td className="px-4 py-3">{r.email || "—"}</td>
                       {showCaseCount ? (

@@ -79,8 +79,8 @@ export async function fetchPartyCases(
     caseManagerEmail: c.case_manager?.user?.email?.trim() || null,
     counterpartName:
       kind === "intended_parent"
-        ? surrogateDisplayName(c.surrogate_mother?.profile_data, c.surrogate_mother?.email ?? undefined) ||
-          "—"
+        ? // IP 端默认不展示孕妈邮箱；无姓名时显示 —
+          surrogateDisplayName(c.surrogate_mother?.profile_data) || "—"
         : intendedParentDisplay(c.intended_parent?.profile_data, c.intended_parent?.email ?? undefined) ||
           "—",
   }));

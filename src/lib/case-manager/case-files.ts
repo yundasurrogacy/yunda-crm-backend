@@ -221,13 +221,7 @@ export async function addCaseFile(
   if (input.about_role && !CASE_FILE_ABOUT_ROLES.includes(input.about_role)) {
     return { ok: false, error: "bad_input" };
   }
-  const visibility: CaseFileVisibility =
-    input.visibility ??
-    (input.category === "PrenatalReport" ||
-    input.category === "Photo" ||
-    input.category === "EscrowLegalContract"
-      ? "all"
-      : "manager");
+  const visibility: CaseFileVisibility = input.visibility ?? "all";
   if (!CASE_FILE_VISIBILITIES.includes(visibility)) {
     return { ok: false, error: "bad_input" };
   }

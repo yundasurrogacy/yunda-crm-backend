@@ -47,7 +47,8 @@ export function CaseFilesPanel({ caseId, apiPathBase }: Props) {
   const [errorKey, setErrorKey] = useState<string | null>(null);
   const [category, setCategory] = useState("Other");
   const [aboutRole, setAboutRole] = useState("");
-  const [visibility, setVisibility] = useState<"all" | "manager">("manager");
+  /** 默认客户可见；内部材料可手动改为仅经理 */
+  const [visibility, setVisibility] = useState<"all" | "manager">("all");
   const [note, setNote] = useState("");
   const [fileUrl, setFileUrl] = useState("");
 

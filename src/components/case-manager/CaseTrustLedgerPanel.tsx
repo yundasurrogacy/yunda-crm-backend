@@ -78,6 +78,12 @@ export function CaseTrustLedgerPanel({
   const [voucherUrl, setVoucherUrl] = useState("");
   const [visibility, setVisibility] = useState<"all" | "manager">("manager");
 
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editReceiver, setEditReceiver] = useState("");
+  const [editRemark, setEditRemark] = useState("");
+  const [editVisibility, setEditVisibility] = useState<"all" | "manager">("manager");
+  const [editSaving, setEditSaving] = useState(false);
+
   const trustApi = `${apiPathBase}/${encodeURIComponent(caseId)}/trust`;
   const onBalanceUpdatedRef = useRef(onBalanceUpdated);
   onBalanceUpdatedRef.current = onBalanceUpdated;
@@ -119,6 +125,45 @@ export function CaseTrustLedgerPanel({
     if ((changeType === "CREDIT" || changeType === "SEED") && signed < 0) signed = Math.abs(signed);
     return Math.round((before + signed) * 100) / 100;
   }, [amount, balance, changeType]);
+
+  function startEdit(e: TrustLedgerEntry) {
+    setEditingId(e.id);
+    setEditReceiver(e.receiver ?? "");
+    setEditRemark(e.remark ?? "");
+    setEditVisibility(e.visibility === "all" ? "all" : "manager");
+    setErrorKey(null);
+  }
+
+  async function saveEdit() {
+    if (!editingId || editSaving) return;
+    setEditSaving(true);
+    setErrorKey(null);
+    try {
+      const res = await fetch(trustApi, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          entryId: editingId,
+          receiver: editReceiver,
+          remark: editRemark,
+          visibility: editVisibility,
+        }),
+      });
+      if (!res.ok) {
+        setErrorKey("case_detail.trust.error_edit");
+        return;
+      }
+      const json = (await res.json()) as { balance: string; entries: TrustLedgerEntry[] };
+      setEntries(json.entries ?? []);
+      setBalance(json.balance);
+      onBalanceUpdatedRef.current(json.balance);
+      setEditingId(null);
+    } catch {
+      setErrorKey("case_detail.trust.error_edit");
+    } finally {
+      setEditSaving(false);
+    }
+  }
 
   const onSubmit = async () => {
     if (saving) return;
@@ -362,43 +407,114 @@ export function CaseTrustLedgerPanel({
                   <th className="py-2 pr-3 font-semibold">{t("case_detail.trust.col_receiver")}</th>
                   <th className="py-2 pr-3 font-semibold">{t("case_detail.trust.col_visibility")}</th>
                   <th className="py-2 pr-3 font-semibold">{t("case_detail.trust.col_voucher")}</th>
-                  <th className="py-2 font-semibold">{t("case_detail.trust.col_remark")}</th>
+                  <th className="py-2 pr-3 font-semibold">{t("case_detail.trust.col_remark")}</th>
+                  <th className="py-2 font-semibold">{t("case_detail.trust.col_actions")}</th>
                 </tr>
               </thead>
               <tbody>
-                {entries.map((e) => (
-                  <tr key={e.id} className="border-b border-sage-100 align-top">
-                    <td className="py-2 pr-3 whitespace-nowrap text-sage-700">
-                      {formatDt(e.created_at, lng)}
-                    </td>
-                    <td className="py-2 pr-3 text-sage-800">{typeLabel(e.change_type, t)}</td>
-                    <td className="py-2 pr-3 tabular-nums font-medium text-sage-900">
-                      {formatMoney(e.change_amount, lng)}
-                    </td>
-                    <td className="py-2 pr-3 tabular-nums text-sage-800">
-                      {e.balance_after != null ? formatMoney(e.balance_after, lng) : "—"}
-                    </td>
-                    <td className="py-2 pr-3 text-sage-700">{e.receiver || "—"}</td>
-                    <td className="py-2 pr-3 text-sage-700">{visibilityLabel(e.visibility, t)}</td>
-                    <td className="py-2 pr-3 text-sage-700">
-                      {e.voucher_url ? (
-                        <a
-                          href={e.voucher_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="font-medium text-brand-brown underline"
-                        >
-                          {t("case_detail.trust.voucher_link")}
-                        </a>
-                      ) : (
-                        "—"
-                      )}
-                    </td>
-                    <td className="py-2 text-sage-700">{e.remark || "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                {entries.map((e) => {
+                  const isEditing = editingId === e.id;
+                  return (
+                    <tr key={e.id} className="border-b border-sage-100 align-top">
+                      <td className="py-2 pr-3 whitespace-nowrap text-sage-700">
+                        {formatDt(e.created_at, lng)}
+                      </td>
+                      <td className="py-2 pr-3 text-sage-800">{typeLabel(e.change_type, t)}</td>
+                      <td className="py-2 pr-3 tabular-nums font-medium text-sage-900">
+                        {formatMoney(e.change_amount, lng)}
+                      </td>
+                      <td className="py-2 pr-3 tabular-nums text-sage-800">
+                        {e.balance_after != null ? formatMoney(e.balance_after, lng) : "—"}
+                      </td>
+                      <td className="py-2 pr-3 text-sage-700">
+                        {isEditing ? (
+                          <input
+                            className="w-full min-w-[6rem] rounded border border-sage-300 px-2 py-1 text-sm"
+                            value={editReceiver}
+                            onChange={(ev) => setEditReceiver(ev.target.value)}
+                            disabled={editSaving}
+                          />
+                        ) : (
+                          e.receiver || "—"
+                        )}
+                      </td>
+                      <td className="py-2 pr-3 text-sage-700">
+                        {isEditing ? (
+                          <SelectMenu
+                            value={editVisibility}
+                            onChange={(v) => setEditVisibility(v as "all" | "manager")}
+                            options={[
+                              { value: "manager", label: t("case_detail.trust.visibility_manager") },
+                              { value: "all", label: t("case_detail.trust.visibility_all") },
+                            ]}
+                            disabled={editSaving}
+                          />
+                        ) : (
+                          visibilityLabel(e.visibility, t)
+                        )}
+                      </td>
+                      <td className="py-2 pr-3 text-sage-700">
+                        {e.voucher_url ? (
+                          <a
+                            href={e.voucher_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="font-medium text-brand-brown underline"
+                          >
+                            {t("case_detail.trust.voucher_link")}
+                          </a>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                      <td className="py-2 pr-3 text-sage-700">
+                        {isEditing ? (
+                          <input
+                            className="w-full min-w-[8rem] rounded border border-sage-300 px-2 py-1 text-sm"
+                            value={editRemark}
+                            onChange={(ev) => setEditRemark(ev.target.value)}
+                            disabled={editSaving}
+                          />
+                        ) : (
+                          e.remark || "—"
+                        )}
+                      </td>
+                      <td className="py-2">
+                        {isEditing ? (
+                          <div className="flex flex-wrap gap-1">
+                            <button
+                              type="button"
+                              disabled={editSaving}
+                              onClick={() => void saveEdit()}
+                              className="rounded border border-brand-brown bg-brand-brown px-2 py-1 text-xs font-semibold text-white disabled:opacity-50"
+                            >
+                              {editSaving
+                                ? t("case_detail.trust.edit_saving")
+                                : t("case_detail.trust.edit_save")}
+                            </button>
+                            <button
+                              type="button"
+                              disabled={editSaving}
+                              onClick={() => setEditingId(null)}
+                              className="rounded border border-sage-300 bg-white px-2 py-1 text-xs font-semibold text-sage-800"
+                            >
+                              {t("case_detail.trust.edit_cancel")}
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => startEdit(e)}
+                            className="rounded border border-sage-300 bg-white px-2 py-1 text-xs font-semibold text-sage-800 hover:bg-sage-50"
+                          >
+                            {t("case_detail.trust.edit")}
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>            </table>
           </div>
         </>
       )}

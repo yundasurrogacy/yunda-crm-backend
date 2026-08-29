@@ -10,7 +10,7 @@ import { PartyCaseExtras } from "@/components/party/PartyCaseExtras";
 import { PartyTrustLedgerPanel } from "@/components/party/PartyTrustLedgerPanel";
 import type { AmCaseDetail } from "@/lib/case-manager/fetch-case-detail";
 import {
-  partyVisibleGcProfileSections,
+  partyVisibleGcProfileSectionsForClient,
   partyVisibleIpProfileSections,
 } from "@/lib/party/redact-case-detail-for-party";
 import { translateProcessStatus } from "@/lib/i18n/translate-process-status";
@@ -36,7 +36,7 @@ export function PartyCaseDetailPage({
   caseId: string;
   apiBase: string;
   listHref: string;
-  /** IP 可发留言；GC 暂只读对客附件 */
+  /** IP / 孕妈均可发留言 */
   canPostMessages?: boolean;
 }) {
   const { t } = useTranslation("portal");
@@ -146,7 +146,11 @@ export function PartyCaseDetailPage({
             </dl>
           </section>
 
-          <PartyCaseProgressTimeline processStatus={data.process_status} />
+          <PartyCaseProgressTimeline
+            processStatus={data.process_status}
+            caseId={caseId}
+            apiBase={apiBase}
+          />
 
           {canPostMessages ? (
             <PartyTrustLedgerPanel caseId={caseId} apiBase={apiBase} />
@@ -155,9 +159,9 @@ export function PartyCaseDetailPage({
           <div className="grid gap-4 lg:grid-cols-2">
             <CaseEntityProfileCard
               title={t("case_detail.section_surrogate")}
-              subtitle={data.surrogate.displayName || data.surrogate.email || null}
+              subtitle={data.surrogate.displayName || null}
               profileTitle={t("case_detail.section_gc_profile")}
-              sections={partyVisibleGcProfileSections()}
+              sections={partyVisibleGcProfileSectionsForClient()}
               profileData={data.surrogate.profile_data}
               lng={lng}
               emptyMessage={t("case_detail.profile_empty_gc")}

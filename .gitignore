@@ -35,6 +35,9 @@ yarn-error.log*
 .env*.local
 !.env.example
 
+# local help-screenshot capture snippets (preview credentials + machine paths)
+/scripts/
+
 # vercel
 .vercel
 

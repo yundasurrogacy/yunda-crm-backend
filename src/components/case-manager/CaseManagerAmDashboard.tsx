@@ -142,6 +142,9 @@ export function CaseManagerAmDashboard({
   const [gcOptions, setGcOptions] = useState<SelectOption[]>([]);
   const [gcAssignTarget, setGcAssignTarget] = useState<string | null>(null);
   const [gcAssignValue, setGcAssignValue] = useState("");
+  const [gcAssignQuery, setGcAssignQuery] = useState("");
+  const [gcAssignBusy, setGcAssignBusy] = useState(false);
+  const [gcAssignError, setGcAssignError] = useState<string | null>(null);
   const [selectedCaseIds, setSelectedCaseIds] = useState<string[]>([]);
   const [reassignCmId, setReassignCmId] = useState("");
   const [reassigning, setReassigning] = useState(false);
@@ -490,17 +493,45 @@ export function CaseManagerAmDashboard({
     }
   }
 
-  async function assignGc(caseId: string) {
-    if (!gcAssignValue.trim()) return;
-    await fetch(`${casesApiBase}/${caseId}/actions`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "match_gc", surrogateId: gcAssignValue.trim() }),
-    });
+  async function assignGc() {
+    if (!gcAssignTarget || !gcAssignValue.trim() || gcAssignBusy) return;
+    setGcAssignBusy(true);
+    setGcAssignError(null);
+    try {
+      const res = await fetch(`${casesApiBase}/${gcAssignTarget}/actions`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "match_gc", surrogateId: gcAssignValue.trim() }),
+      });
+      if (!res.ok) {
+        setGcAssignError(t("am_dash.error_gc_match"));
+        return;
+      }
+      setGcAssignTarget(null);
+      setGcAssignValue("");
+      setGcAssignQuery("");
+      await load();
+    } catch {
+      setGcAssignError(t("am_dash.error_gc_match"));
+    } finally {
+      setGcAssignBusy(false);
+    }
+  }
+
+  function closeGcMatch() {
+    if (gcAssignBusy) return;
     setGcAssignTarget(null);
     setGcAssignValue("");
-    await load();
+    setGcAssignQuery("");
+    setGcAssignError(null);
   }
+
+  const gcAssignRow = data?.rows.find((r) => r.id === gcAssignTarget) ?? null;
+  const gcFiltered = useMemo(() => {
+    const q = gcAssignQuery.trim().toLowerCase();
+    if (!q) return gcOptions;
+    return gcOptions.filter((o) => o.label.toLowerCase().includes(q) || o.id.toLowerCase().includes(q));
+  }, [gcAssignQuery, gcOptions]);
 
   const rowIds = useMemo(() => (data?.rows ?? []).map((r) => r.id), [data?.rows]);
   const allSelected = rowIds.length > 0 && rowIds.every((id) => selectedCaseIds.includes(id));
@@ -948,37 +979,18 @@ export function CaseManagerAmDashboard({
                                 </button>
                               ) : null}
                               {!isDeleted && !row.surrogateId ? (
-                                gcAssignTarget === row.id ? (
-                                  <div className="inline-flex min-w-[14rem] max-w-[20rem] items-center gap-2">
-                                    <EntitySearchSelect
-                                      className="min-w-0 flex-1"
-                                      options={gcOptions}
-                                      value={gcAssignValue}
-                                      onChange={setGcAssignValue}
-                                      placeholder={t("entity_search.placeholder")}
-                                      emptyLabel={t("am_dash.pick_gc")}
-                                      allowEmpty
-                                    />
-                                    <button
-                                      type="button"
-                                      onClick={() => void assignGc(row.id)}
-                                      className="crm-btn crm-btn-primary crm-btn-xs shrink-0"
-                                    >
-                                      {t("am_dash.confirm_gc_match")}
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setGcAssignTarget(row.id);
-                                      setGcAssignValue("");
-                                    }}
-                                    className="crm-btn crm-btn-secondary crm-btn-xs"
-                                  >
-                                    {t("am_dash.gc_match")}
-                                  </button>
-                                )
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setGcAssignTarget(row.id);
+                                    setGcAssignValue("");
+                                    setGcAssignQuery("");
+                                    setGcAssignError(null);
+                                  }}
+                                  className="crm-btn crm-btn-secondary crm-btn-xs"
+                                >
+                                  {t("am_dash.gc_match")}
+                                </button>
                               ) : null}
                             </div>
                           </td>
@@ -1033,6 +1045,65 @@ export function CaseManagerAmDashboard({
           )}
         </CrmModal>
       ) : null}
+      <CrmModal
+        open={Boolean(gcAssignTarget)}
+        onClose={closeGcMatch}
+        title={t("am_dash.gc_match")}
+      >
+        <div className="space-y-3">
+          <p className="text-sm text-sage-700">
+            {t("am_dash.gc_match_intro", {
+              id: gcAssignTarget ?? "",
+              ip: gcAssignRow?.intendedParentName || "—",
+            })}
+          </p>
+          <label className="block text-xs font-medium text-sage-700">
+            {t("am_dash.pick_gc")}
+            <input
+              value={gcAssignQuery}
+              onChange={(e) => setGcAssignQuery(e.target.value)}
+              placeholder={t("am_dash.gc_search_placeholder")}
+              disabled={gcAssignBusy}
+              className="mt-1 w-full rounded-md border border-sage-300 bg-white px-3 py-2 text-sm font-normal text-sage-900"
+            />
+          </label>
+          <ul className="max-h-56 overflow-auto rounded-md border border-sage-200 bg-white py-1">
+            {gcFiltered.length === 0 ? (
+              <li className="px-3 py-2 text-sm text-sage-500">{t("entity_search.no_matches")}</li>
+            ) : (
+              gcFiltered.map((o) => (
+                <li key={o.id}>
+                  <button
+                    type="button"
+                    disabled={gcAssignBusy}
+                    onClick={() => setGcAssignValue(o.id)}
+                    className={[
+                      "block w-full px-3 py-2 text-left text-sm text-sage-900 hover:bg-sage-100",
+                      gcAssignValue === o.id ? "bg-maple/40 font-medium" : "",
+                    ].join(" ")}
+                  >
+                    {o.label}
+                  </button>
+                </li>
+              ))
+            )}
+          </ul>
+          {gcAssignError ? <p className="text-sm text-red-700">{gcAssignError}</p> : null}
+          <div className="flex flex-wrap gap-2 pt-1">
+            <button type="button" disabled={gcAssignBusy} onClick={closeGcMatch} className="crm-btn crm-btn-secondary">
+              {t("confirm_dialog.cancel")}
+            </button>
+            <button
+              type="button"
+              disabled={gcAssignBusy || !gcAssignValue.trim()}
+              onClick={() => void assignGc()}
+              className="crm-btn crm-btn-primary"
+            >
+              {gcAssignBusy ? t("am_dash.matching_gc") : t("am_dash.confirm_gc_match")}
+            </button>
+          </div>
+        </div>
+      </CrmModal>
     </div>
   );
 }

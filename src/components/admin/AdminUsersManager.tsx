@@ -70,6 +70,8 @@ export function AdminUsersManager() {
   const [edit, setEdit] = useState<{ userId: string; email: string; role: string; password: string } | null>(
     null,
   );
+  const [editError, setEditError] = useState<string | null>(null);
+  const [editSaving, setEditSaving] = useState(false);
   const [bindModal, setBindModal] = useState<{
     userId: string;
     email: string;
@@ -161,8 +163,10 @@ export function AdminUsersManager() {
 
   async function onSaveEdit(e: React.FormEvent) {
     e.preventDefault();
-    if (!edit) return;
+    if (!edit || editSaving) return;
     setMessage(null);
+    setEditError(null);
+    setEditSaving(true);
     try {
       const body: { userId: string; email?: string; role?: string; password?: string } = {
         userId: edit.userId,
@@ -176,14 +180,16 @@ export function AdminUsersManager() {
         body: JSON.stringify(body),
       });
       if (!res.ok) {
-        setMessage(t("admin_users.error_update"));
+        setEditError(t("admin_users.error_update"));
         return;
       }
       setEdit(null);
       setMessage(t("admin_users.update_ok"));
       await load();
     } catch {
-      setMessage(t("admin_users.error_update"));
+      setEditError(t("admin_users.error_update"));
+    } finally {
+      setEditSaving(false);
     }
   }
 
@@ -246,53 +252,6 @@ export function AdminUsersManager() {
           </div>
         </div>
         </div>
-
-        {edit ? (
-          <form
-            className="mt-4 space-y-3 rounded-lg border border-sage-200 bg-sage-50/80 p-4"
-            onSubmit={onSaveEdit}
-          >
-            <p className="text-sm font-semibold text-brand-brown">{t("admin_users.edit_user", { id: edit.userId })}</p>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <label className="flex flex-col gap-1 text-sm">
-                <span className="text-xs font-medium text-sage-700">{t("admin_users.lbl_email")}</span>
-                <input
-                  value={edit.email}
-                  onChange={(e) => setEdit((p) => (p ? { ...p, email: e.target.value } : p))}
-                  type="email"
-                  className="rounded-md border border-sage-300 bg-white px-3 py-2 text-sm"
-                />
-              </label>
-              <label className="flex flex-col gap-1 text-sm">
-                <span className="text-xs font-medium text-sage-700">{t("admin_users.lbl_role")}</span>
-                <RoleField
-                  idPrefix="edit"
-                  value={ROLE_VALUES.includes(edit.role as (typeof ROLE_VALUES)[number]) ? edit.role : "user"}
-                  onChange={(role) => setEdit((p) => (p ? { ...p, role } : p))}
-                />
-              </label>
-              <label className="flex flex-col gap-1 text-sm sm:col-span-2">
-                <span className="text-xs font-medium text-sage-700">{t("admin_users.lbl_password_reset")}</span>
-                <input
-                  value={edit.password}
-                  onChange={(e) => setEdit((p) => (p ? { ...p, password: e.target.value } : p))}
-                  type="password"
-                  autoComplete="new-password"
-                  placeholder={t("admin_users.ph_password_optional")}
-                  className="rounded-md border border-sage-300 bg-white px-3 py-2 text-sm"
-                />
-              </label>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button type="submit" className="crm-btn crm-btn-primary">
-                {t("admin_users.save")}
-              </button>
-              <button type="button" onClick={() => setEdit(null)} className="crm-btn crm-btn-secondary">
-                {t("admin_users.cancel")}
-              </button>
-            </div>
-          </form>
-        ) : null}
 
         <div className="crm-table-scroll">
           <table className="crm-table min-w-[960px]">
@@ -398,9 +357,10 @@ export function AdminUsersManager() {
                         )}
                         <button
                           type="button"
-                          onClick={() =>
-                            setEdit({ userId: r.userId, email: r.email, role: r.role, password: "" })
-                          }
+                          onClick={() => {
+                            setEditError(null);
+                            setEdit({ userId: r.userId, email: r.email, role: r.role, password: "" });
+                          }}
                           className="crm-btn crm-btn-secondary crm-btn-xs"
                         >
                           {t("admin_users.action_edit")}
@@ -492,6 +452,63 @@ export function AdminUsersManager() {
             </button>
           </div>
         </form>
+      </CrmModal>
+      <CrmModal
+        open={Boolean(edit)}
+        onClose={() => {
+          if (editSaving) return;
+          setEdit(null);
+        }}
+        title={edit ? t("admin_users.edit_user", { id: edit.userId }) : t("admin_users.action_edit")}
+      >
+        {edit ? (
+          <form className="space-y-3 pb-20" onSubmit={(e) => void onSaveEdit(e)}>
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="text-xs font-medium text-sage-700">{t("admin_users.lbl_email")}</span>
+              <input
+                value={edit.email}
+                onChange={(e) => setEdit((p) => (p ? { ...p, email: e.target.value } : p))}
+                type="email"
+                disabled={editSaving}
+                className="rounded-md border border-sage-300 bg-white px-3 py-2 text-sm"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="text-xs font-medium text-sage-700">{t("admin_users.lbl_role")}</span>
+              <RoleField
+                idPrefix="edit"
+                value={ROLE_VALUES.includes(edit.role as (typeof ROLE_VALUES)[number]) ? edit.role : "user"}
+                onChange={(role) => setEdit((p) => (p ? { ...p, role } : p))}
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="text-xs font-medium text-sage-700">{t("admin_users.lbl_password_reset")}</span>
+              <input
+                value={edit.password}
+                onChange={(e) => setEdit((p) => (p ? { ...p, password: e.target.value } : p))}
+                type="password"
+                autoComplete="new-password"
+                placeholder={t("admin_users.ph_password_optional")}
+                disabled={editSaving}
+                className="rounded-md border border-sage-300 bg-white px-3 py-2 text-sm"
+              />
+            </label>
+            {editError ? <p className="text-sm text-red-700">{editError}</p> : null}
+            <div className="flex flex-wrap gap-2 pt-1">
+              <button
+                type="button"
+                disabled={editSaving}
+                onClick={() => setEdit(null)}
+                className="crm-btn crm-btn-secondary"
+              >
+                {t("admin_users.cancel")}
+              </button>
+              <button type="submit" disabled={editSaving} className="crm-btn crm-btn-primary">
+                {t("admin_users.save")}
+              </button>
+            </div>
+          </form>
+        ) : null}
       </CrmModal>
     </div>
   );

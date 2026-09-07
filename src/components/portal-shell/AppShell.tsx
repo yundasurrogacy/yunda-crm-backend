@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/components/ui/AppLink";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
@@ -127,7 +127,6 @@ export function AppShell({
                     <Link
                       key={item.href}
                       href={item.href}
-                      prefetch={false}
                       aria-current={active ? "page" : undefined}
                       className={[
                         "shrink-0 rounded-md px-3 py-2.5 text-[15px] font-medium transition-all duration-150",

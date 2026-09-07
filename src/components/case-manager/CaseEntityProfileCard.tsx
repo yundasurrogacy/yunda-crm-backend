@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/components/ui/AppLink";
 import type { ReactNode } from "react";
 import { StructuredProfileView } from "@/components/profile/StructuredProfileView";
 import { ProfilePhotosView } from "@/components/profile/ProfilePhotosView";

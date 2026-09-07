@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/components/ui/AppLink";
 import { useTranslation } from "react-i18next";
 import type { AdminCmWorkloadPayload } from "@/lib/admin/case-manager-caseload";
 

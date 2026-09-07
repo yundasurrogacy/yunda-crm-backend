@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/components/ui/AppLink";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { listHrefForBack } from "@/lib/crm-list-return";

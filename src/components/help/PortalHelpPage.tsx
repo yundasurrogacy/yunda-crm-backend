@@ -1,13 +1,34 @@
 "use client";
 
-import { helpDocForPath, type PortalHelpDoc } from "@/lib/help/portal-help";
+import { helpDocForPath, helpShotSrc, type PortalHelpDoc } from "@/lib/help/portal-help";
+import { OverlayPortal } from "@/components/ui/OverlayPortal";
 import { usePathname } from "next/navigation";
+import { useEffect, useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 export function PortalHelpPage({ doc }: { doc?: PortalHelpDoc }) {
   const pathname = usePathname() ?? "";
-  const { t } = useTranslation("portal");
+  const { t, i18n } = useTranslation("portal");
   const data = doc ?? helpDocForPath(pathname);
+  const [preview, setPreview] = useState<{ image: string; alt: string } | null>(null);
+  const previewTitleId = useId();
+
+  useEffect(() => {
+    if (!preview) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setPreview(null);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [preview]);
 
   return (
     <div className="ami-ui crm-font-ui crm-page">
@@ -50,23 +71,38 @@ export function PortalHelpPage({ doc }: { doc?: PortalHelpDoc }) {
           <h2 className="crm-font-display mb-2 text-lg font-semibold text-brand-brown">{t(section.titleKey)}</h2>
           {section.introKey ? <p className="mb-3 text-sm text-sage-700">{t(section.introKey)}</p> : null}
           <ol className="space-y-4">
-            {section.steps.map((step, i) => (
-              <li key={step.titleKey} className="rounded-lg border border-sage-200/80 bg-white/70 p-4">
-                <p className="text-sm font-semibold text-sage-900">
-                  <span className="mr-2 tabular-nums text-brand-brown">{i + 1}.</span>
-                  {t(step.titleKey)}
-                </p>
-                <p className="mt-1 text-sm leading-relaxed text-sage-700">{t(step.bodyKey)}</p>
-                {step.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={step.image}
-                    alt={t(step.titleKey)}
-                    className="mt-3 max-h-[22rem] w-full rounded-md border border-sage-200 object-contain bg-sage-50"
-                  />
-                ) : null}
-              </li>
-            ))}
+            {section.steps.map((step, i) => {
+              const src = step.image ? helpShotSrc(step.image, i18n.language) : null;
+              const alt = t(step.titleKey);
+              return (
+                <li key={step.titleKey} className="rounded-lg border border-sage-200/80 bg-white/70 p-4">
+                  <p className="text-sm font-semibold text-sage-900">
+                    <span className="mr-2 tabular-nums text-brand-brown">{i + 1}.</span>
+                    {alt}
+                  </p>
+                  <p className="mt-1 text-sm leading-relaxed text-sage-700">{t(step.bodyKey)}</p>
+                  {src ? (
+                    <button
+                      type="button"
+                      onClick={() => setPreview({ image: step.image!, alt })}
+                      className="group relative mt-3 block w-full cursor-zoom-in rounded-md border border-sage-200 bg-sage-50 text-left transition hover:border-brand-brown/40 focus:outline-none focus-visible:ring-[3px] focus-visible:ring-brand-brown/30"
+                      aria-label={`${t("help.open_image")} — ${alt}`}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={src}
+                        alt={alt}
+                        key={src}
+                        className="max-h-[22rem] w-full object-contain"
+                      />
+                      <span className="pointer-events-none absolute bottom-2 right-2 rounded-md bg-[color:color-mix(in_srgb,var(--bark)_78%,transparent)] px-2 py-1 text-[11px] font-semibold text-petal opacity-90 group-hover:opacity-100">
+                        {t("help.open_image")}
+                      </span>
+                    </button>
+                  ) : null}
+                </li>
+              );
+            })}
           </ol>
         </section>
       ))}
@@ -83,6 +119,45 @@ export function PortalHelpPage({ doc }: { doc?: PortalHelpDoc }) {
             ))}
           </dl>
         </section>
+      ) : null}
+
+      {preview ? (
+        <OverlayPortal>
+          <div
+            className="crm-dialog-backdrop fixed inset-0 z-[110] flex items-center justify-center bg-[color:color-mix(in_srgb,var(--bark)_62%,transparent)] p-3 sm:p-6"
+            role="presentation"
+            onMouseDown={(e) => {
+              if (e.target === e.currentTarget) setPreview(null);
+            }}
+          >
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={previewTitleId}
+              className="relative flex max-h-[96vh] w-full max-w-[92vw] flex-col"
+            >
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <p id={previewTitleId} className="min-w-0 truncate text-sm font-semibold text-petal">
+                  {t("help.image_preview")} · {preview.alt}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setPreview(null)}
+                  className="crm-btn crm-btn-secondary crm-btn-sm shrink-0 bg-petal"
+                  autoFocus
+                >
+                  {t("help.close_preview")}
+                </button>
+              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={helpShotSrc(preview.image, i18n.language)}
+                alt={preview.alt}
+                className="max-h-[88vh] w-full rounded-lg border border-white/40 bg-petal object-contain shadow-[0_24px_48px_rgba(60,36,21,0.28)]"
+              />
+            </div>
+          </div>
+        </OverlayPortal>
       ) : null}
     </div>
   );

@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { BindLoginUserModal } from "./BindLoginUserModal";
 import { CrmModal } from "@/components/ui/CrmModal";
 import { ListPager } from "@/components/ui/ListPager";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
-import { DEFAULT_PAGE_SIZE, type PageSizeOption } from "@/lib/crm-pagination";
+import { rememberListReturn, restoreMainScroll } from "@/lib/crm-list-return";
+import { hrefWithReturnTo, useSyncedListQuery } from "@/lib/use-synced-list-query";
 
 type Kind = "case_manager" | "intended_parent" | "surrogate_mother";
 type Row = {
@@ -25,10 +26,9 @@ type ModalState = { entityId: string; mode: "bind" | "rebind" };
 export function AdminAccountManager({ kind }: { kind: Kind }) {
   const { t } = useTranslation("portal");
   const confirm = useConfirm();
+  const { page, pageSize, q, includeDeleted, href, replaceQuery } = useSyncedListQuery();
   const [rows, setRows] = useState<Row[]>([]);
-  const [q, setQ] = useState("");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState<PageSizeOption>(DEFAULT_PAGE_SIZE);
+  const [qInput, setQInput] = useState(q);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
@@ -38,8 +38,12 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
   const [createName, setCreateName] = useState("");
   const [createError, setCreateError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
-  const [includeDeleted, setIncludeDeleted] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const didRestoreScroll = useRef(false);
+
+  useEffect(() => {
+    setQInput(q);
+  }, [q]);
 
   async function load() {
     setLoading(true);
@@ -65,9 +69,21 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
   useEffect(() => {
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kind, page, pageSize, includeDeleted]);
+  }, [kind, page, pageSize, q, includeDeleted]);
+
+  useEffect(() => {
+    if (didRestoreScroll.current || loading) return;
+    didRestoreScroll.current = true;
+    restoreMainScroll(href);
+  }, [href, loading]);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const displayPage = Math.min(page, totalPages);
+
+  useEffect(() => {
+    if (loading || page <= totalPages) return;
+    replaceQuery({ page: totalPages });
+  }, [loading, page, replaceQuery, totalPages]);
 
   const showProfileActions = kind === "intended_parent" || kind === "surrogate_mother";
   const canCreateEntity = true;
@@ -125,7 +141,7 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
       setCreateName("");
       setCreateOpen(false);
       setMessage(t("admin_accounts.created_entity", { id: json.id ?? "" }));
-      setPage(1);
+      replaceQuery({ page: 1 });
       await load();
     } catch {
       setCreateError(t("admin_accounts.error_create_entity"));
@@ -197,16 +213,22 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
         <div className="crm-toolbar !py-3">
         <div className="flex flex-wrap items-center gap-2">
           <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
+            value={qInput}
+            onChange={(e) => setQInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                replaceQuery({ page: 1, q: qInput });
+              }
+            }}
             placeholder={t("admin_accounts.search_placeholder")}
             className="min-w-[12rem] flex-1 rounded-md border border-sage-300 bg-white px-3 py-2 text-sm"
           />
           <button
             type="button"
             onClick={() => {
-              setPage(1);
-              void load();
+              if (qInput.trim() === q && page === 1) void load();
+              else replaceQuery({ page: 1, q: qInput });
             }}
             className="crm-btn crm-btn-primary crm-btn-sm"
           >
@@ -217,8 +239,7 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
               type="checkbox"
               checked={includeDeleted}
               onChange={(e) => {
-                setIncludeDeleted(e.target.checked);
-                setPage(1);
+                replaceQuery({ page: 1, includeDeleted: e.target.checked });
               }}
             />
             {t("admin_accounts.show_deleted")}
@@ -330,7 +351,8 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
                           ) : null}
                           {showProfileActions && !isDeleted ? (
                             <Link
-                              href={`${detailBase}/${r.entityId}`}
+                              href={hrefWithReturnTo(`${detailBase}/${r.entityId}`, href)}
+                              onClick={() => rememberListReturn(href)}
                               className="crm-btn crm-btn-secondary crm-btn-xs"
                             >
                               {t("admin_accounts.btn_view_profile")}
@@ -365,19 +387,18 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
           </table>
         </div>
         <ListPager
-          page={page}
+          page={displayPage}
           totalPages={totalPages}
           pageSize={pageSize}
           disabled={loading}
           stats={t("admin_accounts.list_stats", {
             total,
-            from: total === 0 ? 0 : (page - 1) * pageSize + 1,
-            to: Math.min(page * pageSize, total),
+            from: total === 0 ? 0 : (displayPage - 1) * pageSize + 1,
+            to: Math.min(displayPage * pageSize, total),
           })}
-          onPageChange={setPage}
+          onPageChange={(next) => replaceQuery({ page: next })}
           onPageSizeChange={(size) => {
-            setPageSize(size);
-            setPage(1);
+            replaceQuery({ page: 1, pageSize: size });
           }}
         />
       </section>

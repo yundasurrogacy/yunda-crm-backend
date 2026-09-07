@@ -1,22 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { EntityKind } from "@/lib/admin/entity-profile";
 import type { PartyListRow } from "@/lib/party/list-cm-parties";
 import { CrmModal } from "@/components/ui/CrmModal";
 import { ListPager } from "@/components/ui/ListPager";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
-import { DEFAULT_PAGE_SIZE, type PageSizeOption } from "@/lib/crm-pagination";
+import { rememberListReturn, restoreMainScroll } from "@/lib/crm-list-return";
+import { hrefWithReturnTo, useSyncedListQuery } from "@/lib/use-synced-list-query";
 
 export function CaseManagerPartyListPage({ kind }: { kind: EntityKind }) {
   const { t } = useTranslation("portal");
   const confirm = useConfirm();
+  const { page, pageSize, q, includeDeleted, href, replaceQuery } = useSyncedListQuery();
   const [rows, setRows] = useState<PartyListRow[]>([]);
-  const [q, setQ] = useState("");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState<PageSizeOption>(DEFAULT_PAGE_SIZE);
+  const [qInput, setQInput] = useState(q);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -26,9 +26,12 @@ export function CaseManagerPartyListPage({ kind }: { kind: EntityKind }) {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [createError, setCreateError] = useState<string | null>(null);
-
-  const [includeDeleted, setIncludeDeleted] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const didRestoreScroll = useRef(false);
+
+  useEffect(() => {
+    setQInput(q);
+  }, [q]);
 
   const detailBase =
     kind === "intended_parent"
@@ -36,15 +39,15 @@ export function CaseManagerPartyListPage({ kind }: { kind: EntityKind }) {
       : "/case_manager/parties/surrogates";
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const displayPage = Math.min(page, totalPages);
 
-  const load = useCallback(async (pageOverride?: number) => {
-    const pageToUse = pageOverride ?? page;
+  const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const url = new URL("/api/case-manager/parties", window.location.origin);
       url.searchParams.set("kind", kind);
-      url.searchParams.set("page", String(pageToUse));
+      url.searchParams.set("page", String(page));
       url.searchParams.set("pageSize", String(pageSize));
       if (q.trim()) url.searchParams.set("q", q.trim());
       if (includeDeleted) url.searchParams.set("includeDeleted", "1");
@@ -57,8 +60,11 @@ export function CaseManagerPartyListPage({ kind }: { kind: EntityKind }) {
       };
       setRows(json.rows ?? []);
       setTotal(json.total ?? 0);
-      if (typeof json.page === "number" && json.page !== pageToUse) {
-        setPage(json.page);
+      const maxPage = Math.max(1, Math.ceil((json.total ?? 0) / pageSize));
+      if (page > maxPage) {
+        replaceQuery({ page: maxPage });
+      } else if (typeof json.page === "number" && json.page !== page) {
+        replaceQuery({ page: json.page });
       }
     } catch {
       setError(t("cm_parties.error_load"));
@@ -67,11 +73,17 @@ export function CaseManagerPartyListPage({ kind }: { kind: EntityKind }) {
     } finally {
       setLoading(false);
     }
-  }, [kind, q, includeDeleted, page, pageSize, t]);
+  }, [kind, q, includeDeleted, page, pageSize, replaceQuery, t]);
 
   useEffect(() => {
     void load();
-  }, [kind, includeDeleted, page, pageSize]); // eslint-disable-line react-hooks/exhaustive-deps -- search via button
+  }, [load]);
+
+  useEffect(() => {
+    if (didRestoreScroll.current || loading) return;
+    didRestoreScroll.current = true;
+    restoreMainScroll(href);
+  }, [href, loading]);
 
   async function onSoftDelete(row: PartyListRow, deleted: boolean) {
     if (busyId) return;
@@ -134,8 +146,8 @@ export function CaseManagerPartyListPage({ kind }: { kind: EntityKind }) {
       setDisplayName("");
       setCreateOpen(false);
       setMessage(t("cm_parties.created", { id: json.id ?? "" }));
-      setPage(1);
-      await load(1);
+      replaceQuery({ page: 1 });
+      await load();
     } catch {
       setCreateError(t("cm_parties.error_create"));
     } finally {
@@ -171,13 +183,12 @@ export function CaseManagerPartyListPage({ kind }: { kind: EntityKind }) {
         <div className="crm-toolbar !py-3">
         <div className="flex flex-wrap items-center gap-2">
           <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
+            value={qInput}
+            onChange={(e) => setQInput(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
-                setPage(1);
-                void load(1);
+                replaceQuery({ page: 1, q: qInput });
               }
             }}
             placeholder={t("cm_parties.search_placeholder")}
@@ -186,8 +197,8 @@ export function CaseManagerPartyListPage({ kind }: { kind: EntityKind }) {
           <button
             type="button"
             onClick={() => {
-              setPage(1);
-              void load(1);
+              if (qInput.trim() === q && page === 1) void load();
+              else replaceQuery({ page: 1, q: qInput });
             }}
             className="crm-btn crm-btn-primary crm-btn-sm"
           >
@@ -198,8 +209,7 @@ export function CaseManagerPartyListPage({ kind }: { kind: EntityKind }) {
               type="checkbox"
               checked={includeDeleted}
               onChange={(e) => {
-                setIncludeDeleted(e.target.checked);
-                setPage(1);
+                replaceQuery({ page: 1, includeDeleted: e.target.checked });
               }}
             />
             {t("cm_parties.show_deleted")}
@@ -266,7 +276,8 @@ export function CaseManagerPartyListPage({ kind }: { kind: EntityKind }) {
                         <div className="flex flex-wrap gap-2">
                           {!isDeleted ? (
                             <Link
-                              href={`${detailBase}/${r.entityId}`}
+                              href={hrefWithReturnTo(`${detailBase}/${r.entityId}`, href)}
+                              onClick={() => rememberListReturn(href)}
                               className="crm-btn crm-btn-secondary crm-btn-xs"
                             >
                               {t("cm_parties.view_profile")}
@@ -302,19 +313,18 @@ export function CaseManagerPartyListPage({ kind }: { kind: EntityKind }) {
         </div>
 
         <ListPager
-          page={page}
+          page={displayPage}
           totalPages={totalPages}
           pageSize={pageSize}
           disabled={loading}
           stats={t("cm_parties.list_stats", {
             total,
-            from: total === 0 ? 0 : (page - 1) * pageSize + 1,
-            to: Math.min(page * pageSize, total),
+            from: total === 0 ? 0 : (displayPage - 1) * pageSize + 1,
+            to: Math.min(displayPage * pageSize, total),
           })}
-          onPageChange={setPage}
+          onPageChange={(next) => replaceQuery({ page: next })}
           onPageSizeChange={(size) => {
-            setPageSize(size);
-            setPage(1);
+            replaceQuery({ page: 1, pageSize: size });
           }}
         />
       </section>

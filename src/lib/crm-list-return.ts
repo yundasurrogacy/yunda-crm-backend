@@ -48,6 +48,14 @@ export function listHrefForBack(fallback: string): string {
   return rememberedPath === fallbackPath ? remembered.href : fallback;
 }
 
+/** Only accept in-app return paths under the given prefixes (open-redirect guard). */
+export function safeReturnTo(raw: string | null | undefined, prefixes: string[], fallback: string): string {
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//")) return fallback;
+  const path = raw.split("?")[0] ?? "";
+  const allowed = prefixes.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
+  return allowed ? raw : fallback;
+}
+
 export function restoreMainScroll(href: string): void {
   const remembered = readListReturn();
   if (!remembered) return;

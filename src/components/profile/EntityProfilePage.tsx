@@ -1,9 +1,8 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { ListBackLink } from "@/components/ui/ListBackLink";
 
 import type { AdminEntityProfileDetail } from "@/lib/admin/entity-profile";
 import type { EntityKind } from "@/lib/admin/entity-profile";
@@ -111,13 +110,7 @@ export function EntityProfilePage({
   return (
     <div className="ami-ui crm-font-ui crm-page">
       <div className="flex flex-wrap items-start gap-4">
-        <Link
-          href={backHref}
-          className="ami-ui inline-flex items-center gap-1.5 rounded-md border border-bark bg-petal px-3 py-2 text-sm font-semibold text-bark shadow-sm hover:bg-maple"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" aria-hidden strokeWidth={2} />
-          {t(`${i18nPrefix}.back`)}
-        </Link>
+        <ListBackLink fallbackHref={backHref}>{t(`${i18nPrefix}.back`)}</ListBackLink>
         <div className="min-w-0 flex-1">
           <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">
             {t(`${i18nPrefix}.title_${kind}`)}

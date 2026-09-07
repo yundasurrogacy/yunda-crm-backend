@@ -21,6 +21,7 @@ import {
   rememberListReturn,
   restoreMainScroll,
 } from "@/lib/crm-list-return";
+import { hrefWithReturnTo } from "@/lib/use-synced-list-query";
 import { DEFAULT_PAGE_SIZE, parsePageSize, type PageSizeOption } from "@/lib/crm-pagination";
 import { ListPager } from "@/components/ui/ListPager";
 
@@ -87,7 +88,6 @@ export function CaseManagerAmDashboard({
   detailHrefBase = "/case_manager/cases",
   headingMode = "case_manager",
   headerExtra,
-  hidePageHeading = false,
   createCaseMode = false,
 }: {
   /**
@@ -101,8 +101,6 @@ export function CaseManagerAmDashboard({
   headingMode?: "case_manager" | "admin";
   /** 标题行右侧附加内容 */
   headerExtra?: ReactNode;
-  /** 管理端首页已在上方放了标题时，避免重复 H1 */
-  hidePageHeading?: boolean;
   /** 案例列表：在表格上方打开创建弹窗 */
   createCaseMode?: false | "admin" | "case_manager";
 }) {
@@ -334,6 +332,15 @@ export function CaseManagerAmDashboard({
       const json = (await res.json()) as DashboardPayload;
       setData(json);
       cacheListPayload(`crm:list:${window.location.pathname}${window.location.search}`, json);
+      const maxPage = Math.max(1, Math.ceil((json.total ?? 0) / (json.pageSize || pageSize)));
+      if (page > maxPage) {
+        setPage(maxPage);
+        if (isMyCases) {
+          syncMyCasesUrl(maxPage, myCaseScope, q, processStatus, caseManagerId, intendedParentId, surrogateId);
+        } else {
+          syncUrl(stage, maxPage, q, "", caseManagerId, intendedParentId, surrogateId);
+        }
+      }
     } catch {
       setErrorKey("am_dash.error_data");
       setData(null);
@@ -354,6 +361,8 @@ export function CaseManagerAmDashboard({
     surrogateId,
     includeArchived,
     apiPath,
+    syncUrl,
+    syncMyCasesUrl,
   ]);
 
   useEffect(() => {
@@ -535,9 +544,9 @@ export function CaseManagerAmDashboard({
 
   return (
     <div className={variant === "full" ? "ami-ui crm-font-ui flex w-full shrink-0 flex-col gap-4" : "ami-ui crm-font-ui crm-fill-page"}>
-      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
-        <div className="min-w-0">
-          {variant === "full" && !hidePageHeading ? (
+      <div className="flex shrink-0 items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          {variant === "full" ? (
             <>
               <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">
                 {headingMode === "admin" ? t("pages.admin_dashboard_heading") : t("pages.dashboard_heading")}
@@ -560,7 +569,7 @@ export function CaseManagerAmDashboard({
             </>
           ) : null}
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
           {isMyCases ? (
             <div className="inline-flex rounded-md border border-sage-300 bg-white p-0.5">
               <button
@@ -897,7 +906,10 @@ export function CaseManagerAmDashboard({
                           <td className="crm-freeze-end">
                             <div className="flex flex-wrap items-center gap-1.5">
                               <Link
-                                href={`${detailHrefBase}/${row.id}`}
+                                href={hrefWithReturnTo(
+                                  `${detailHrefBase}/${row.id}`,
+                                  `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`,
+                                )}
                                 onClick={() =>
                                   rememberListReturn(
                                     `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`,
@@ -979,14 +991,14 @@ export function CaseManagerAmDashboard({
             </div>
 
             <ListPager
-              page={page}
+              page={Math.min(page, totalPages)}
               totalPages={totalPages}
               pageSize={pageSize}
               disabled={loading}
               stats={t("am_dash.list_stats", {
                 total: data?.total ?? 0,
-                from: !data || data.total === 0 ? 0 : (page - 1) * data.pageSize + 1,
-                to: data ? Math.min(page * data.pageSize, data.total) : 0,
+                from: !data || data.total === 0 ? 0 : (Math.min(page, totalPages) - 1) * data.pageSize + 1,
+                to: data ? Math.min(Math.min(page, totalPages) * data.pageSize, data.total) : 0,
               })}
               onPageChange={onPageChange}
               onPageSizeChange={onPageSizeChange}

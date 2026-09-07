@@ -8,7 +8,7 @@ import { CrmModal } from "@/components/ui/CrmModal";
 import { ListPager } from "@/components/ui/ListPager";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { SelectMenu } from "@/components/ui/SelectMenu";
-import { DEFAULT_PAGE_SIZE, type PageSizeOption } from "@/lib/crm-pagination";
+import { useSyncedListQuery } from "@/lib/use-synced-list-query";
 
 const ROLE_VALUES = ["user", "admin", "operator"] as const;
 
@@ -53,10 +53,9 @@ function RoleField({
 export function AdminUsersManager() {
   const { t } = useTranslation("portal");
   const confirm = useConfirm();
+  const { page, pageSize, q, replaceQuery } = useSyncedListQuery();
   const [rows, setRows] = useState<UserRow[]>([]);
-  const [q, setQ] = useState("");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState<PageSizeOption>(DEFAULT_PAGE_SIZE);
+  const [qInput, setQInput] = useState(q);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
@@ -95,6 +94,10 @@ export function AdminUsersManager() {
       setLoading(false);
     }
   }, [page, pageSize, q, t]);
+
+  useEffect(() => {
+    setQInput(q);
+  }, [q]);
 
   useEffect(() => {
     void load();
@@ -185,6 +188,12 @@ export function AdminUsersManager() {
   }
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const displayPage = Math.min(page, totalPages);
+
+  useEffect(() => {
+    if (loading || page <= totalPages) return;
+    replaceQuery({ page: totalPages });
+  }, [loading, page, replaceQuery, totalPages]);
 
   return (
     <div className="crm-fill-page ami-ui crm-font-ui">
@@ -213,16 +222,22 @@ export function AdminUsersManager() {
           <h2 className="text-sm font-semibold uppercase tracking-wide text-sage-600">{t("admin_users.list_section")}</h2>
           <div className="flex flex-wrap gap-2">
             <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
+              value={qInput}
+              onChange={(e) => setQInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  replaceQuery({ page: 1, q: qInput });
+                }
+              }}
               placeholder={t("admin_users.search_ph")}
               className="min-w-[200px] flex-1 rounded-md border border-sage-300 bg-white px-3 py-2 text-sm sm:flex-none sm:min-w-[220px]"
             />
             <button
               type="button"
               onClick={() => {
-                setPage(1);
-                void load();
+                if (qInput.trim() === q && page === 1) void load();
+                else replaceQuery({ page: 1, q: qInput });
               }}
               className="crm-btn crm-btn-primary crm-btn-sm"
             >
@@ -399,19 +414,18 @@ export function AdminUsersManager() {
           </table>
         </div>
         <ListPager
-          page={page}
+          page={displayPage}
           totalPages={totalPages}
           pageSize={pageSize}
           disabled={loading}
           stats={t("admin_users.list_stats", {
             total,
-            from: total === 0 ? 0 : (page - 1) * pageSize + 1,
-            to: Math.min(page * pageSize, total),
+            from: total === 0 ? 0 : (displayPage - 1) * pageSize + 1,
+            to: Math.min(displayPage * pageSize, total),
           })}
-          onPageChange={setPage}
+          onPageChange={(next) => replaceQuery({ page: next })}
           onPageSizeChange={(size) => {
-            setPageSize(size);
-            setPage(1);
+            replaceQuery({ page: 1, pageSize: size });
           }}
         />
       </section>

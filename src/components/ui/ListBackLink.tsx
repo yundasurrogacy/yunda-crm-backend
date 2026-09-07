@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 import { listHrefForBack } from "@/lib/crm-list-return";
 
 export function ListBackLink({
@@ -12,7 +12,10 @@ export function ListBackLink({
   fallbackHref: string;
   children: React.ReactNode;
 }) {
-  const href = useMemo(() => listHrefForBack(fallbackHref), [fallbackHref]);
+  const [href, setHref] = useState(fallbackHref);
+  useEffect(() => {
+    setHref(listHrefForBack(fallbackHref));
+  }, [fallbackHref]);
   return (
     <Link
       href={href}

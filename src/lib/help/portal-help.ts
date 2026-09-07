@@ -1,8 +1,16 @@
 export type HelpStep = {
   titleKey: string;
   bodyKey: string;
+  /** Path under /help/, e.g. `/help/01-login.png`. Locale folder is applied at render time. */
   image?: string;
 };
+
+/** `/help/01-login.png` → `/help/zh/01-login.png` or `/help/en/01-login.png` */
+export function helpShotSrc(image: string, language: string): string {
+  const file = image.replace(/^\/help\//, "").replace(/^zh\/|^en\//, "");
+  const folder = language.toLowerCase().startsWith("zh") ? "zh" : "en";
+  return `/help/${folder}/${file}`;
+}
 
 export type HelpSection = {
   id: string;
@@ -38,22 +46,40 @@ export const ADMIN_HELP: PortalHelpDoc = {
       ],
     },
     {
+      id: "dashboard",
+      titleKey: "help.admin.dashboard.title",
+      steps: [
+        { titleKey: "help.admin.dashboard.s1_title", bodyKey: "help.admin.dashboard.s1_body", image: "/help/03-admin-dashboard.png" },
+        { titleKey: "help.admin.dashboard.s2_title", bodyKey: "help.admin.dashboard.s2_body" },
+        { titleKey: "help.admin.dashboard.s3_title", bodyKey: "help.admin.dashboard.s3_body" },
+      ],
+    },
+    {
       id: "accounts",
       titleKey: "help.admin.accounts.title",
       steps: [
         { titleKey: "help.admin.accounts.s1_title", bodyKey: "help.admin.accounts.s1_body", image: "/help/04-admin-users.png" },
-        { titleKey: "help.admin.accounts.s2_title", bodyKey: "help.admin.accounts.s2_body" },
-        { titleKey: "help.admin.accounts.s3_title", bodyKey: "help.admin.accounts.s3_body" },
+        { titleKey: "help.admin.accounts.s2_title", bodyKey: "help.admin.accounts.s2_body", image: "/help/05-admin-create-user.png" },
+        { titleKey: "help.admin.accounts.s3_title", bodyKey: "help.admin.accounts.s3_body", image: "/help/06-admin-profiles.png" },
+        { titleKey: "help.admin.accounts.s4_title", bodyKey: "help.admin.accounts.s4_body" },
       ],
     },
     {
       id: "cases",
       titleKey: "help.admin.cases.title",
       steps: [
-        { titleKey: "help.admin.cases.s1_title", bodyKey: "help.admin.cases.s1_body", image: "/help/07-admin-create-case.png" },
-        { titleKey: "help.admin.cases.s2_title", bodyKey: "help.admin.cases.s2_body" },
+        { titleKey: "help.admin.cases.s1_title", bodyKey: "help.admin.cases.s1_body", image: "/help/07-admin-cases.png" },
+        { titleKey: "help.admin.cases.s2_title", bodyKey: "help.admin.cases.s2_body", image: "/help/08-admin-create-case.png" },
         { titleKey: "help.admin.cases.s3_title", bodyKey: "help.admin.cases.s3_body" },
-        { titleKey: "help.admin.cases.s4_title", bodyKey: "help.admin.cases.s4_body" },
+      ],
+    },
+    {
+      id: "detail",
+      titleKey: "help.admin.detail.title",
+      steps: [
+        { titleKey: "help.admin.detail.s1_title", bodyKey: "help.admin.detail.s1_body", image: "/help/09-admin-case-detail.png" },
+        { titleKey: "help.admin.detail.s2_title", bodyKey: "help.admin.detail.s2_body" },
+        { titleKey: "help.admin.detail.s3_title", bodyKey: "help.admin.detail.s3_body" },
       ],
     },
     {
@@ -61,8 +87,8 @@ export const ADMIN_HELP: PortalHelpDoc = {
       titleKey: "help.admin.replace.title",
       steps: [
         { titleKey: "help.admin.replace.s1_title", bodyKey: "help.admin.replace.s1_body" },
-        { titleKey: "help.admin.replace.s2_title", bodyKey: "help.admin.replace.s2_body" },
-        { titleKey: "help.admin.replace.s3_title", bodyKey: "help.admin.replace.s3_body", image: "/help/09-admin-replace-gc.png" },
+        { titleKey: "help.admin.replace.s2_title", bodyKey: "help.admin.replace.s2_body", image: "/help/10-admin-replace-gc.png" },
+        { titleKey: "help.admin.replace.s3_title", bodyKey: "help.admin.replace.s3_body" },
       ],
     },
   ],
@@ -86,15 +112,23 @@ export const CM_HELP: PortalHelpDoc = {
       id: "dashboard",
       titleKey: "help.cm.dashboard.title",
       steps: [
-        { titleKey: "help.cm.dashboard.s1_title", bodyKey: "help.cm.dashboard.s1_body", image: "/help/13-cm-dashboard.png" },
+        { titleKey: "help.cm.dashboard.s1_title", bodyKey: "help.cm.dashboard.s1_body", image: "/help/11-cm-dashboard.png" },
         { titleKey: "help.cm.dashboard.s2_title", bodyKey: "help.cm.dashboard.s2_body" },
+      ],
+    },
+    {
+      id: "parties",
+      titleKey: "help.cm.parties.title",
+      steps: [
+        { titleKey: "help.cm.parties.s1_title", bodyKey: "help.cm.parties.s1_body", image: "/help/12-cm-parties.png" },
+        { titleKey: "help.cm.parties.s2_title", bodyKey: "help.cm.parties.s2_body" },
       ],
     },
     {
       id: "progress",
       titleKey: "help.cm.progress.title",
       steps: [
-        { titleKey: "help.cm.progress.s1_title", bodyKey: "help.cm.progress.s1_body" },
+        { titleKey: "help.cm.progress.s1_title", bodyKey: "help.cm.progress.s1_body", image: "/help/13-cm-case-detail.png" },
         { titleKey: "help.cm.progress.s2_title", bodyKey: "help.cm.progress.s2_body" },
       ],
     },
@@ -111,7 +145,7 @@ export const CM_HELP: PortalHelpDoc = {
       titleKey: "help.cm.replace.title",
       steps: [
         { titleKey: "help.cm.replace.s1_title", bodyKey: "help.cm.replace.s1_body" },
-        { titleKey: "help.cm.replace.s2_title", bodyKey: "help.cm.replace.s2_body", image: "/help/09-admin-replace-gc.png" },
+        { titleKey: "help.cm.replace.s2_title", bodyKey: "help.cm.replace.s2_body", image: "/help/10-admin-replace-gc.png" },
       ],
     },
   ],
@@ -131,8 +165,8 @@ export const IP_HELP: PortalHelpDoc = {
       id: "home",
       titleKey: "help.ip.home.title",
       steps: [
-        { titleKey: "help.ip.home.s1_title", bodyKey: "help.ip.home.s1_body", image: "/help/15-ip-home.png" },
-        { titleKey: "help.ip.home.s2_title", bodyKey: "help.ip.home.s2_body", image: "/help/16-ip-case-progress.png" },
+        { titleKey: "help.ip.home.s1_title", bodyKey: "help.ip.home.s1_body", image: "/help/14-ip-home.png" },
+        { titleKey: "help.ip.home.s2_title", bodyKey: "help.ip.home.s2_body", image: "/help/15-ip-case.png" },
       ],
     },
     {
@@ -163,11 +197,16 @@ export const SM_HELP: PortalHelpDoc = {
   subtitleKey: "help.sm.subtitle",
   sections: [
     {
+      id: "home",
+      titleKey: "help.sm.home.title",
+      steps: [{ titleKey: "help.sm.home.s1_title", bodyKey: "help.sm.home.s1_body", image: "/help/16-sm-home.png" }],
+    },
+    {
       id: "profile",
       titleKey: "help.sm.profile.title",
       steps: [
-        { titleKey: "help.sm.profile.s1_title", bodyKey: "help.sm.profile.s1_body" },
-        { titleKey: "help.sm.profile.s2_title", bodyKey: "help.sm.profile.s2_body", image: "/help/18-gc-birth-history.png" },
+        { titleKey: "help.sm.profile.s1_title", bodyKey: "help.sm.profile.s1_body", image: "/help/17-sm-profile.png" },
+        { titleKey: "help.sm.profile.s2_title", bodyKey: "help.sm.profile.s2_body" },
       ],
     },
     {

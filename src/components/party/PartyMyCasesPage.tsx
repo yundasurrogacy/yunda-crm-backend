@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { PartyCaseRow } from "@/lib/party/fetch-party-cases";
 import { translateProcessStatus } from "@/lib/i18n/translate-process-status";
-import { rememberListReturn } from "@/lib/crm-list-return";
-import { DEFAULT_PAGE_SIZE, type PageSizeOption } from "@/lib/crm-pagination";
+import { rememberListReturn, restoreMainScroll } from "@/lib/crm-list-return";
+import { hrefWithReturnTo, useSyncedListQuery } from "@/lib/use-synced-list-query";
 import { ListPager } from "@/components/ui/ListPager";
 
 function formatDt(iso: string | null, lng: string) {
@@ -44,11 +44,11 @@ export function PartyMyCasesPage({
   const { t: tCommon } = useTranslation("common");
   const { t: tStage } = useTranslation("caseStage");
   const { i18n } = useTranslation();
+  const { page, pageSize, href, replaceQuery } = useSyncedListQuery();
   const [rows, setRows] = useState<PartyCaseRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorKey, setErrorKey] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState<PageSizeOption>(DEFAULT_PAGE_SIZE);
+  const didRestoreScroll = useRef(false);
 
   const showTrust = party === "intended_parent";
   const counterpartLabel =
@@ -99,6 +99,12 @@ export function PartyMyCasesPage({
   const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
   const safePage = Math.min(page, totalPages);
   const pageRows = rows.slice((safePage - 1) * pageSize, safePage * pageSize);
+
+  useEffect(() => {
+    if (didRestoreScroll.current || loading) return;
+    didRestoreScroll.current = true;
+    restoreMainScroll(href);
+  }, [href, loading]);
 
   return (
     <div className="ami-ui crm-font-ui crm-fill-page">
@@ -165,8 +171,8 @@ export function PartyMyCasesPage({
                     </td>
                     <td className="crm-freeze-end">
                       <Link
-                        href={`${detailBase}/${row.id}`}
-                        onClick={() => rememberListReturn(window.location.pathname)}
+                        href={hrefWithReturnTo(`${detailBase}/${row.id}`, href)}
+                        onClick={() => rememberListReturn(href)}
                         className="crm-btn crm-btn-secondary crm-btn-xs"
                       >
                         {t("party_cases.view_detail")}
@@ -187,10 +193,9 @@ export function PartyMyCasesPage({
               from: rows.length === 0 ? 0 : (safePage - 1) * pageSize + 1,
               to: Math.min(safePage * pageSize, rows.length),
             })}
-            onPageChange={setPage}
+            onPageChange={(next) => replaceQuery({ page: next })}
             onPageSizeChange={(size) => {
-              setPageSize(size);
-              setPage(1);
+              replaceQuery({ page: 1, pageSize: size });
             }}
           />
         </div>

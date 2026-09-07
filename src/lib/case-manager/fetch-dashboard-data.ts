@@ -55,16 +55,6 @@ const CASES_LIST_QUERY = `
   }
 `;
 
-const COUNT_FRAGMENT = `
-  query AmStageCount($where: cases_bool_exp!) {
-    cases_aggregate(where: $where) {
-      aggregate {
-        count
-      }
-    }
-  }
-`;
-
 export type AmCaseRow = {
   id: string;
   process_status: string | null;
@@ -230,25 +220,28 @@ export async function fetchStageCounts(
   includeArchived = false,
 ): Promise<Record<CanonicalCaseStage, number>> {
   const client = getClient();
-  const entries = await Promise.all(
-    CANONICAL_CASE_STAGES.map(async (stage) => {
-      const where = buildCasesWhere(
-        { stage, includeArchived },
-        listScope,
-        resolvedCaseManagerEntityId,
-        session.userId,
-      );
-      const data = await client.execute<{
-        cases_aggregate: { aggregate: { count: number } | null };
-      }>({
-        query: COUNT_FRAGMENT,
-        variables: { where },
-      });
-      const n = data.cases_aggregate?.aggregate?.count ?? 0;
-      return [stage, n] as const;
-    }),
-  );
-  return Object.fromEntries(entries) as Record<CanonicalCaseStage, number>;
+  const variables: Record<string, unknown> = {};
+  const defs: string[] = [];
+  const fields: string[] = [];
+  CANONICAL_CASE_STAGES.forEach((stage, i) => {
+    variables[`w${i}`] = buildCasesWhere(
+      { stage, includeArchived },
+      listScope,
+      resolvedCaseManagerEntityId,
+      session.userId,
+    );
+    defs.push(`$w${i}: cases_bool_exp!`);
+    fields.push(`c${i}: cases_aggregate(where: $w${i}) { aggregate { count } }`);
+  });
+  const data = await client.execute<Record<string, { aggregate: { count: number } | null }>>({
+    query: `query AmStageCounts(${defs.join(", ")}) {\n${fields.join("\n")}\n}`,
+    variables,
+  });
+  const out = {} as Record<CanonicalCaseStage, number>;
+  CANONICAL_CASE_STAGES.forEach((stage, i) => {
+    out[stage] = data[`c${i}`]?.aggregate?.count ?? 0;
+  });
+  return out;
 }
 
 /** `all`：不按阶段筛选，文档「我的案例」——当前账号下有权限的全部负责案例 */

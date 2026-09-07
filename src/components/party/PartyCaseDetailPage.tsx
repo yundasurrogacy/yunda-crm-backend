@@ -8,6 +8,9 @@ import { PartyCaseProgressTimeline } from "@/components/party/PartyCaseProgressT
 import { PartyCaseExtras } from "@/components/party/PartyCaseExtras";
 import { PartyTrustLedgerPanel } from "@/components/party/PartyTrustLedgerPanel";
 import type { AmCaseDetail } from "@/lib/case-manager/fetch-case-detail";
+import type { CaseFileRow } from "@/lib/case-manager/case-files";
+import type { CaseMessageRow } from "@/lib/case-manager/case-messages";
+import type { PartyTrustSnapshot } from "@/lib/party/fetch-party-case-page";
 import {
   partyVisibleGcProfileSectionsForClient,
   partyVisibleIpProfileSections,
@@ -31,18 +34,24 @@ export function PartyCaseDetailPage({
   apiBase,
   listHref,
   canPostMessages = false,
+  showTrust = false,
 }: {
   caseId: string;
   apiBase: string;
   listHref: string;
   /** IP / 孕妈均可发留言 */
   canPostMessages?: boolean;
+  /** 仅准父母端展示信托 */
+  showTrust?: boolean;
 }) {
   const { t } = useTranslation("portal");
   const { t: tCommon } = useTranslation("common");
   const { t: tStage } = useTranslation("caseStage");
   const { i18n } = useTranslation();
   const [data, setData] = useState<AmCaseDetail | null>(null);
+  const [files, setFiles] = useState<CaseFileRow[]>([]);
+  const [messages, setMessages] = useState<CaseMessageRow[]>([]);
+  const [trust, setTrust] = useState<PartyTrustSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
   const [errorKey, setErrorKey] = useState<string | null>(null);
 
@@ -65,8 +74,16 @@ export function PartyCaseDetailPage({
           setErrorKey("party_cases.error_load");
           return;
         }
-        const json = (await res.json()) as AmCaseDetail;
-        if (!cancelled) setData(json);
+        const json = (await res.json()) as AmCaseDetail & {
+          files?: CaseFileRow[];
+          messages?: CaseMessageRow[];
+          trust?: PartyTrustSnapshot | null;
+        };
+        if (cancelled) return;
+        setData(json);
+        setFiles(json.files ?? []);
+        setMessages(json.messages ?? []);
+        setTrust(json.trust ?? null);
       } catch {
         if (!cancelled) setErrorKey("party_cases.error_load");
       } finally {
@@ -144,12 +161,11 @@ export function PartyCaseDetailPage({
           <PartyCaseProgressTimeline
             processStatus={data.process_status}
             stageData={data.stage_data}
-            caseId={caseId}
-            apiBase={apiBase}
+            files={files}
           />
 
-          {canPostMessages ? (
-            <PartyTrustLedgerPanel caseId={caseId} apiBase={apiBase} />
+          {showTrust ? (
+            <PartyTrustLedgerPanel initial={trust} />
           ) : null}
 
           <div className="grid gap-4 lg:grid-cols-2">
@@ -174,7 +190,13 @@ export function PartyCaseDetailPage({
             />
           </div>
 
-          <PartyCaseExtras caseId={caseId} apiBase={apiBase} canPostMessages={canPostMessages} />
+          <PartyCaseExtras
+            caseId={caseId}
+            apiBase={apiBase}
+            canPostMessages={canPostMessages}
+            files={files}
+            initialMessages={messages}
+          />
         </>
       ) : null}
     </div>

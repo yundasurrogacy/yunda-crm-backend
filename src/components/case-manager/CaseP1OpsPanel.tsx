@@ -33,30 +33,32 @@ export function CaseP1OpsPanel({
   const [messages, setMessages] = useState<CaseMessageRow[]>([]);
   const [messageBody, setMessageBody] = useState("");
   const [emailNotify, setEmailNotify] = useState(false);
+  const [sectionOpen, setSectionOpen] = useState(false);
 
   const actionsUrl = `${apiPathBase}/${encodeURIComponent(caseId)}/actions`;
-  const historyUrl = `${apiPathBase}/${encodeURIComponent(caseId)}/gc-history`;
+  const historyUrl = `${apiPathBase}/${encodeURIComponent(caseId)}/gc-history?include=messages`;
   const messagesUrl = `${apiPathBase}/${encodeURIComponent(caseId)}/messages`;
 
   const reloadExtras = useCallback(async () => {
     try {
-      const [hRes, mRes] = await Promise.all([fetch(historyUrl), fetch(messagesUrl)]);
+      const hRes = await fetch(historyUrl);
       if (hRes.ok) {
-        const json = (await hRes.json()) as { entries?: CaseGcHistoryRow[] };
+        const json = (await hRes.json()) as {
+          entries?: CaseGcHistoryRow[];
+          messages?: CaseMessageRow[];
+        };
         setHistory(json.entries ?? []);
-      }
-      if (mRes.ok) {
-        const json = (await mRes.json()) as { messages?: CaseMessageRow[] };
-        setMessages(json.messages ?? []);
+        if (json.messages) setMessages(json.messages);
       }
     } catch {
       /* ignore */
     }
-  }, [historyUrl, messagesUrl]);
+  }, [historyUrl]);
 
   useEffect(() => {
+    if (!sectionOpen) return;
     void reloadExtras();
-  }, [reloadExtras, refreshTick]);
+  }, [reloadExtras, refreshTick, sectionOpen]);
 
   async function runAction(body: Record<string, unknown>) {
     setBusy(true);
@@ -147,6 +149,7 @@ export function CaseP1OpsPanel({
       }
       storageKey={`crm-case-detail-p1-${caseId}`}
       defaultOpen={false}
+      onOpenChange={setSectionOpen}
       bodyClassName="space-y-6"
     >
       {msg ? <p className="text-sm text-sage-800">{msg}</p> : null}

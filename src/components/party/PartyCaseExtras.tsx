@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { CaseFileRow } from "@/lib/case-manager/case-files";
 import type { CaseMessageRow } from "@/lib/case-manager/case-messages";
@@ -9,42 +9,24 @@ export function PartyCaseExtras({
   caseId,
   apiBase,
   canPostMessages,
+  files,
+  initialMessages,
 }: {
   caseId: string;
   apiBase: string;
   canPostMessages: boolean;
+  files: CaseFileRow[];
+  initialMessages?: CaseMessageRow[];
 }) {
   const { t, i18n } = useTranslation("portal");
-  const [files, setFiles] = useState<CaseFileRow[]>([]);
-  const [messages, setMessages] = useState<CaseMessageRow[]>([]);
+  const [messages, setMessages] = useState<CaseMessageRow[]>(initialMessages ?? []);
   const [body, setBody] = useState("");
   const [emailNotify, setEmailNotify] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const load = useCallback(async () => {
-    try {
-      const [fRes, mRes] = await Promise.all([
-        fetch(`${apiBase}/${encodeURIComponent(caseId)}/files`),
-        canPostMessages
-          ? fetch(`${apiBase}/${encodeURIComponent(caseId)}/messages`)
-          : Promise.resolve(null),
-      ]);
-      if (fRes.ok) {
-        const json = (await fRes.json()) as { files?: CaseFileRow[] };
-        setFiles(json.files ?? []);
-      }
-      if (mRes?.ok) {
-        const json = (await mRes.json()) as { messages?: CaseMessageRow[] };
-        setMessages(json.messages ?? []);
-      }
-    } catch {
-      /* ignore */
-    }
-  }, [apiBase, canPostMessages, caseId]);
-
   useEffect(() => {
-    void load();
-  }, [load]);
+    setMessages(initialMessages ?? []);
+  }, [initialMessages]);
 
   async function send() {
     if (!canPostMessages || !body.trim() || busy) return;

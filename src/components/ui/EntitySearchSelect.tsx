@@ -16,6 +16,8 @@ type Props = {
   emptyLabel?: string;
   allowEmpty?: boolean;
   disabled?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  loading?: boolean;
   className?: string;
   id?: string;
 };
@@ -35,6 +37,8 @@ export function EntitySearchSelect({
   emptyLabel,
   allowEmpty,
   disabled,
+  onOpenChange,
+  loading,
   className,
   id,
 }: Props) {
@@ -45,8 +49,16 @@ export function EntitySearchSelect({
   const selected = options.find((o) => o.id === value) ?? null;
   const ph = placeholder ?? t("entity_search.placeholder");
 
+  const onOpenChangeRef = useRef(onOpenChange);
+  onOpenChangeRef.current = onOpenChange;
+
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+
+  function setOpenState(next: boolean) {
+    if (next) onOpenChangeRef.current?.(true);
+    setOpen(next);
+  }
 
   useEffect(() => {
     if (!open) setQuery("");
@@ -55,10 +67,10 @@ export function EntitySearchSelect({
   useEffect(() => {
     if (!open) return;
     const onDoc = (e: MouseEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+      if (!rootRef.current?.contains(e.target as Node)) setOpenState(false);
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") setOpenState(false);
     };
     document.addEventListener("mousedown", onDoc);
     document.addEventListener("keydown", onKey);
@@ -88,10 +100,10 @@ export function EntitySearchSelect({
         value={displayValue}
         onChange={(e) => {
           setQuery(e.target.value);
-          if (!open) setOpen(true);
+          if (!open) setOpenState(true);
         }}
         onFocus={() => {
-          if (!disabled) setOpen(true);
+          if (!disabled) setOpenState(true);
         }}
         className="crm-font-ui block w-full rounded-md border border-sage-300 bg-white px-3 py-2 text-sm text-sage-900 shadow-sm placeholder:text-sage-400 transition focus:border-brand-brown focus:outline-none focus:ring-[3px] focus:ring-brand-brown/30 disabled:cursor-not-allowed disabled:bg-sage-100/80"
       />
@@ -114,14 +126,16 @@ export function EntitySearchSelect({
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => {
                   onChange("");
-                  setOpen(false);
+                  setOpenState(false);
                 }}
               >
                 {emptyLabel || "—"}
               </button>
             </li>
           ) : null}
-          {filtered.length === 0 ? (
+          {loading ? (
+            <li className="px-3 py-2 text-sage-500">{t("entity_search.loading")}</li>
+          ) : filtered.length === 0 ? (
             <li className="px-3 py-2 text-sage-500">{t("entity_search.no_matches")}</li>
           ) : (
             filtered.map((o) => (
@@ -137,7 +151,7 @@ export function EntitySearchSelect({
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => {
                     onChange(o.id);
-                    setOpen(false);
+                    setOpenState(false);
                   }}
                 >
                   {o.label}

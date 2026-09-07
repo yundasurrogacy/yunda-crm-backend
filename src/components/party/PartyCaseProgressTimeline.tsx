@@ -1,7 +1,6 @@
 "use client";
 
 import { Check, Circle, ExternalLink } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getFieldsForStage } from "@/constants/am-stage-field-groups";
 import {
@@ -46,35 +45,14 @@ function stageFilledRows(
 export function PartyCaseProgressTimeline({
   processStatus,
   stageData,
-  caseId,
-  apiBase,
+  files = [],
 }: {
   processStatus: string | null;
   stageData?: AmWorkspacePayload;
-  caseId?: string;
-  apiBase?: string;
+  files?: CaseFileRow[];
 }) {
   const { t, i18n } = useTranslation("portal");
   const { t: tStage } = useTranslation("caseStage");
-  const [files, setFiles] = useState<CaseFileRow[]>([]);
-
-  useEffect(() => {
-    if (!caseId || !apiBase) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch(`${apiBase}/${encodeURIComponent(caseId)}/files`);
-        if (!res.ok) return;
-        const json = (await res.json()) as { files?: CaseFileRow[] };
-        if (!cancelled) setFiles(json.files ?? []);
-      } catch {
-        /* ignore */
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [apiBase, caseId]);
 
   const curIdx = processStatus && isCanonicalCaseStage(processStatus) ? canonicalStageIndex(processStatus) : -1;
   const progressPct =
@@ -169,8 +147,7 @@ export function PartyCaseProgressTimeline({
         })}
       </ol>
 
-      {caseId && apiBase ? (
-        <div className="mt-5 border-t border-sage-200/80 pt-4">
+      <div className="mt-5 border-t border-sage-200/80 pt-4">
           <h3 className="mb-1 text-sm font-semibold text-sage-900">
             {t("party_cases.progress_docs_title")}
           </h3>
@@ -205,7 +182,6 @@ export function PartyCaseProgressTimeline({
             </ul>
           )}
         </div>
-      ) : null}
     </section>
   );
 }

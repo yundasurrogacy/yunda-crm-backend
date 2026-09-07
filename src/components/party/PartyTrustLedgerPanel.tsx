@@ -1,8 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { TrustLedgerEntry } from "@/lib/case-manager/trust-ledger";
+import type { PartyTrustSnapshot } from "@/lib/party/fetch-party-case-page";
 
 function formatMoney(raw: string, lng: string) {
   const n = Number(raw);
@@ -37,41 +36,17 @@ function typeLabel(raw: string, t: (k: string) => string): string {
   return key ? t(key) : raw;
 }
 
-/** 准父母端：只读信托余额与「客户可见」流水 */
+/** 准父母端：只读信托余额与「客户可见」流水（随案例详情一次返回） */
 export function PartyTrustLedgerPanel({
-  caseId,
-  apiBase,
+  initial,
 }: {
-  caseId: string;
-  apiBase: string;
+  initial: PartyTrustSnapshot | null;
 }) {
   const { t, i18n } = useTranslation("portal");
   const lng = i18n.language;
-  const [balance, setBalance] = useState("0");
-  const [entries, setEntries] = useState<TrustLedgerEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(false);
-    try {
-      const res = await fetch(`${apiBase}/${encodeURIComponent(caseId)}/trust`);
-      if (!res.ok) throw new Error("load");
-      const json = (await res.json()) as { balance?: string; entries?: TrustLedgerEntry[] };
-      setBalance(json.balance ?? "0");
-      setEntries(json.entries ?? []);
-    } catch {
-      setError(true);
-      setEntries([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [apiBase, caseId]);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
+  const balance = initial?.balance ?? "0";
+  const entries = initial?.entries ?? [];
+  const error = initial == null;
 
   const balNum = Number(balance);
   const isNegative = Number.isFinite(balNum) && balNum < 0;
@@ -97,10 +72,9 @@ export function PartyTrustLedgerPanel({
         </span>
       </div>
 
-      {loading ? <p className="text-sm text-sage-600">{t("case_detail.trust.loading")}</p> : null}
       {error ? <p className="text-sm text-red-700">{t("party_cases.trust_error_load")}</p> : null}
 
-      {!loading && !error ? (
+      {!error ? (
         entries.length === 0 ? (
           <p className="text-sm text-sage-600">{t("party_cases.trust_empty")}</p>
         ) : (

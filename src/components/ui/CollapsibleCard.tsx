@@ -4,6 +4,7 @@ import { ChevronDown } from "lucide-react";
 import {
   useEffect,
   useId,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -20,6 +21,7 @@ type Props = {
   defaultOpen?: boolean;
   /** 记住展开/收起；建议按案例+区块唯一 */
   storageKey?: string;
+  onOpenChange?: (open: boolean) => void;
   children: ReactNode;
   className?: string;
   bodyClassName?: string;
@@ -51,6 +53,7 @@ export function CollapsibleCard({
   headerAside,
   defaultOpen = true,
   storageKey,
+  onOpenChange,
   children,
   className,
   bodyClassName,
@@ -58,18 +61,20 @@ export function CollapsibleCard({
   const { t } = useTranslation("common");
   const panelId = useId();
   const [open, setOpen] = useState(defaultOpen);
+  const onOpenChangeRef = useRef(onOpenChange);
+  onOpenChangeRef.current = onOpenChange;
 
   useEffect(() => {
-    if (!storageKey) return;
-    setOpen(readStored(storageKey, defaultOpen));
+    const next = storageKey ? readStored(storageKey, defaultOpen) : defaultOpen;
+    setOpen(next);
+    onOpenChangeRef.current?.(next);
   }, [storageKey, defaultOpen]);
 
   const toggle = () => {
-    setOpen((prev) => {
-      const next = !prev;
-      if (storageKey) writeStored(storageKey, next);
-      return next;
-    });
+    const next = !open;
+    if (storageKey) writeStored(storageKey, next);
+    setOpen(next);
+    onOpenChangeRef.current?.(next);
   };
 
   return (

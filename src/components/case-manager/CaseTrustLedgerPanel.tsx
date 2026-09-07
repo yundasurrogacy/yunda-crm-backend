@@ -66,9 +66,10 @@ export function CaseTrustLedgerPanel({
 
   const [entries, setEntries] = useState<TrustLedgerEntry[]>([]);
   const [balance, setBalance] = useState(currentBalance);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [errorKey, setErrorKey] = useState<string | null>(null);
+  const [sectionOpen, setSectionOpen] = useState(false);
   const [warnNegative, setWarnNegative] = useState(false);
 
   const [amount, setAmount] = useState("");
@@ -109,8 +110,9 @@ export function CaseTrustLedgerPanel({
   }, [trustApi]);
 
   useEffect(() => {
+    if (!sectionOpen) return;
     void reload();
-  }, [reload]);
+  }, [reload, sectionOpen]);
 
   useEffect(() => {
     setBalance(currentBalance);
@@ -255,6 +257,7 @@ export function CaseTrustLedgerPanel({
       summary={formatMoney(balance, lng)}
       storageKey={`crm-case-detail-trust-${caseId}`}
       defaultOpen={false}
+      onOpenChange={setSectionOpen}
     >
       <p className="mb-2 text-sm text-sage-700">{t("case_detail.trust.section_intro")}</p>
       <p className="mb-4 text-xs text-sage-600">{t("case_detail.trust.edit_locked_hint")}</p>

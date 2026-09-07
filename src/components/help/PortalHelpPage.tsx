@@ -66,7 +66,7 @@ export function PortalHelpPage({ doc }: { doc?: PortalHelpDoc }) {
         </nav>
       ) : null}
 
-      {data.sections.map((section) => (
+      {data.sections.map((section, sectionIdx) => (
         <section key={section.id} id={`help-${section.id}`} className="crm-card scroll-mt-4">
           <h2 className="crm-font-display mb-2 text-lg font-semibold text-brand-brown">{t(section.titleKey)}</h2>
           {section.introKey ? <p className="mb-3 text-sm text-sage-700">{t(section.introKey)}</p> : null}
@@ -93,6 +93,8 @@ export function PortalHelpPage({ doc }: { doc?: PortalHelpDoc }) {
                         src={src}
                         alt={alt}
                         key={src}
+                        loading={sectionIdx === 0 && i === 0 ? "eager" : "lazy"}
+                        decoding="async"
                         className="max-h-[22rem] w-full object-contain"
                       />
                       <span className="pointer-events-none absolute bottom-2 right-2 rounded-md bg-[color:color-mix(in_srgb,var(--bark)_78%,transparent)] px-2 py-1 text-[11px] font-semibold text-petal opacity-90 group-hover:opacity-100">

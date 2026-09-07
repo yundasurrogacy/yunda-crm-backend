@@ -1,32 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { SessionIdentity } from "@/lib/auth/fetch-session-identity";
 import type { PortalId } from "@/types/portal";
 
 type Shell = "admin" | PortalId;
 
-export function PortalSwitcherFooter({ shell }: { shell: Shell }) {
+export function PortalSwitcherFooter({
+  shell,
+  identity,
+}: {
+  shell: Shell;
+  identity: SessionIdentity | null;
+}) {
   const { t } = useTranslation("portal");
-  const [identity, setIdentity] = useState<SessionIdentity | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch(`/api/session/me?shell=${encodeURIComponent(shell)}`);
-        if (!res.ok) return;
-        const json = (await res.json()) as SessionIdentity;
-        if (!cancelled) setIdentity(json);
-      } catch {
-        /* ignore */
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [shell]);
 
   async function switchPortal() {
     await fetch("/api/session", {
@@ -92,9 +79,7 @@ export function PortalSwitcherFooter({ shell }: { shell: Shell }) {
             )
           ) : null}
         </div>
-      ) : (
-        <div className="h-16 animate-pulse rounded-lg bg-white/30" aria-hidden />
-      )}
+      ) : null}
       <div className="flex flex-col gap-1.5">
         <button
           type="button"

@@ -1,53 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import type { AdminCmWorkloadPayload } from "@/lib/admin/case-manager-caseload";
 
-type Row = { entityId: string; email: string; caseCount: number };
+type Props = {
+  data: AdminCmWorkloadPayload | null;
+  loading?: boolean;
+  error?: boolean;
+};
 
-export function AdminCaseManagerWorkload() {
+export function AdminCaseManagerWorkload({ data, loading = false, error = false }: Props) {
   const { t } = useTranslation("portal");
-  const [rows, setRows] = useState<Row[]>([]);
-  const [assignedTotal, setAssignedTotal] = useState(0);
-  const [unassignedCount, setUnassignedCount] = useState(0);
-  const [activeTotal, setActiveTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setError(false);
-      try {
-        const res = await fetch("/api/admin/case-manager-workload");
-        if (!res.ok) throw new Error("load");
-        const json = (await res.json()) as {
-          rows?: Row[];
-          assignedTotal?: number;
-          unassignedCount?: number;
-          activeTotal?: number;
-        };
-        if (!cancelled) {
-          setRows(json.rows ?? []);
-          setAssignedTotal(json.assignedTotal ?? 0);
-          setUnassignedCount(json.unassignedCount ?? 0);
-          setActiveTotal(json.activeTotal ?? 0);
-        }
-      } catch {
-        if (!cancelled) {
-          setError(true);
-          setRows([]);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const rows = data?.rows ?? [];
+  const assignedTotal = data?.assignedTotal ?? 0;
+  const unassignedCount = data?.unassignedCount ?? 0;
+  const activeTotal = data?.activeTotal ?? 0;
 
   return (
     <section className="crm-card">
@@ -67,7 +35,7 @@ export function AdminCaseManagerWorkload() {
       {loading ? <p className="text-sm text-sage-600">{t("admin_cm_workload.loading")}</p> : null}
       {error ? <p className="text-sm text-red-700">{t("admin_cm_workload.error")}</p> : null}
 
-      {!loading && !error ? (
+      {!loading && !error && data ? (
         <>
           <p className="mb-3 text-sm leading-relaxed text-sage-800">
             {t("admin_cm_workload.summary", {

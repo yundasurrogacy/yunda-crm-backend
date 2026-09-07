@@ -726,7 +726,8 @@
   },
   "entity_search": {
     "placeholder": "Search email / name / ID…",
-    "no_matches": "No matches"
+    "no_matches": "No matches",
+    "loading": "Loading…"
   },
   "cm_parties": {
     "title_intended_parent": "Intended parents",

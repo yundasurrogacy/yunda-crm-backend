@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { fetchCaseDetail } from "@/lib/case-manager/fetch-case-detail";
 import { getServerSession } from "@/lib/auth/session-cookie";
+import { fetchPartyCasePagePayload } from "@/lib/party/fetch-party-case-page";
 
 export async function GET(_req: Request, context: { params: Promise<{ id: string }> }) {
   const session = await getServerSession();
@@ -10,9 +10,9 @@ export async function GET(_req: Request, context: { params: Promise<{ id: string
 
   const { id } = await context.params;
   try {
-    const detail = await fetchCaseDetail(session, id, { mode: "surrogate_mother_api" });
-    if (!detail) return NextResponse.json({ error: "not_found" }, { status: 404 });
-    return NextResponse.json(detail);
+    const payload = await fetchPartyCasePagePayload(session, id, "surrogate_mother_api");
+    if (!payload) return NextResponse.json({ error: "not_found" }, { status: 404 });
+    return NextResponse.json(payload);
   } catch {
     return NextResponse.json({ error: "data_unavailable" }, { status: 503 });
   }

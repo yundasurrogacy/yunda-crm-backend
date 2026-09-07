@@ -45,9 +45,10 @@ export function CaseFilesPanel({ caseId, apiPathBase }: Props) {
   const confirm = useConfirm();
   const [files, setFiles] = useState<CaseFileRow[]>([]);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [errorKey, setErrorKey] = useState<string | null>(null);
+  const [sectionOpen, setSectionOpen] = useState(false);
   const [category, setCategory] = useState("Other");
   const [aboutRole, setAboutRole] = useState("");
   /** 默认客户可见；内部材料可手动改为仅经理 */
@@ -86,8 +87,9 @@ export function CaseFilesPanel({ caseId, apiPathBase }: Props) {
   }, [filesApi]);
 
   useEffect(() => {
+    if (!sectionOpen) return;
     void reload();
-  }, [reload]);
+  }, [reload, sectionOpen]);
 
   const onSubmit = async () => {
     if (saving || !fileUrl.trim()) {
@@ -156,6 +158,7 @@ export function CaseFilesPanel({ caseId, apiPathBase }: Props) {
       summary={t("case_detail.files.summary_count", { count: files.length })}
       storageKey={`crm-case-detail-files-${caseId}`}
       defaultOpen={false}
+      onOpenChange={setSectionOpen}
     >
       <p className="mb-4 text-sm text-sage-700">{t("case_detail.files.section_intro")}</p>
       {errorKey ? <p className="mb-3 text-sm text-red-700">{t(errorKey)}</p> : null}

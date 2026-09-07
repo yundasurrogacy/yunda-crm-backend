@@ -95,7 +95,7 @@ export function AdminUsersManager() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, q, t]);
+  }, [page, pageSize, q]);
 
   useEffect(() => {
     setQInput(q);

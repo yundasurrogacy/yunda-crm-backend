@@ -10,6 +10,7 @@ import {
   setPrimaryAndLinkCaseManagers,
   unlinkCaseManagerFromCase,
 } from "@/lib/case-manager/case-case-managers";
+import { fetchAdminCaseManagerPickerOptions } from "@/lib/admin/fetch-admin-case-options";
 
 const CASE_EXISTS = `
   query AdminCaseExists($id: bigint!) {
@@ -49,11 +50,14 @@ export async function GET(_req: Request, context: { params: Promise<{ id: string
     return NextResponse.json({ error: "bad_id" }, { status: 400 });
   }
   try {
-    const result = await listCaseManagerAssignments(id);
+    const [result, caseManagers] = await Promise.all([
+      listCaseManagerAssignments(id),
+      fetchAdminCaseManagerPickerOptions(),
+    ]);
     if (!result) {
       return NextResponse.json({ error: "not_found" }, { status: 404 });
     }
-    return NextResponse.json(result);
+    return NextResponse.json({ ...result, caseManagers });
   } catch {
     return NextResponse.json({ error: "data_unavailable" }, { status: 503 });
   }

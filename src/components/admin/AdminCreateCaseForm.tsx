@@ -14,10 +14,16 @@ export function AdminCreateCaseForm({
   variant = "page",
   onCreated,
   onCancel,
+  preloadedOptions,
 }: {
   variant?: "page" | "dialog";
   onCreated?: (id: string) => void;
   onCancel?: () => void;
+  preloadedOptions?: {
+    caseManagers: Option[];
+    intendedParents: Option[];
+    surrogates: Option[];
+  };
 }) {
   const router = useRouter();
   const { t } = useTranslation("portal");
@@ -42,8 +48,16 @@ export function AdminCreateCaseForm({
     processStatus: CANONICAL_CASE_STAGES[0]!,
     trustAccountBalance: "0",
   });
+  const [snapshot] = useState(() => preloadedOptions);
 
   useEffect(() => {
+    if (snapshot) {
+      setCaseManagers(snapshot.caseManagers);
+      setIntendedParents(snapshot.intendedParents);
+      setSurrogates(snapshot.surrogates);
+      setLoading(false);
+      return;
+    }
     let cancelled = false;
     (async () => {
       setLoading(true);
@@ -71,7 +85,7 @@ export function AdminCreateCaseForm({
     return () => {
       cancelled = true;
     };
-  }, [t]);
+  }, [snapshot, t]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();

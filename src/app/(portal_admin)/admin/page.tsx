@@ -1,6 +1,5 @@
 "use client";
 
-import { AdminCaseManagerWorkload } from "@/components/admin/AdminCaseManagerWorkload";
 import { CaseManagerAmDashboard } from "@/components/case-manager/CaseManagerAmDashboard";
 
 export default function AdminHomePage() {
@@ -12,7 +11,6 @@ export default function AdminHomePage() {
         detailHrefBase="/admin/cases"
         headingMode="admin"
       />
-      <AdminCaseManagerWorkload />
     </div>
   );
 }

@@ -21,26 +21,24 @@ export function AdminCaseManagersPanel({ caseId }: { caseId: string }) {
   const [options, setOptions] = useState<EntitySearchOption[]>([]);
   const [primaryPickId, setPrimaryPickId] = useState("");
   const [auxPickId, setAuxPickId] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState(false);
+  const [sectionOpen, setSectionOpen] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(false);
     try {
-      const [listRes, optRes] = await Promise.all([
-        fetch(`/api/admin/cases/${encodeURIComponent(caseId)}/case-managers`),
-        fetch("/api/admin/cases?options=1"),
-      ]);
+      const listRes = await fetch(`/api/admin/cases/${encodeURIComponent(caseId)}/case-managers`);
       if (!listRes.ok) throw new Error("list");
-      const listJson = (await listRes.json()) as { managers?: ManagerRow[] };
+      const listJson = (await listRes.json()) as {
+        managers?: ManagerRow[];
+        caseManagers?: EntitySearchOption[];
+      };
       setManagers(listJson.managers ?? []);
-      if (optRes.ok) {
-        const optJson = (await optRes.json()) as { caseManagers?: EntitySearchOption[] };
-        setOptions(optJson.caseManagers ?? []);
-      }
+      if (listJson.caseManagers) setOptions(listJson.caseManagers);
     } catch {
       setError(true);
       setManagers([]);
@@ -50,8 +48,9 @@ export function AdminCaseManagersPanel({ caseId }: { caseId: string }) {
   }, [caseId]);
 
   useEffect(() => {
+    if (!sectionOpen) return;
     void load();
-  }, [load]);
+  }, [load, sectionOpen]);
 
   const primary = useMemo(() => managers.find((m) => m.isPrimary) ?? null, [managers]);
   const auxiliaries = useMemo(() => managers.filter((m) => !m.isPrimary), [managers]);
@@ -158,6 +157,7 @@ export function AdminCaseManagersPanel({ caseId }: { caseId: string }) {
       title={t("case_detail.section_case_managers")}
       summary={summary}
       defaultOpen={false}
+      onOpenChange={setSectionOpen}
       storageKey={`crm-case-detail-cm-${caseId}`}
     >
       <p className="mb-4 text-sm text-sage-700">{t("case_detail.cm_intro")}</p>

@@ -14,6 +14,7 @@ export default function IntendedParentCaseDetailPage() {
       apiBase="/api/intended-parent/cases"
       listHref={safeReturnTo(searchParams.get("returnTo"), ["/intended_parent"], "/intended_parent/my-cases")}
       canPostMessages
+      showTrust
     />
   );
 }

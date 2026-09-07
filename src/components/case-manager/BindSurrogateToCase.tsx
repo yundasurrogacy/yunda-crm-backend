@@ -27,7 +27,9 @@ export function BindSurrogateToCase({
   const confirm = useConfirm();
   const [options, setOptions] = useState<Option[]>([]);
   const [selectedId, setSelectedId] = useState("");
-  const [loadingOptions, setLoadingOptions] = useState(true);
+  const [wantOptions, setWantOptions] = useState(false);
+  const [loadingOptions, setLoadingOptions] = useState(false);
+  const [loadedOptions, setLoadedOptions] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorKey, setErrorKey] = useState<string | null>(null);
 
@@ -40,16 +42,20 @@ export function BindSurrogateToCase({
       const exclude = excludeSurrogateId?.trim() ?? "";
       const list = (json.surrogates ?? []).filter((o) => !exclude || o.id !== exclude);
       setOptions(list);
+      setLoadedOptions(true);
     } catch {
       setOptions([]);
+      setLoadedOptions(true);
     } finally {
       setLoadingOptions(false);
     }
   }, [apiCasesBase, excludeSurrogateId]);
 
   useEffect(() => {
+    // 未绑定 GC：绑定区默认展开，进页即可拉列表。换绑在折叠档案里，点开搜索再拉。
+    if (mode === "replace" && !wantOptions) return;
     void loadOptions();
-  }, [loadOptions]);
+  }, [mode, wantOptions, loadOptions]);
 
   async function handleBind() {
     if (!selectedId.trim()) return;
@@ -132,7 +138,11 @@ export function BindSurrogateToCase({
             options={options}
             value={selectedId}
             onChange={setSelectedId}
-            disabled={loadingOptions || submitting}
+            disabled={submitting}
+            loading={loadingOptions}
+            onOpenChange={(open) => {
+              if (open) setWantOptions(true);
+            }}
             placeholder={
               loadingOptions ? t("case_detail.bind_gc_loading") : t("case_detail.bind_gc_search_ph")
             }
@@ -149,7 +159,7 @@ export function BindSurrogateToCase({
           {submitting ? t(submittingKey) : t(confirmKey)}
         </button>
       </div>
-      {!loadingOptions && options.length === 0 ? (
+      {loadedOptions && !loadingOptions && options.length === 0 ? (
         <p className="mt-2 text-xs text-sage-600">{t("case_detail.bind_gc_no_options")}</p>
       ) : null}
       {errorKey ? <p className="mt-2 text-xs text-red-700">{t(errorKey)}</p> : null}

@@ -6,6 +6,8 @@ import {
   resolveCaseManagerEntityId,
   type CasesListScope,
 } from "@/lib/case-manager/fetch-dashboard-data";
+import { fetchCmFilterOptions } from "@/lib/case-manager/fetch-cm-filter-options";
+import { parseIncludeParam } from "@/lib/http/parse-include";
 
 import { getServerSession } from "@/lib/auth/session-cookie";
 
@@ -44,39 +46,54 @@ export async function GET(req: Request) {
 
   const resolvedCmId = await resolveCaseManagerEntityId(session);
   const listStage: CanonicalCaseStage | "all" = stage === "all" ? "all" : stage;
+  const include = parseIncludeParam(searchParams.get("include"));
 
   try {
-    if (skipCounts) {
-      const list = await fetchCasesPage(
-        session,
-        listStage,
-        page,
-        pageSize,
-        filters,
-        listScope,
-        resolvedCmId,
-      );
-      return NextResponse.json({
-        stage: listStage,
-        counts: null,
-        ...list,
-        page,
-        pageSize,
-      });
-    }
+    const listPromise = skipCounts
+      ? fetchCasesPage(
+          session,
+          listStage,
+          page,
+          pageSize,
+          filters,
+          listScope,
+          resolvedCmId,
+        ).then((list) => ({
+          stage: listStage,
+          counts: null as Record<string, number> | null,
+          ...list,
+          page,
+          pageSize,
+        }))
+      : Promise.all([
+          fetchStageCounts(session, listScope, resolvedCmId, filters.includeArchived),
+          fetchCasesPage(session, listStage, page, pageSize, filters, listScope, resolvedCmId),
+        ]).then(([counts, list]) => ({
+          stage: listStage,
+          counts,
+          ...list,
+          page,
+          pageSize,
+        }));
 
-    const [counts, list] = await Promise.all([
-      fetchStageCounts(session, listScope, resolvedCmId, filters.includeArchived),
-      fetchCasesPage(session, listStage, page, pageSize, filters, listScope, resolvedCmId),
+    const [listResult, optionsResult] = await Promise.allSettled([
+      listPromise,
+      include.has("options") ? fetchCmFilterOptions(session, resolvedCmId) : Promise.resolve(null),
     ]);
+    if (listResult.status === "rejected") {
+      console.error("[cm/dashboard GET list]", listResult.reason);
+      return NextResponse.json({ error: "data_unavailable" }, { status: 503 });
+    }
+    const options = optionsResult.status === "fulfilled" ? optionsResult.value : null;
+    if (optionsResult.status === "rejected") {
+      console.error("[cm/dashboard GET options]", optionsResult.reason);
+    }
     return NextResponse.json({
-      stage: listStage,
-      counts,
-      ...list,
-      page,
-      pageSize,
+      ...listResult.value,
+      ...(options ?? {}),
     });
-  } catch {
+  } catch (e) {
+    console.error("[cm/dashboard GET]", e);
     return NextResponse.json({ error: "data_unavailable" }, { status: 503 });
   }
 }

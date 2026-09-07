@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
 import { getClient } from "@/config-lib/graphql-client";
-import { CANONICAL_CASE_STAGES, isCanonicalCaseStage, type CanonicalCaseStage } from "@/constants/case-stages";
+import { isCanonicalCaseStage, type CanonicalCaseStage } from "@/constants/case-stages";
 import {
   fetchCasesPage,
   fetchStageCounts,
   type CasesListScope,
 } from "@/lib/case-manager/fetch-dashboard-data";
 import { getServerSession } from "@/lib/auth/session-cookie";
-import { intendedParentDisplay, surrogateDisplayName } from "@/lib/case-manager/display-names";
+import { fetchAdminCaseOptions } from "@/lib/admin/fetch-admin-case-options";
+import { fetchAdminWorkloadPayload } from "@/lib/admin/case-manager-caseload";
+import { parseIncludeParam } from "@/lib/http/parse-include";
 import { fetchSurrogatesAvailableForMatch } from "@/lib/case-manager/match-gc";
 
 const ADMIN_SCOPE = "admin_all" satisfies CasesListScope;
@@ -23,27 +25,6 @@ function classifyCaseInsertError(message: string): "surrogate_has_case" | "unkno
   }
   return "unknown";
 }
-
-const OPTIONS_QUERY = `
-  query AdminCaseOptions {
-    case_managers(where: { deleted_at: { _is_null: true } }, order_by: { id: asc }, limit: 500) {
-      id
-      user {
-        email
-      }
-    }
-    intended_parents(where: { deleted_at: { _is_null: true } }, order_by: { id: asc }, limit: 500) {
-      id
-      email
-      profile_data
-    }
-    surrogate_mothers(where: { deleted_at: { _is_null: true } }, order_by: { id: asc }, limit: 500) {
-      id
-      email
-      profile_data
-    }
-  }
-`;
 
 const CREATE_CASE_MUTATION = `
   mutation AdminCreateCase(
@@ -97,28 +78,7 @@ export async function GET(req: Request) {
 
   if (searchParams.get("options") === "1") {
     try {
-      const client = getClient();
-      const data = await client.execute<{
-        case_managers: { id: string | number; user: { email: string | null } | null }[];
-        intended_parents: { id: string | number; email: string | null; profile_data: unknown }[];
-        surrogate_mothers: { id: string | number; email: string | null; profile_data: unknown }[];
-      }>({
-        query: OPTIONS_QUERY,
-      });
-      return NextResponse.json({
-        caseManagers: (data.case_managers ?? []).map((r) => ({
-          id: String(r.id),
-          label: `${r.user?.email?.trim() || "—"} (#${r.id})`,
-        })),
-        intendedParents: (data.intended_parents ?? []).map((r) => ({
-          id: String(r.id),
-          label: `${intendedParentDisplay(r.profile_data, r.email ?? undefined) || "—"} (#${r.id})`,
-        })),
-        surrogates: (data.surrogate_mothers ?? []).map((r) => ({
-          id: String(r.id),
-          label: `${surrogateDisplayName(r.profile_data, r.email ?? undefined) || "—"} (#${r.id})`,
-        })),
-      });
+      return NextResponse.json(await fetchAdminCaseOptions());
     } catch {
       return NextResponse.json({ error: "data_unavailable" }, { status: 503 });
     }
@@ -141,24 +101,45 @@ export async function GET(req: Request) {
     surrogateId: searchParams.get("surrogateId") ?? undefined,
     includeArchived: searchParams.get("includeArchived") === "1",
   };
+  const include = parseIncludeParam(searchParams.get("include"));
   try {
-    if (skipCounts) {
-      const list = await fetchCasesPage(
-        session,
-        stage,
-        page,
-        pageSize,
-        filters,
-        ADMIN_SCOPE,
-      );
-      return NextResponse.json({ stage, counts: null, ...list, page, pageSize });
-    }
-    const [counts, list] = await Promise.all([
-      fetchStageCounts(session, ADMIN_SCOPE, null, filters.includeArchived),
-      fetchCasesPage(session, stage, page, pageSize, filters, ADMIN_SCOPE),
+    const listPromise = skipCounts
+      ? fetchCasesPage(session, stage, page, pageSize, filters, ADMIN_SCOPE).then((list) => ({
+          stage,
+          counts: null as Record<string, number> | null,
+          ...list,
+          page,
+          pageSize,
+        }))
+      : Promise.all([
+          fetchStageCounts(session, ADMIN_SCOPE, null, filters.includeArchived),
+          fetchCasesPage(session, stage, page, pageSize, filters, ADMIN_SCOPE),
+        ]).then(([counts, list]) => ({ stage, counts, ...list, page, pageSize }));
+
+    const [listResult, optionsResult, workloadResult] = await Promise.allSettled([
+      listPromise,
+      include.has("options") ? fetchAdminCaseOptions() : Promise.resolve(null),
+      include.has("workload") ? fetchAdminWorkloadPayload() : Promise.resolve(null),
     ]);
-    return NextResponse.json({ stage, counts, ...list, page, pageSize });
-  } catch {
+    if (listResult.status === "rejected") {
+      console.error("[admin/cases GET list]", listResult.reason);
+      return NextResponse.json({ error: "data_unavailable" }, { status: 503 });
+    }
+    const options = optionsResult.status === "fulfilled" ? optionsResult.value : null;
+    if (optionsResult.status === "rejected") {
+      console.error("[admin/cases GET options]", optionsResult.reason);
+    }
+    const workload = workloadResult.status === "fulfilled" ? workloadResult.value : null;
+    if (workloadResult.status === "rejected") {
+      console.error("[admin/cases GET workload]", workloadResult.reason);
+    }
+    return NextResponse.json({
+      ...listResult.value,
+      ...(options ?? {}),
+      ...(workload ? { workload } : {}),
+    });
+  } catch (e) {
+    console.error("[admin/cases GET]", e);
     return NextResponse.json({ error: "data_unavailable" }, { status: 503 });
   }
 }

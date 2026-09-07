@@ -6,6 +6,7 @@ import {
   surrogateMotherNav,
   type PortalNavItem,
 } from "@/config/portal-nav";
+import type { SessionIdentity } from "@/lib/auth/fetch-session-identity";
 import { AppShell } from "./AppShell";
 
 type PortalRole = "case_manager" | "intended_parent" | "surrogate_mother";
@@ -24,16 +25,18 @@ const headingKeyByRole: Record<PortalRole, string> = {
 
 export function PortalChrome({
   role,
+  identity,
   children,
 }: {
   role: PortalRole;
+  identity: SessionIdentity | null;
   children: React.ReactNode;
 }) {
   const nav = navByRole[role];
   const headingKey = headingKeyByRole[role];
 
   return (
-    <AppShell sidebarTitleKey={headingKey} navItems={nav} shell={role}>
+    <AppShell sidebarTitleKey={headingKey} navItems={nav} shell={role} identity={identity}>
       {children}
     </AppShell>
   );

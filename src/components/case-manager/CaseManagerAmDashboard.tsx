@@ -24,6 +24,8 @@ import {
 import { hrefWithReturnTo } from "@/lib/use-synced-list-query";
 import { DEFAULT_PAGE_SIZE, parsePageSize, type PageSizeOption } from "@/lib/crm-pagination";
 import { ListPager } from "@/components/ui/ListPager";
+import { AdminCaseManagerWorkload } from "@/components/admin/AdminCaseManagerWorkload";
+import type { AdminCmWorkloadPayload } from "@/lib/admin/case-manager-caseload";
 
 type SelectOption = { id: string; label: string };
 type MyCaseScope = "all" | "created" | "assigned";
@@ -56,6 +58,10 @@ type DashboardPayload = {
   total: number;
   page: number;
   pageSize: number;
+  caseManagers?: SelectOption[];
+  intendedParents?: SelectOption[];
+  surrogates?: SelectOption[];
+  workload?: AdminCmWorkloadPayload;
 };
 
 function readStageFromSearch(sp: URLSearchParams | null): CanonicalCaseStage | "all" {
@@ -140,6 +146,10 @@ export function CaseManagerAmDashboard({
   const [surrogateOptions, setSurrogateOptions] = useState<SelectOption[]>([]);
   const [myCaseScope, setMyCaseScope] = useState<MyCaseScope>(() => readMyCaseScope(searchParams));
   const [gcOptions, setGcOptions] = useState<SelectOption[]>([]);
+  const [gcOptionsLoading, setGcOptionsLoading] = useState(false);
+  const [workload, setWorkload] = useState<AdminCmWorkloadPayload | null>(null);
+  const [workloadError, setWorkloadError] = useState(false);
+  const extrasLoadedRef = useRef(false);
   const [gcAssignTarget, setGcAssignTarget] = useState<string | null>(null);
   const [gcAssignValue, setGcAssignValue] = useState("");
   const [gcAssignQuery, setGcAssignQuery] = useState("");
@@ -256,53 +266,6 @@ export function CaseManagerAmDashboard({
     router.replace(`${pathname}?${q.toString()}`, { scroll: false });
   }, [isMyCases, pathname, router, searchParams]);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        if (headingMode === "admin") {
-          const url = new URL(apiPath, window.location.origin);
-          url.searchParams.set("options", "1");
-          const res = await fetch(url.pathname + url.search);
-          if (!res.ok) return;
-          const json = (await res.json()) as {
-            caseManagers: SelectOption[];
-            intendedParents: SelectOption[];
-            surrogates: SelectOption[];
-          };
-          if (cancelled) return;
-          setCaseManagerOptions(json.caseManagers ?? []);
-          setIntendedParentOptions(json.intendedParents ?? []);
-          setSurrogateOptions(json.surrogates ?? []);
-        } else {
-          const res = await fetch("/api/case-manager/case-options");
-          if (!res.ok) return;
-          const json = (await res.json()) as {
-            caseManagers: SelectOption[];
-            intendedParents: SelectOption[];
-            surrogates: SelectOption[];
-          };
-          if (cancelled) return;
-          setCaseManagerOptions(json.caseManagers ?? []);
-          setIntendedParentOptions(json.intendedParents ?? []);
-          setSurrogateOptions(json.surrogates ?? []);
-        }
-        const gcUrl =
-          headingMode === "admin" ? "/api/admin/cases?options=gc" : "/api/case-manager/cases?options=gc";
-        const gcRes = await fetch(gcUrl);
-        if (gcRes.ok) {
-          const gcJson = (await gcRes.json()) as { surrogates: SelectOption[] };
-          if (!cancelled) setGcOptions(gcJson.surrogates ?? []);
-        }
-      } catch {
-        /* ignore */
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [apiPath, headingMode, isMyCases]);
-
   const load = useCallback(async () => {
     setErrorKey(null);
     setLoading((prev) => (dataRef.current ? prev : true));
@@ -321,6 +284,11 @@ export function CaseManagerAmDashboard({
       if (intendedParentId.trim()) url.searchParams.set("intendedParentId", intendedParentId.trim());
       if (surrogateId.trim()) url.searchParams.set("surrogateId", surrogateId.trim());
       if (includeArchived) url.searchParams.set("includeArchived", "1");
+      if (!extrasLoadedRef.current) {
+        const bits = ["options"];
+        if (headingMode === "admin" && variant === "full") bits.push("workload");
+        url.searchParams.set("include", bits.join(","));
+      }
       const res = await fetch(url.pathname + url.search);
       if (res.status === 401) {
         setErrorKey("am_dash.error_unauthorized");
@@ -330,11 +298,32 @@ export function CaseManagerAmDashboard({
       if (!res.ok) {
         setErrorKey("am_dash.error_data");
         setData(null);
+        if (!extrasLoadedRef.current && headingMode === "admin" && variant === "full") {
+          setWorkloadError(true);
+        }
         return;
       }
       const json = (await res.json()) as DashboardPayload;
-      setData(json);
-      cacheListPayload(`crm:list:${window.location.pathname}${window.location.search}`, json);
+      if (json.caseManagers || json.intendedParents || json.surrogates) {
+        if (json.caseManagers) setCaseManagerOptions(json.caseManagers);
+        if (json.intendedParents) setIntendedParentOptions(json.intendedParents);
+        if (json.surrogates) setSurrogateOptions(json.surrogates);
+        extrasLoadedRef.current = true;
+      }
+      if (json.workload) {
+        setWorkload(json.workload);
+        setWorkloadError(false);
+      }
+      const listPayload: DashboardPayload = {
+        stage: json.stage,
+        counts: json.counts,
+        rows: json.rows,
+        total: json.total,
+        page: json.page,
+        pageSize: json.pageSize,
+      };
+      setData(listPayload);
+      cacheListPayload(`crm:list:${window.location.pathname}${window.location.search}`, listPayload);
       const maxPage = Math.max(1, Math.ceil((json.total ?? 0) / (json.pageSize || pageSize)));
       if (page > maxPage) {
         setPage(maxPage);
@@ -364,6 +353,7 @@ export function CaseManagerAmDashboard({
     surrogateId,
     includeArchived,
     apiPath,
+    headingMode,
     syncUrl,
     syncMyCasesUrl,
   ]);
@@ -526,6 +516,32 @@ export function CaseManagerAmDashboard({
     setGcAssignError(null);
   }
 
+  async function ensureGcOptions() {
+    if (gcOptions.length > 0 || gcOptionsLoading) return;
+    setGcOptionsLoading(true);
+    try {
+      const gcUrl =
+        headingMode === "admin" ? "/api/admin/cases?options=gc" : "/api/case-manager/cases?options=gc";
+      const gcRes = await fetch(gcUrl);
+      if (gcRes.ok) {
+        const gcJson = (await gcRes.json()) as { surrogates?: SelectOption[] };
+        setGcOptions(gcJson.surrogates ?? []);
+      }
+    } catch {
+      setGcOptions([]);
+    } finally {
+      setGcOptionsLoading(false);
+    }
+  }
+
+  function openGcMatch(caseId: string) {
+    setGcAssignTarget(caseId);
+    setGcAssignValue("");
+    setGcAssignQuery("");
+    setGcAssignError(null);
+    void ensureGcOptions();
+  }
+
   const gcAssignRow = data?.rows.find((r) => r.id === gcAssignTarget) ?? null;
   const gcFiltered = useMemo(() => {
     const q = gcAssignQuery.trim().toLowerCase();
@@ -574,6 +590,7 @@ export function CaseManagerAmDashboard({
   const filterFieldClass = "flex min-w-0 flex-col gap-1 text-xs font-medium text-sage-700";
 
   return (
+    <>
     <div className={variant === "full" ? "ami-ui crm-font-ui flex w-full shrink-0 flex-col gap-4" : "ami-ui crm-font-ui crm-fill-page"}>
       <div className="flex shrink-0 items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
@@ -981,12 +998,7 @@ export function CaseManagerAmDashboard({
                               {!isDeleted && !row.surrogateId ? (
                                 <button
                                   type="button"
-                                  onClick={() => {
-                                    setGcAssignTarget(row.id);
-                                    setGcAssignValue("");
-                                    setGcAssignQuery("");
-                                    setGcAssignError(null);
-                                  }}
+                                  onClick={() => openGcMatch(row.id)}
                                   className="crm-btn crm-btn-secondary crm-btn-xs"
                                 >
                                   {t("am_dash.gc_match")}
@@ -1027,6 +1039,15 @@ export function CaseManagerAmDashboard({
           {createCaseMode === "admin" ? (
             <AdminCreateCaseForm
               variant="dialog"
+              preloadedOptions={
+                caseManagerOptions.length > 0 || intendedParentOptions.length > 0
+                  ? {
+                      caseManagers: caseManagerOptions,
+                      intendedParents: intendedParentOptions,
+                      surrogates: surrogateOptions,
+                    }
+                  : undefined
+              }
               onCancel={() => setCreateOpen(false)}
               onCreated={() => {
                 setCreateOpen(false);
@@ -1068,7 +1089,9 @@ export function CaseManagerAmDashboard({
             />
           </label>
           <ul className="max-h-56 overflow-auto rounded-md border border-sage-200 bg-white py-1">
-            {gcFiltered.length === 0 ? (
+            {gcOptionsLoading ? (
+              <li className="px-3 py-2 text-sm text-sage-500">{tCommon("loading")}</li>
+            ) : gcFiltered.length === 0 ? (
               <li className="px-3 py-2 text-sm text-sage-500">{t("entity_search.no_matches")}</li>
             ) : (
               gcFiltered.map((o) => (
@@ -1105,5 +1128,13 @@ export function CaseManagerAmDashboard({
         </div>
       </CrmModal>
     </div>
+    {headingMode === "admin" && variant === "full" ? (
+      <AdminCaseManagerWorkload
+        data={workload}
+        loading={!workload && !workloadError && loading}
+        error={workloadError}
+      />
+    ) : null}
+    </>
   );
 }

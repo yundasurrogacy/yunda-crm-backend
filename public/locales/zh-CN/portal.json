@@ -726,7 +726,8 @@
   },
   "entity_search": {
     "placeholder": "搜索邮箱 / 姓名 / ID…",
-    "no_matches": "无匹配结果"
+    "no_matches": "无匹配结果",
+    "loading": "加载中…"
   },
   "cm_parties": {
     "title_intended_parent": "准父母",

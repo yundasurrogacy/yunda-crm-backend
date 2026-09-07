@@ -10,6 +10,7 @@ import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import type { PortalNavItem } from "@/config/portal-nav";
 import { isPortalNavActive } from "@/lib/portal-nav-active";
 import type { PortalId } from "@/types/portal";
+import type { SessionIdentity } from "@/lib/auth/fetch-session-identity";
 import { ConfirmDialogProvider } from "@/components/ui/ConfirmDialog";
 import { PageEnter } from "./PageEnter";
 import { PortalSwitcherFooter } from "./PortalSwitcherFooter";
@@ -28,6 +29,7 @@ export function AppShell({
   sidebarTitleKey,
   navItems,
   shell,
+  identity,
   centerSlot,
   children,
 }: {
@@ -35,6 +37,7 @@ export function AppShell({
   navItems: readonly PortalNavItem[];
   /** 侧栏账号条：管理端 / 业务端口 */
   shell: "admin" | PortalId;
+  identity: SessionIdentity | null;
   /** 右侧顶栏居中（默认 YUNDA 标志） */
   centerSlot?: ReactNode;
   children: React.ReactNode;
@@ -124,7 +127,7 @@ export function AppShell({
                     <Link
                       key={item.href}
                       href={item.href}
-                      prefetch
+                      prefetch={false}
                       aria-current={active ? "page" : undefined}
                       className={[
                         "shrink-0 rounded-md px-3 py-2.5 text-[15px] font-medium transition-all duration-150",
@@ -139,7 +142,7 @@ export function AppShell({
                 })}
               </nav>
               <div className="mt-auto shrink-0 border-t border-bark/15 px-3 pb-4 pt-3 md:px-4 md:pb-5">
-                <PortalSwitcherFooter shell={shell} />
+                <PortalSwitcherFooter shell={shell} identity={identity} />
               </div>
             </>
           ) : null}

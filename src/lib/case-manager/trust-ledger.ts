@@ -350,7 +350,14 @@ const TRUST_ENTRY_BY_ID = `
     trust_account_balance_changes_by_pk(id: $id) {
       id
       case_cases
+      change_amount
     }
+  }
+`;
+
+const DELETE_TRUST_CHANGE = `
+  mutation DeleteTrustChange($id: bigint!) {
+    delete_trust_account_balance_changes_by_pk(id: $id) { id }
   }
 `;
 
@@ -423,6 +430,67 @@ export async function updateTrustLedgerMeta(
       return { ok: false, error: "update_failed" };
     }
     return { ok: true };
+  } catch {
+    return { ok: false, error: "update_failed" };
+  }
+}
+
+/** 删除流水并冲回案例余额（change_amount 已带符号）。 */
+export async function deleteTrustLedgerEntry(
+  session: CrmSession,
+  caseIdRaw: string,
+  mode: WriteMode,
+  entryId: string,
+): Promise<
+  | { ok: true; balance: string }
+  | { ok: false; error: "not_found" | "update_failed" }
+> {
+  if (!/^\d+$/u.test(caseIdRaw) || !/^\d+$/u.test(entryId)) {
+    return { ok: false, error: "not_found" };
+  }
+  const caseId = BigInt(caseIdRaw);
+  const where = await scopedWhere(session, caseId, mode);
+  const client = getClient();
+
+  const row = await client.execute<{
+    cases: { id: string | number; trust_account_balance: string | number }[];
+  }>({ query: CASE_TRUST_ROW, variables: { where } });
+  if (!row.cases?.[0]) return { ok: false, error: "not_found" };
+
+  const entry = await client.execute<{
+    trust_account_balance_changes_by_pk: {
+      id: string | number;
+      case_cases: string | number;
+      change_amount: string | number;
+    } | null;
+  }>({ query: TRUST_ENTRY_BY_ID, variables: { id: entryId } });
+
+  const found = entry.trust_account_balance_changes_by_pk;
+  if (!found || String(found.case_cases) !== caseIdRaw) {
+    return { ok: false, error: "not_found" };
+  }
+
+  const current = parseAmount(row.cases[0].trust_account_balance) ?? 0;
+  const signed = parseAmount(found.change_amount) ?? 0;
+  const after = Math.round((current - signed) * 100) / 100;
+
+  try {
+    const deleted = await client.execute<{
+      delete_trust_account_balance_changes_by_pk: { id: string | number } | null;
+    }>({ query: DELETE_TRUST_CHANGE, variables: { id: entryId } });
+    if (!deleted.delete_trust_account_balance_changes_by_pk) {
+      return { ok: false, error: "update_failed" };
+    }
+    const updated = await client.execute<{
+      update_cases: { affected_rows: number | null } | null;
+    }>({
+      query: UPDATE_CASE_BALANCE,
+      variables: { where, balance: String(after) },
+    });
+    if ((updated.update_cases?.affected_rows ?? 0) < 1) {
+      return { ok: false, error: "update_failed" };
+    }
+    return { ok: true, balance: String(after) };
   } catch {
     return { ok: false, error: "update_failed" };
   }

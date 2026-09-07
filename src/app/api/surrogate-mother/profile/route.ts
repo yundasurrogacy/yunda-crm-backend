@@ -3,6 +3,7 @@ import {
   fetchAdminEntityProfile,
   saveAdminEntityProfile,
 } from "@/lib/admin/entity-profile";
+import { BIRTH_HISTORY_ENTRIES_KEY } from "@/lib/profile/birth-history";
 import { partyVisibleGcProfileSections } from "@/lib/party/redact-case-detail-for-party";
 import { resolvePartyEntityId } from "@/lib/party/resolve-party-entity";
 import { getServerSession } from "@/lib/auth/session-cookie";
@@ -15,6 +16,7 @@ function allowedGcSelfEditKeys(): Set<string> {
   // photos / gallery URLs stored as free-form keys in profile_data
   keys.add("photo_urls");
   keys.add("profile_photo_url");
+  keys.add(BIRTH_HISTORY_ENTRIES_KEY);
   return keys;
 }
 

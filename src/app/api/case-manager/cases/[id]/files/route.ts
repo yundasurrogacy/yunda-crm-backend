@@ -4,6 +4,7 @@ import {
   CASE_FILE_ABOUT_ROLES,
   CASE_FILE_CATEGORIES,
   CASE_FILE_VISIBILITIES,
+  deleteCaseFile,
   listCaseFiles,
   type CaseFileAboutRole,
   type CaseFileCategory,
@@ -79,6 +80,34 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
     }
     const files = await listCaseFiles(session, id, "case_manager_api");
     return NextResponse.json({ files, id: result.id });
+  } catch {
+    return NextResponse.json({ error: "data_unavailable" }, { status: 503 });
+  }
+}
+
+export async function DELETE(req: Request, context: { params: Promise<{ id: string }> }) {
+  const session = await getServerSession();
+  if (!session?.portals.includes("case_manager")) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+  const { id } = await context.params;
+  let body: { fileId?: unknown };
+  try {
+    body = (await req.json()) as { fileId?: unknown };
+  } catch {
+    return NextResponse.json({ error: "bad_json" }, { status: 400 });
+  }
+  const fileId = typeof body.fileId === "string" ? body.fileId.trim() : "";
+  if (!fileId) return NextResponse.json({ error: "bad_file" }, { status: 400 });
+
+  try {
+    const result = await deleteCaseFile(session, id, "case_manager_api", fileId);
+    if (!result.ok) {
+      const status = result.error === "not_found" ? 404 : 503;
+      return NextResponse.json({ error: result.error }, { status });
+    }
+    const files = await listCaseFiles(session, id, "case_manager_api");
+    return NextResponse.json({ files });
   } catch {
     return NextResponse.json({ error: "data_unavailable" }, { status: 503 });
   }

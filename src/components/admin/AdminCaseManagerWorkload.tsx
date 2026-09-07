@@ -58,7 +58,7 @@ export function AdminCaseManagerWorkload() {
         <p className="mt-2 text-sm leading-relaxed text-sage-700">{t("admin_cm_workload.intro")}</p>
         <Link
           href="/admin/accounts/case-managers"
-          className="mt-2 inline-block text-sm font-semibold text-brand-brown underline"
+          className="crm-btn crm-btn-secondary crm-btn-sm mt-2"
         >
           {t("admin_cm_workload.manage_link")}
         </Link>
@@ -104,7 +104,7 @@ export function AdminCaseManagerWorkload() {
                       <td className="px-4 py-3">
                         <Link
                           href={`/admin/cases?stage=all&caseManagerId=${encodeURIComponent(r.entityId)}`}
-                          className="rounded-md border border-sage-500 bg-sage-50 px-3 py-1.5 text-xs font-semibold text-sage-900 hover:bg-sage-100"
+                          className="crm-btn crm-btn-secondary crm-btn-xs"
                         >
                           {t("admin_cm_workload.view_cases")}
                         </Link>
@@ -124,7 +124,7 @@ export function AdminCaseManagerWorkload() {
                     <td className="px-4 py-3">
                       <Link
                         href="/admin/cases?stage=all&caseManagerId=unassigned"
-                        className="rounded-md border border-amber-700 bg-white px-3 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-50"
+                        className="crm-btn crm-btn-secondary crm-btn-xs"
                       >
                         {t("admin_cm_workload.view_cases")}
                       </Link>

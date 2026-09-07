@@ -8,9 +8,23 @@ import { useTranslation } from "react-i18next";
 import type { AdminEntityProfileDetail } from "@/lib/admin/entity-profile";
 import type { EntityKind } from "@/lib/admin/entity-profile";
 import { GC_PROFILE_PHOTO_KEYS } from "@/lib/profile/gc-photos";
+import { BIRTH_HISTORY_ENTRIES_KEY, readBirthHistoryEntries } from "@/lib/profile/birth-history";
 import { buildProfileFormValues } from "@/lib/profile/profile-form";
+import { BirthHistoryEditor } from "@/components/profile/BirthHistoryEditor";
 import { ProfileFieldControl } from "@/components/profile/ProfileFieldControl";
 import { ProfilePhotosView } from "@/components/profile/ProfilePhotosView";
+
+function formFromDetail(kind: EntityKind, detail: AdminEntityProfileDetail) {
+  const form = buildProfileFormValues(
+    detail.sections,
+    [detail.profile_data],
+    kind === "surrogate_mother" ? GC_PROFILE_PHOTO_KEYS : [],
+  );
+  if (kind === "surrogate_mother") {
+    form[BIRTH_HISTORY_ENTRIES_KEY] = JSON.stringify(readBirthHistoryEntries(detail.profile_data));
+  }
+  return form;
+}
 
 export function EntityProfilePage({
   kind,
@@ -54,13 +68,7 @@ export function EntityProfilePage({
       const json = (await res.json()) as AdminEntityProfileDetail;
       setDetail(json);
       setEmail(json.email ?? "");
-      setForm(
-        buildProfileFormValues(
-          json.sections,
-          [json.profile_data],
-          kind === "surrogate_mother" ? GC_PROFILE_PHOTO_KEYS : [],
-        ),
-      );
+      setForm(formFromDetail(kind, json));
     } catch {
       setMessage({ type: "err", text: t(`${i18nPrefix}.error_load`) });
     } finally {
@@ -86,13 +94,7 @@ export function EntityProfilePage({
       const json = (await res.json()) as { detail?: AdminEntityProfileDetail };
       if (json.detail) {
         setDetail(json.detail);
-        setForm(
-          buildProfileFormValues(
-            json.detail.sections,
-            [json.detail.profile_data],
-            kind === "surrogate_mother" ? GC_PROFILE_PHOTO_KEYS : [],
-          ),
-        );
+        setForm(formFromDetail(kind, json.detail));
         setEmail(json.detail.email ?? "");
       }
       setMessage({ type: "ok", text: t(`${i18nPrefix}.saved`) });
@@ -111,7 +113,7 @@ export function EntityProfilePage({
       <div className="flex flex-wrap items-start gap-4">
         <Link
           href={backHref}
-          className="ami-ui inline-flex items-center gap-1.5 rounded-md border border-sage-300 bg-white/80 px-3 py-1.5 text-xs font-semibold text-sage-800 shadow-sm hover:bg-white"
+          className="ami-ui inline-flex items-center gap-1.5 rounded-md border border-bark bg-petal px-3 py-2 text-sm font-semibold text-bark shadow-sm hover:bg-maple"
         >
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden strokeWidth={2} />
           {t(`${i18nPrefix}.back`)}
@@ -174,6 +176,27 @@ export function EntityProfilePage({
                 {zh ? section.titleZh : section.titleEn}
               </h2>
               <div className="grid gap-4 sm:grid-cols-2">
+                {section.id === "birth_history" ? (
+                  <BirthHistoryEditor
+                    entries={readBirthHistoryEntries({
+                      [BIRTH_HISTORY_ENTRIES_KEY]: (() => {
+                        try {
+                          return JSON.parse(form[BIRTH_HISTORY_ENTRIES_KEY] || "[]");
+                        } catch {
+                          return [];
+                        }
+                      })(),
+                    })}
+                    onChange={(entries) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        [BIRTH_HISTORY_ENTRIES_KEY]: JSON.stringify(entries),
+                      }))
+                    }
+                    zh={zh}
+                    disabled={saving}
+                  />
+                ) : null}
                 {section.fields.map((field) => (
                   <div key={field.key}>
                     <label className="text-xs font-semibold text-sage-700">
@@ -206,7 +229,7 @@ export function EntityProfilePage({
             <button
               type="submit"
               disabled={saving}
-              className="rounded-md bg-brand-brown px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-95 disabled:opacity-50"
+              className="crm-btn crm-btn-primary"
             >
               {saving ? t(`${i18nPrefix}.saving`) : t(`${i18nPrefix}.save`)}
             </button>

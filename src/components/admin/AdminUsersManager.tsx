@@ -4,8 +4,11 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { BindRoleKind } from "@/lib/admin/bind-user-role";
 import { BindEntityToUserModal } from "@/components/admin/BindEntityToUserModal";
+import { CrmModal } from "@/components/ui/CrmModal";
+import { ListPager } from "@/components/ui/ListPager";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { SelectMenu } from "@/components/ui/SelectMenu";
+import { DEFAULT_PAGE_SIZE, type PageSizeOption } from "@/lib/crm-pagination";
 
 const ROLE_VALUES = ["user", "admin", "operator"] as const;
 
@@ -53,10 +56,13 @@ export function AdminUsersManager() {
   const [rows, setRows] = useState<UserRow[]>([]);
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
-  const pageSize = 10;
+  const [pageSize, setPageSize] = useState<PageSizeOption>(DEFAULT_PAGE_SIZE);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
   const [create, setCreate] = useState({
     email: "",
     password: "",
@@ -122,7 +128,9 @@ export function AdminUsersManager() {
 
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
+    setCreating(true);
     setMessage(null);
+    setCreateError(null);
     try {
       const res = await fetch("/api/admin/users", {
         method: "POST",
@@ -134,14 +142,17 @@ export function AdminUsersManager() {
         }),
       });
       if (!res.ok) {
-        setMessage(t("admin_users.error_create"));
+        setCreateError(t("admin_users.error_create"));
         return;
       }
       setCreate({ email: "", password: "", role: "user" });
+      setCreateOpen(false);
       setMessage(t("admin_users.create_ok"));
       await load();
     } catch {
-      setMessage(t("admin_users.error_create"));
+      setCreateError(t("admin_users.error_create"));
+    } finally {
+      setCreating(false);
     }
   }
 
@@ -176,60 +187,28 @@ export function AdminUsersManager() {
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
-    <div className="crm-page ami-ui crm-font-ui">
-      <div>
-        <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">{t("admin_users.title")}</h1>
-        <p className="mt-1 text-sm text-sage-700">{t("admin_users.subtitle")}</p>
+    <div className="crm-fill-page ami-ui crm-font-ui">
+      <div className="flex shrink-0 flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">{t("admin_users.title")}</h1>
+          <p className="mt-1 text-sm text-sage-700">{t("admin_users.subtitle")}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setCreateError(null);
+            setCreateOpen(true);
+          }}
+          className="crm-btn crm-btn-primary crm-btn-sm"
+        >
+          {t("admin_users.create_submit")}
+        </button>
       </div>
 
-      {message ? <p className="text-sm text-sage-900">{message}</p> : null}
+      {message ? <p className="shrink-0 text-sm text-sage-900">{message}</p> : null}
 
-      <section className="crm-card">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-sage-600">{t("admin_users.create_section")}</h2>
-        <form className="mt-3" onSubmit={onCreate}>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-12 lg:items-end">
-            <label className="flex flex-col gap-1 text-sm lg:col-span-3">
-              <span className="text-xs font-medium text-sage-700">{t("admin_users.lbl_email")}</span>
-              <input
-                required
-                value={create.email}
-                onChange={(e) => setCreate((p) => ({ ...p, email: e.target.value }))}
-                type="email"
-                autoComplete="off"
-                placeholder={t("admin_users.ph_email")}
-                className="rounded-md border border-sage-300 bg-white px-3 py-2 text-sm"
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-sm lg:col-span-3">
-              <span className="text-xs font-medium text-sage-700">{t("admin_users.ph_password")}</span>
-              <input
-                required
-                type="password"
-                value={create.password}
-                onChange={(e) => setCreate((p) => ({ ...p, password: e.target.value }))}
-                autoComplete="new-password"
-                placeholder="••••••••"
-                className="rounded-md border border-sage-300 bg-white px-3 py-2 text-sm"
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-sm lg:col-span-3">
-              <span className="text-xs font-medium text-sage-700">{t("admin_users.lbl_role")}</span>
-              <RoleField
-                idPrefix="create"
-                value={create.role}
-                onChange={(role) => setCreate((p) => ({ ...p, role }))}
-              />
-            </label>
-            <div className="lg:col-span-3">
-              <button type="submit" className="w-full rounded-md bg-brand-brown px-4 py-2 text-sm font-semibold text-white sm:w-auto">
-                {t("admin_users.create_submit")}
-              </button>
-            </div>
-          </div>
-        </form>
-      </section>
-
-      <section className="crm-card">
+      <section className="crm-card crm-card-list">
+        <div className="crm-toolbar !py-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-sage-600">{t("admin_users.list_section")}</h2>
           <div className="flex flex-wrap gap-2">
@@ -245,11 +224,12 @@ export function AdminUsersManager() {
                 setPage(1);
                 void load();
               }}
-              className="rounded-md bg-sage-700 px-3 py-2 text-sm font-semibold text-white"
+              className="crm-btn crm-btn-primary crm-btn-sm"
             >
               {t("admin_users.search_btn")}
             </button>
           </div>
+        </div>
         </div>
 
         {edit ? (
@@ -289,31 +269,27 @@ export function AdminUsersManager() {
               </label>
             </div>
             <div className="flex flex-wrap gap-2">
-              <button type="submit" className="rounded-md bg-sage-700 px-4 py-2 text-sm font-semibold text-white">
+              <button type="submit" className="crm-btn crm-btn-primary">
                 {t("admin_users.save")}
               </button>
-              <button
-                type="button"
-                onClick={() => setEdit(null)}
-                className="rounded-md border border-sage-300 bg-white px-4 py-2 text-sm"
-              >
+              <button type="button" onClick={() => setEdit(null)} className="crm-btn crm-btn-secondary">
                 {t("admin_users.cancel")}
               </button>
             </div>
           </form>
         ) : null}
 
-        <div className="mt-4 overflow-x-auto rounded-lg border border-sage-200/80 bg-white">
-          <table className="w-full min-w-[960px] text-left text-sm">
+        <div className="crm-table-scroll">
+          <table className="crm-table min-w-[960px]">
             <thead>
-              <tr className="border-b border-sage-200 bg-sage-100 text-xs font-semibold uppercase tracking-wide text-sage-700">
-                <th className="px-3 py-2.5">{t("admin_users.col_user_id")}</th>
-                <th className="px-3 py-2.5">{t("admin_users.col_email")}</th>
-                <th className="px-3 py-2.5">{t("admin_users.col_role")}</th>
-                <th className="px-3 py-2.5">{t("admin_users.col_cm")}</th>
-                <th className="px-3 py-2.5">{t("admin_users.col_ip")}</th>
-                <th className="px-3 py-2.5">{t("admin_users.col_sm")}</th>
-                <th className="px-3 py-2.5">{t("admin_users.col_actions")}</th>
+              <tr>
+                <th className="crm-freeze-start">{t("admin_users.col_user_id")}</th>
+                <th>{t("admin_users.col_email")}</th>
+                <th>{t("admin_users.col_role")}</th>
+                <th>{t("admin_users.col_cm")}</th>
+                <th>{t("admin_users.col_ip")}</th>
+                <th>{t("admin_users.col_sm")}</th>
+                <th className="crm-freeze-end">{t("admin_users.col_actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -331,20 +307,20 @@ export function AdminUsersManager() {
                 </tr>
               ) : (
                 rows.map((r) => (
-                  <tr key={r.userId} className="border-b border-sage-100">
-                    <td className="px-3 py-2.5 tabular-nums">{r.userId}</td>
-                    <td className="px-3 py-2.5 break-all">{r.email}</td>
-                    <td className="px-3 py-2.5">{r.role}</td>
-                    <td className="px-3 py-2.5 tabular-nums">{r.caseManagerId ?? "—"}</td>
-                    <td className="px-3 py-2.5 tabular-nums">{r.intendedParentId ?? "—"}</td>
-                    <td className="px-3 py-2.5 tabular-nums">{r.surrogateId ?? "—"}</td>
-                    <td className="px-3 py-2.5">
-                      <div className="flex flex-col gap-1">
+                  <tr key={r.userId}>
+                    <td className="crm-freeze-start tabular-nums">{r.userId}</td>
+                    <td className="break-all">{r.email}</td>
+                    <td>{r.role}</td>
+                    <td className="tabular-nums">{r.caseManagerId ?? "—"}</td>
+                    <td className="tabular-nums">{r.intendedParentId ?? "—"}</td>
+                    <td className="tabular-nums">{r.surrogateId ?? "—"}</td>
+                    <td className="crm-freeze-end">
+                      <div className="flex flex-col items-stretch gap-1.5">
                         {r.caseManagerId ? (
                           <button
                             type="button"
                             onClick={() => void onUnbind(r.userId, "case_manager")}
-                            className="text-left text-xs font-semibold text-red-800 underline"
+                            className="crm-btn crm-btn-danger crm-btn-xs"
                           >
                             {t("admin_users.action_unbind_cm")}
                           </button>
@@ -354,7 +330,7 @@ export function AdminUsersManager() {
                             onClick={() =>
                               setBindModal({ userId: r.userId, email: r.email, kind: "case_manager" })
                             }
-                            className="text-left text-xs font-semibold text-brand-brown underline"
+                            className="crm-btn crm-btn-secondary crm-btn-xs"
                           >
                             {t("admin_users.action_bind_cm")}
                           </button>
@@ -363,7 +339,7 @@ export function AdminUsersManager() {
                           <button
                             type="button"
                             onClick={() => void onUnbind(r.userId, "intended_parent")}
-                            className="text-left text-xs font-semibold text-red-800 underline"
+                            className="crm-btn crm-btn-danger crm-btn-xs"
                           >
                             {t("admin_users.action_unbind_ip")}
                           </button>
@@ -377,7 +353,7 @@ export function AdminUsersManager() {
                                 kind: "intended_parent",
                               })
                             }
-                            className="text-left text-xs font-semibold text-brand-brown underline"
+                            className="crm-btn crm-btn-secondary crm-btn-xs"
                           >
                             {t("admin_users.action_bind_ip")}
                           </button>
@@ -386,7 +362,7 @@ export function AdminUsersManager() {
                           <button
                             type="button"
                             onClick={() => void onUnbind(r.userId, "surrogate_mother")}
-                            className="text-left text-xs font-semibold text-red-800 underline"
+                            className="crm-btn crm-btn-danger crm-btn-xs"
                           >
                             {t("admin_users.action_unbind_sm")}
                           </button>
@@ -400,7 +376,7 @@ export function AdminUsersManager() {
                                 kind: "surrogate_mother",
                               })
                             }
-                            className="text-left text-xs font-semibold text-brand-brown underline"
+                            className="crm-btn crm-btn-secondary crm-btn-xs"
                           >
                             {t("admin_users.action_bind_sm")}
                           </button>
@@ -410,7 +386,7 @@ export function AdminUsersManager() {
                           onClick={() =>
                             setEdit({ userId: r.userId, email: r.email, role: r.role, password: "" })
                           }
-                          className="text-left text-xs font-semibold text-sage-800 underline"
+                          className="crm-btn crm-btn-secondary crm-btn-xs"
                         >
                           {t("admin_users.action_edit")}
                         </button>
@@ -422,36 +398,22 @@ export function AdminUsersManager() {
             </tbody>
           </table>
         </div>
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-sage-700">
-          <p className="min-w-0">
-            {t("admin_users.list_stats", {
-              total,
-              from: total === 0 ? 0 : (page - 1) * pageSize + 1,
-              to: Math.min(page * pageSize, total),
-            })}
-          </p>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              className="rounded border border-sage-300 bg-white px-2 py-1 disabled:opacity-40"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              {t("admin_users.prev")}
-            </button>
-            <span>
-              {page} / {totalPages}
-            </span>
-            <button
-              type="button"
-              className="rounded border border-sage-300 bg-white px-2 py-1 disabled:opacity-40"
-              disabled={page >= totalPages}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              {t("admin_users.next")}
-            </button>
-          </div>
-        </div>
+        <ListPager
+          page={page}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          disabled={loading}
+          stats={t("admin_users.list_stats", {
+            total,
+            from: total === 0 ? 0 : (page - 1) * pageSize + 1,
+            to: Math.min(page * pageSize, total),
+          })}
+          onPageChange={setPage}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(1);
+          }}
+        />
       </section>
 
       {bindModal ? (
@@ -465,6 +427,58 @@ export function AdminUsersManager() {
           setBanner={setMessage}
         />
       ) : null}
+
+      <CrmModal
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        title={t("admin_users.create_section")}
+      >
+        <form className="space-y-3 pb-20" onSubmit={onCreate}>
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="text-xs font-medium text-sage-700">{t("admin_users.lbl_email")}</span>
+            <input
+              required
+              value={create.email}
+              onChange={(e) => setCreate((p) => ({ ...p, email: e.target.value }))}
+              type="email"
+              autoComplete="off"
+              placeholder={t("admin_users.ph_email")}
+              disabled={creating}
+              className="rounded-md border border-sage-300 bg-white px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="text-xs font-medium text-sage-700">{t("admin_users.ph_password")}</span>
+            <input
+              required
+              type="password"
+              value={create.password}
+              onChange={(e) => setCreate((p) => ({ ...p, password: e.target.value }))}
+              autoComplete="new-password"
+              placeholder="••••••••"
+              disabled={creating}
+              className="rounded-md border border-sage-300 bg-white px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="text-xs font-medium text-sage-700">{t("admin_users.lbl_role")}</span>
+            <RoleField
+              idPrefix="create"
+              value={create.role}
+              onChange={(role) => setCreate((p) => ({ ...p, role }))}
+            />
+          </label>
+          {createError ? <p className="text-sm text-red-700">{createError}</p> : null}
+          <div className="flex flex-wrap gap-2 pt-1">
+            <button type="button" onClick={() => setCreateOpen(false)} className="crm-btn crm-btn-secondary">
+              {t("admin_users.cancel")}
+            </button>
+            <button type="submit" disabled={creating} className="crm-btn crm-btn-primary">
+              {t("admin_users.create_submit")}
+            </button>
+          </div>
+        </form>
+      </CrmModal>
     </div>
   );
 }

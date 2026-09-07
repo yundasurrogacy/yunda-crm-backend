@@ -7,6 +7,7 @@ import { CRM_I18N_LANG_KEY, parseCrmLang } from "@/i18n/constants";
 export const metadata: Metadata = {
   title: "孕达 CRM",
   description: "Yunda surrogacy CRM",
+  icons: { icon: "/favicon.ico" },
 };
 
 export default async function RootLayout({

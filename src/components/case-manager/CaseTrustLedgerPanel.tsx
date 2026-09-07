@@ -134,6 +134,33 @@ export function CaseTrustLedgerPanel({
     setErrorKey(null);
   }
 
+  async function deleteEntry(entryId: string) {
+    const ok = await confirm({
+      message: t("case_detail.trust.confirm_delete"),
+      danger: true,
+    });
+    if (!ok) return;
+    setErrorKey(null);
+    try {
+      const res = await fetch(trustApi, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ entryId }),
+      });
+      if (!res.ok) {
+        setErrorKey("case_detail.trust.error_delete");
+        return;
+      }
+      const json = (await res.json()) as { balance: string; entries: TrustLedgerEntry[] };
+      setEntries(json.entries ?? []);
+      setBalance(json.balance);
+      onBalanceUpdatedRef.current(json.balance);
+      if (editingId === entryId) setEditingId(null);
+    } catch {
+      setErrorKey("case_detail.trust.error_delete");
+    }
+  }
+
   async function saveEdit() {
     if (!editingId || editSaving) return;
     setEditSaving(true);
@@ -229,7 +256,8 @@ export function CaseTrustLedgerPanel({
       storageKey={`crm-case-detail-trust-${caseId}`}
       defaultOpen={false}
     >
-      <p className="mb-4 text-sm text-sage-700">{t("case_detail.trust.section_intro")}</p>
+      <p className="mb-2 text-sm text-sage-700">{t("case_detail.trust.section_intro")}</p>
+      <p className="mb-4 text-xs text-sage-600">{t("case_detail.trust.edit_locked_hint")}</p>
 
       <div className="mb-4 flex flex-wrap items-baseline gap-3">
         <span className="text-xs font-semibold uppercase tracking-wide text-sage-600">
@@ -502,13 +530,22 @@ export function CaseTrustLedgerPanel({
                             </button>
                           </div>
                         ) : (
-                          <button
-                            type="button"
-                            onClick={() => startEdit(e)}
-                            className="rounded border border-sage-300 bg-white px-2 py-1 text-xs font-semibold text-sage-800 hover:bg-sage-50"
-                          >
-                            {t("case_detail.trust.edit")}
-                          </button>
+                          <div className="flex flex-wrap gap-1">
+                            <button
+                              type="button"
+                              onClick={() => startEdit(e)}
+                              className="rounded border border-sage-300 bg-white px-2 py-1 text-xs font-semibold text-sage-800 hover:bg-sage-50"
+                            >
+                              {t("case_detail.trust.edit")}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => void deleteEntry(e.id)}
+                              className="rounded border border-red-300 bg-red-50 px-2 py-1 text-xs font-semibold text-red-800 hover:bg-red-100"
+                            >
+                              {t("case_detail.trust.delete")}
+                            </button>
+                          </div>
                         )}
                       </td>
                     </tr>

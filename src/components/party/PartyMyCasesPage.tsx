@@ -5,6 +5,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { PartyCaseRow } from "@/lib/party/fetch-party-cases";
 import { translateProcessStatus } from "@/lib/i18n/translate-process-status";
+import { rememberListReturn } from "@/lib/crm-list-return";
+import { DEFAULT_PAGE_SIZE, type PageSizeOption } from "@/lib/crm-pagination";
+import { ListPager } from "@/components/ui/ListPager";
 
 function formatDt(iso: string | null, lng: string) {
   if (!iso) return "—";
@@ -44,6 +47,8 @@ export function PartyMyCasesPage({
   const [rows, setRows] = useState<PartyCaseRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorKey, setErrorKey] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<PageSizeOption>(DEFAULT_PAGE_SIZE);
 
   const showTrust = party === "intended_parent";
   const counterpartLabel =
@@ -91,9 +96,12 @@ export function PartyMyCasesPage({
   }, [apiBase]);
 
   const colSpan = showTrust ? 7 : 6;
+  const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const pageRows = rows.slice((safePage - 1) * pageSize, safePage * pageSize);
 
   return (
-    <div className="ami-ui crm-font-ui crm-page">
+    <div className="ami-ui crm-font-ui crm-fill-page">
       <div>
         <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">{t("party_cases.page_title")}</h1>
         <p className="mt-1 text-sm text-sage-700">{t("party_cases.page_intro")}</p>
@@ -115,17 +123,18 @@ export function PartyMyCasesPage({
       {errorKey ? <p className="text-sm text-red-700">{t(errorKey)}</p> : null}
 
       {!loading && !errorKey ? (
-        <div className="crm-card !p-0 overflow-hidden">
-          <table className="crm-font-ui w-full min-w-[32rem] text-left text-sm">
-            <thead className="border-b border-sage-200/80 bg-sage-50/80 text-xs font-semibold uppercase tracking-wide text-sage-600">
+        <div className="crm-card crm-card-list">
+          <div className="crm-table-scroll">
+          <table className="crm-table min-w-[32rem]">
+            <thead>
               <tr>
-                <th className="px-4 py-3">{t("party_cases.col_case_id")}</th>
-                <th className="px-4 py-3">{counterpartLabel}</th>
-                <th className="px-4 py-3">{t("party_cases.col_stage")}</th>
-                {showTrust ? <th className="px-4 py-3">{t("party_cases.col_trust")}</th> : null}
-                <th className="px-4 py-3">{t("party_cases.col_case_manager")}</th>
-                <th className="px-4 py-3">{t("party_cases.col_updated")}</th>
-                <th className="px-4 py-3">{t("party_cases.col_action")}</th>
+                <th className="crm-freeze-id crm-freeze-id-first">{t("party_cases.col_case_id")}</th>
+                <th>{counterpartLabel}</th>
+                <th>{t("party_cases.col_stage")}</th>
+                {showTrust ? <th>{t("party_cases.col_trust")}</th> : null}
+                <th>{t("party_cases.col_case_manager")}</th>
+                <th>{t("party_cases.col_updated")}</th>
+                <th className="crm-freeze-end">{t("party_cases.col_action")}</th>
               </tr>
             </thead>
             <tbody className="text-sage-900">
@@ -136,9 +145,9 @@ export function PartyMyCasesPage({
                   </td>
                 </tr>
               ) : (
-                rows.map((row) => (
+                pageRows.map((row) => (
                   <tr key={row.id} className="border-b border-sage-100 hover:bg-sage-50/80">
-                    <td className="px-4 py-3 tabular-nums font-medium">{row.id}</td>
+                    <td className="crm-freeze-id crm-freeze-id-first tabular-nums font-medium">{row.id}</td>
                     <td className="px-4 py-3">{row.counterpartName}</td>
                     <td className="px-4 py-3">
                       <span className="inline-block rounded-md bg-sage-100 px-2 py-0.5 text-xs font-medium text-sage-800">
@@ -154,10 +163,11 @@ export function PartyMyCasesPage({
                     <td className="px-4 py-3 text-xs text-sage-700">
                       {formatDt(row.updated_at, i18n.language)}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="crm-freeze-end">
                       <Link
                         href={`${detailBase}/${row.id}`}
-                        className="inline-flex rounded-md bg-sage-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sage-800"
+                        onClick={() => rememberListReturn(window.location.pathname)}
+                        className="crm-btn crm-btn-secondary crm-btn-xs"
                       >
                         {t("party_cases.view_detail")}
                       </Link>
@@ -167,6 +177,22 @@ export function PartyMyCasesPage({
               )}
             </tbody>
           </table>
+          </div>
+          <ListPager
+            page={safePage}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            stats={t("party_cases.list_stats", {
+              total: rows.length,
+              from: rows.length === 0 ? 0 : (safePage - 1) * pageSize + 1,
+              to: Math.min(safePage * pageSize, rows.length),
+            })}
+            onPageChange={setPage}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPage(1);
+            }}
+          />
         </div>
       ) : null}
     </div>

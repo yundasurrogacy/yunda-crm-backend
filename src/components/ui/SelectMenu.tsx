@@ -19,6 +19,8 @@ type Props = {
   id?: string;
   /** 选项较多时开启本地过滤 */
   searchable?: boolean;
+  compact?: boolean;
+  placement?: "down" | "up";
 };
 
 const triggerClass =
@@ -34,6 +36,8 @@ export function SelectMenu({
   className,
   id,
   searchable = false,
+  compact = false,
+  placement = "down",
 }: Props) {
   const { t } = useTranslation("common");
   const listId = useId();
@@ -78,7 +82,7 @@ export function SelectMenu({
         aria-expanded={open}
         aria-haspopup="listbox"
         aria-controls={listId}
-        className={triggerClass}
+        className={compact ? `${triggerClass} px-2.5 py-1.5 text-xs` : triggerClass}
         onClick={() => {
           if (!disabled) setOpen((v) => !v);
         }}
@@ -97,7 +101,12 @@ export function SelectMenu({
       </button>
 
       {open && !disabled ? (
-        <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-md border border-sage-200 bg-white shadow-lg ring-1 ring-sage-900/5">
+        <div
+          className={[
+            "absolute z-50 w-full overflow-hidden rounded-md border border-sage-200 bg-white shadow-lg ring-1 ring-sage-900/5",
+            placement === "up" ? "bottom-full mb-1" : "mt-1",
+          ].join(" ")}
+        >
           {searchable ? (
             <div className="border-b border-sage-100 p-2">
               <input

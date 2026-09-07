@@ -29,28 +29,28 @@ const YES_NO: ProfileFieldOption[] = [
   { value: "No", labelEn: "No", labelZh: "否" },
 ];
 
-const CHILD_SEX: ProfileFieldOption[] = [
+export const CHILD_SEX: ProfileFieldOption[] = [
   { value: "Female", labelEn: "Female", labelZh: "女" },
   { value: "Male", labelEn: "Male", labelZh: "男" },
   { value: "Other", labelEn: "Other / Unknown", labelZh: "其他 / 未知" },
 ];
 
-const DELIVERY_METHOD: ProfileFieldOption[] = [
+export const DELIVERY_METHOD: ProfileFieldOption[] = [
   { value: "Vaginal", labelEn: "Vaginal", labelZh: "顺产" },
   { value: "C-Section", labelEn: "C-Section", labelZh: "剖腹产" },
   { value: "Other", labelEn: "Other", labelZh: "其他" },
 ];
 
 const MATCHING_STATUS: ProfileFieldOption[] = [
-  { value: "GC Matching", labelEn: "GC Matching", labelZh: "GC 匹配中" },
-  { value: "GC Pre-Screening", labelEn: "GC Pre-Screening", labelZh: "GC 初步筛查" },
+  { value: "GC Matching", labelEn: "GC Matching", labelZh: "代孕妈妈匹配" },
+  { value: "GC Pre-Screening", labelEn: "GC Pre-Screening", labelZh: "代孕妈妈初步筛选" },
   {
     value: "Contracts & Trust Pending",
     labelEn: "Contracts & Trust Pending",
-    labelZh: "合同签署与信托待办",
+    labelZh: "合同签署与信托设立",
   },
   { value: "Medical Screening", labelEn: "Medical Screening", labelZh: "医学筛查" },
-  { value: "Legal Clearance", labelEn: "Legal Clearance", labelZh: "法律许可" },
+  { value: "Legal Clearance", labelEn: "Legal Clearance", labelZh: "法律审核通过" },
 ];
 
 const TRANSFER_STATUS: ProfileFieldOption[] = [
@@ -112,36 +112,9 @@ export const GC_PROFILE_SECTIONS: ProfileSectionDef[] = [
     titleZh: "生产信息",
     fields: [
       {
-        key: "birth_delivery_date",
-        labelEn: "Delivery Date",
-        labelZh: "生产日期",
-      },
-      {
-        key: "birth_gestational_weeks",
-        labelEn: "Gestational Weeks",
-        labelZh: "孕周",
-      },
-      {
-        key: "birth_weight",
-        labelEn: "Birth Weight",
-        labelZh: "出生体重",
-      },
-      {
-        key: "birth_child_sex",
-        labelEn: "Child Sex",
-        labelZh: "性别",
-        options: CHILD_SEX,
-      },
-      {
-        key: "birth_delivery_method",
-        labelEn: "Delivery Method",
-        labelZh: "生产方式",
-        options: DELIVERY_METHOD,
-      },
-      {
         key: "birth_history_notes",
-        labelEn: "Additional Births / Notes",
-        labelZh: "其他生产记录 / 备注",
+        labelEn: "Additional notes",
+        labelZh: "其他备注",
       },
     ],
   },
@@ -188,13 +161,13 @@ export const GC_PROFILE_SECTIONS: ProfileSectionDef[] = [
       },
       {
         key: "open_to_hiv_ips",
-        labelEn: "Open to IPs living with HIV",
+        labelEn: "Open to IPs with HIV",
         labelZh: "是否接受和 HIV 携带者准父母合作",
         options: YES_NO,
       },
       {
         key: "open_to_hepb_ips",
-        labelEn: "Open to IPs living with Hepatitis B",
+        labelEn: "Open to IPs with Hepatitis B",
         labelZh: "是否接受和 HepB 携带者准父母合作",
         options: YES_NO,
       },

@@ -1,18 +1,18 @@
 /*
- * 与 yunda-admin-system/tailwind.config.js 中 sage 色板对齐（CRM 手写 utility）
+ * 与官网规范对齐：Sage 工具类实际走 Sky → Bark，不再使用第三套草绿。
  */
 :root {
-  --sage-50: #f3f5f1;
-  --sage-100: #e7ebe3;
-  --sage-200: #d0d8c9;
-  --sage-300: #b8c4af;
-  --sage-400: #a1b196;
-  --sage-500: #899d7c;
-  --sage-600: #6e7e63;
-  --sage-700: #525e4a;
-  --sage-800: #373f31;
-  --sage-900: #1b1f19;
-  --sage-950: #172019;
+  --sage-50: #f6f3eb;
+  --sage-100: #ece8dc;
+  --sage-200: #cad3d0;
+  --sage-300: #b3bfbb;
+  --sage-400: #97a6a2;
+  --sage-500: #7a8884;
+  --sage-600: #5c4a3a;
+  --sage-700: #3c2415;
+  --sage-800: #3c2415;
+  --sage-900: #2a1810;
+  --sage-950: #1a0f0a;
 }
 
 /* 无透明度后缀的兼容类；带 /80 等透明度请用 Tailwind theme（globals @theme） */

@@ -56,9 +56,9 @@ export function PortalSwitcherFooter({ shell }: { shell: Shell }) {
           : null;
 
   return (
-    <div className="flex flex-col gap-2 border-t border-sage-400/40 pt-4 text-xs text-sage-800">
+    <div className="flex flex-col gap-2 text-xs text-sage-800">
       {identity ? (
-        <div className="space-y-2 rounded-lg border border-white/50 bg-white/45 px-2.5 py-2.5 text-[11px] leading-snug text-sage-800 shadow-sm">
+        <div className="space-y-2 rounded-lg border border-white/70 bg-white/80 px-2.5 py-2.5 text-[11px] leading-snug text-sage-800 shadow-sm">
           <p className="font-semibold uppercase tracking-wide text-sage-600">
             {t("account_bar.title")}
           </p>
@@ -95,12 +95,22 @@ export function PortalSwitcherFooter({ shell }: { shell: Shell }) {
       ) : (
         <div className="h-16 animate-pulse rounded-lg bg-white/30" aria-hidden />
       )}
-      <button type="button" onClick={() => void switchPortal()} className="crm-btn crm-btn-ghost w-full justify-start px-2 py-1.5 text-left text-xs">
-        {t("switch_portal")}
-      </button>
-      <button type="button" onClick={() => void logout()} className="crm-btn crm-btn-ghost w-full justify-start px-2 py-1.5 text-left text-xs">
-        {t("logout")}
-      </button>
+      <div className="flex flex-col gap-1.5">
+        <button
+          type="button"
+          onClick={() => void switchPortal()}
+          className="crm-btn crm-btn-secondary w-full justify-center px-2 py-1.5 text-xs"
+        >
+          {t("switch_portal")}
+        </button>
+        <button
+          type="button"
+          onClick={() => void logout()}
+          className="w-full rounded-md px-2 py-1.5 text-center text-xs font-semibold text-sage-800 hover:bg-white/40"
+        >
+          {t("logout")}
+        </button>
+      </div>
     </div>
   );
 }

@@ -5,7 +5,10 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { BindLoginUserModal } from "./BindLoginUserModal";
+import { CrmModal } from "@/components/ui/CrmModal";
+import { ListPager } from "@/components/ui/ListPager";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
+import { DEFAULT_PAGE_SIZE, type PageSizeOption } from "@/lib/crm-pagination";
 
 type Kind = "case_manager" | "intended_parent" | "surrogate_mother";
 type Row = {
@@ -25,13 +28,15 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
   const [rows, setRows] = useState<Row[]>([]);
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
+  const [pageSize, setPageSize] = useState<PageSizeOption>(DEFAULT_PAGE_SIZE);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
   const [modal, setModal] = useState<ModalState | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
   const [createEmail, setCreateEmail] = useState("");
   const [createName, setCreateName] = useState("");
+  const [createError, setCreateError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [includeDeleted, setIncludeDeleted] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -72,11 +77,25 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
     kind === "intended_parent" ? "/admin/accounts/intended-parents" : "/admin/accounts/surrogates";
   const colspan = 6 + (showCaseCount ? 1 : 0) + (showDisplayName ? 1 : 0);
 
+  const createTitle =
+    kind === "case_manager"
+      ? t("admin_accounts.create_cm_title")
+      : kind === "intended_parent"
+        ? t("admin_accounts.create_ip_title")
+        : t("admin_accounts.create_gc_title");
+  const createSubmit =
+    kind === "case_manager"
+      ? t("admin_accounts.create_cm_submit")
+      : kind === "intended_parent"
+        ? t("admin_accounts.create_ip_submit")
+        : t("admin_accounts.create_gc_submit");
+
   async function onCreateEntity(e: React.FormEvent) {
     e.preventDefault();
     if (!createEmail.trim()) return;
     setCreating(true);
     setMessage(null);
+    setCreateError(null);
     try {
       const res = await fetch("/api/admin/accounts", {
         method: "POST",
@@ -93,7 +112,7 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
       });
       const json = (await res.json().catch(() => ({}))) as { id?: string; error?: string };
       if (!res.ok) {
-        setMessage(
+        setCreateError(
           json.error === "bad_email"
             ? t("admin_accounts.error_email")
             : json.error === "email_taken"
@@ -104,11 +123,12 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
       }
       setCreateEmail("");
       setCreateName("");
+      setCreateOpen(false);
       setMessage(t("admin_accounts.created_entity", { id: json.id ?? "" }));
       setPage(1);
       await load();
     } catch {
-      setMessage(t("admin_accounts.error_create_entity"));
+      setCreateError(t("admin_accounts.error_create_entity"));
     } finally {
       setCreating(false);
     }
@@ -146,73 +166,35 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
   }
 
   return (
-    <div className="crm-page ami-ui crm-font-ui">
-      <div>
-        <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">{t(`admin_accounts.title_${kind}`)}</h1>
-        <p className="mt-1 text-sm leading-relaxed text-sage-700">
-          {showProfileActions
-            ? t("admin_accounts.intro_with_profile")
-            : t("admin_accounts.intro_case_manager")}
-        </p>
-        <p className="mt-1 text-xs text-sage-600">{t("admin_accounts.soft_delete_hint")}</p>
+    <div className="crm-fill-page ami-ui crm-font-ui">
+      <div className="flex shrink-0 flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">{t(`admin_accounts.title_${kind}`)}</h1>
+          <p className="mt-1 text-sm leading-relaxed text-sage-700">
+            {showProfileActions
+              ? t("admin_accounts.intro_with_profile")
+              : t("admin_accounts.intro_case_manager")}
+          </p>
+          <p className="mt-1 text-xs text-sage-600">{t("admin_accounts.soft_delete_hint")}</p>
+        </div>
+        {canCreateEntity ? (
+          <button
+            type="button"
+            onClick={() => {
+              setCreateError(null);
+              setCreateOpen(true);
+            }}
+            className="crm-btn crm-btn-primary crm-btn-sm"
+          >
+            {createSubmit}
+          </button>
+        ) : null}
       </div>
 
-      {message ? <p className="text-sm text-sage-800">{message}</p> : null}
+      {message ? <p className="shrink-0 text-sm text-sage-800">{message}</p> : null}
 
-      {canCreateEntity ? (
-        <section className="crm-card">
-          <form
-            className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
-            onSubmit={(e) => void onCreateEntity(e)}
-          >
-            <p className="sm:col-span-2 lg:col-span-4 text-xs font-semibold uppercase tracking-wide text-sage-600">
-              {kind === "case_manager"
-                ? t("admin_accounts.create_cm_title")
-                : t("admin_accounts.create_entity_title")}
-            </p>
-            <label className="block text-xs font-medium text-sage-700">
-              {t("admin_accounts.field_entity_email")}
-              <input
-                type="email"
-                required
-                value={createEmail}
-                onChange={(e) => setCreateEmail(e.target.value)}
-                disabled={creating}
-                className="mt-1 w-full rounded-md border border-sage-300 bg-white px-3 py-2 text-sm"
-              />
-            </label>
-            {showProfileActions ? (
-              <label className="block text-xs font-medium text-sage-700">
-                {t("admin_accounts.field_entity_name")}
-                <input
-                  type="text"
-                  value={createName}
-                  onChange={(e) => setCreateName(e.target.value)}
-                  disabled={creating}
-                  className="mt-1 w-full rounded-md border border-sage-300 bg-white px-3 py-2 text-sm"
-                />
-              </label>
-            ) : (
-              <p className="self-end pb-2 text-sm text-sage-700">{t("admin_accounts.create_cm_hint")}</p>
-            )}
-            <div className="flex items-end">
-              <button
-                type="submit"
-                disabled={creating || !createEmail.trim()}
-                className="rounded-md bg-brand-brown px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
-              >
-                {creating
-                  ? t("admin_accounts.creating_entity")
-                  : kind === "case_manager"
-                    ? t("admin_accounts.create_cm_submit")
-                    : t("admin_accounts.create_entity_submit")}
-              </button>
-            </div>
-          </form>
-        </section>
-      ) : null}
-
-      <section className="crm-card">
+      <section className="crm-card crm-card-list">
+        <div className="crm-toolbar !py-3">
         <div className="flex flex-wrap items-center gap-2">
           <input
             value={q}
@@ -226,7 +208,7 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
               setPage(1);
               void load();
             }}
-            className="rounded-md bg-sage-700 px-3 py-2 text-sm font-semibold text-white"
+            className="crm-btn crm-btn-primary crm-btn-sm"
           >
             {t("admin_accounts.search")}
           </button>
@@ -242,11 +224,12 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
             {t("admin_accounts.show_deleted")}
           </label>
         </div>
-        <div className="mt-4 overflow-x-auto rounded-lg border border-sage-200/80 bg-white">
-          <table className="w-full min-w-[640px] text-left text-sm">
+        </div>
+        <div className="crm-table-scroll">
+          <table className="crm-table min-w-[640px]">
             <thead>
-              <tr className="border-b border-sage-200 bg-sage-100 text-xs font-semibold uppercase tracking-wide text-sage-700">
-                <th className="px-4 py-3">{t("admin_accounts.col_entity_id")}</th>
+              <tr>
+                <th className="crm-freeze-start">{t("admin_accounts.col_entity_id")}</th>
                 {showDisplayName ? (
                   <th className="px-4 py-3">{t("admin_accounts.col_name")}</th>
                 ) : null}
@@ -257,7 +240,7 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
                 ) : null}
                 <th className="px-4 py-3">{t("admin_accounts.col_status")}</th>
                 <th className="px-4 py-3">{t("admin_accounts.col_bind_login")}</th>
-                <th className="px-4 py-3">{t("admin_accounts.col_actions")}</th>
+                <th className="crm-freeze-end">{t("admin_accounts.col_actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -284,7 +267,7 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
                         isDeleted ? "bg-sage-50/80 text-sage-500" : "",
                       ].join(" ")}
                     >
-                      <td className="px-4 py-3">{r.entityId}</td>
+                      <td className="crm-freeze-start">{r.entityId}</td>
                       {showDisplayName ? (
                         <td className="px-4 py-3 font-medium text-sage-900">
                           {r.displayName || "—"}
@@ -318,7 +301,7 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
                               setMessage(null);
                               setModal({ entityId: r.entityId, mode: "rebind" });
                             }}
-                            className="rounded-md border border-sage-400 bg-white px-3 py-1.5 text-xs font-semibold text-sage-800 hover:bg-sage-50"
+                            className="crm-btn crm-btn-secondary crm-btn-xs"
                           >
                             {t("admin_accounts.btn_rebind")}
                           </button>
@@ -329,18 +312,18 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
                               setMessage(null);
                               setModal({ entityId: r.entityId, mode: "bind" });
                             }}
-                            className="rounded-md border border-brand-brown bg-brand-brown/10 px-3 py-1.5 text-xs font-semibold text-brand-brown hover:bg-brand-brown/20"
+                            className="crm-btn crm-btn-primary crm-btn-xs"
                           >
                             {t("admin_accounts.btn_bind")}
                           </button>
                         )}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="crm-freeze-end">
                         <div className="flex flex-wrap gap-2">
                           {showCaseCount && !isDeleted ? (
                             <Link
                               href={`/admin/cases?stage=all&caseManagerId=${encodeURIComponent(r.entityId)}`}
-                              className="rounded-md border border-sage-500 bg-sage-50 px-3 py-1.5 text-xs font-semibold text-sage-900 hover:bg-sage-100"
+                              className="crm-btn crm-btn-secondary crm-btn-xs"
                             >
                               {t("admin_accounts.btn_view_cases")}
                             </Link>
@@ -348,7 +331,7 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
                           {showProfileActions && !isDeleted ? (
                             <Link
                               href={`${detailBase}/${r.entityId}`}
-                              className="rounded-md border border-sage-500 bg-sage-50 px-3 py-1.5 text-xs font-semibold text-sage-900 hover:bg-sage-100"
+                              className="crm-btn crm-btn-secondary crm-btn-xs"
                             >
                               {t("admin_accounts.btn_view_profile")}
                             </Link>
@@ -358,7 +341,7 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
                               type="button"
                               disabled={busyId === r.entityId}
                               onClick={() => void onSoftDelete(r, false)}
-                              className="rounded-md border border-emerald-700 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-900 disabled:opacity-50"
+                              className="crm-btn crm-btn-secondary crm-btn-xs"
                             >
                               {t("admin_accounts.btn_restore")}
                             </button>
@@ -367,7 +350,7 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
                               type="button"
                               disabled={busyId === r.entityId}
                               onClick={() => void onSoftDelete(r, true)}
-                              className="rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-800 hover:bg-red-50 disabled:opacity-50"
+                              className="crm-btn crm-btn-danger crm-btn-xs"
                             >
                               {t("admin_accounts.btn_soft_delete")}
                             </button>
@@ -381,36 +364,22 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
             </tbody>
           </table>
         </div>
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-sage-700">
-          <p className="min-w-0">
-            {t("admin_accounts.list_stats", {
-              total,
-              from: total === 0 ? 0 : (page - 1) * pageSize + 1,
-              to: Math.min(page * pageSize, total),
-            })}
-          </p>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              className="rounded border border-sage-300 bg-white px-2 py-1 disabled:opacity-40"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              {t("admin_accounts.prev")}
-            </button>
-            <span>
-              {page} / {totalPages}
-            </span>
-            <button
-              type="button"
-              className="rounded border border-sage-300 bg-white px-2 py-1 disabled:opacity-40"
-              disabled={page >= totalPages}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              {t("admin_accounts.next")}
-            </button>
-          </div>
-        </div>
+        <ListPager
+          page={page}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          disabled={loading}
+          stats={t("admin_accounts.list_stats", {
+            total,
+            from: total === 0 ? 0 : (page - 1) * pageSize + 1,
+            to: Math.min(page * pageSize, total),
+          })}
+          onPageChange={setPage}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(1);
+          }}
+        />
       </section>
 
       {modal ? (
@@ -424,6 +393,49 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
           setBanner={setMessage}
         />
       ) : null}
+
+      <CrmModal open={createOpen} onClose={() => setCreateOpen(false)} title={createTitle}>
+        <form className="space-y-3" onSubmit={(e) => void onCreateEntity(e)}>
+          <label className="block text-xs font-medium text-sage-700">
+            {t("admin_accounts.field_entity_email")}
+            <input
+              type="email"
+              required
+              value={createEmail}
+              onChange={(e) => setCreateEmail(e.target.value)}
+              disabled={creating}
+              className="mt-1 w-full rounded-md border border-sage-300 bg-white px-3 py-2 text-sm"
+            />
+          </label>
+          {showProfileActions ? (
+            <label className="block text-xs font-medium text-sage-700">
+              {t("admin_accounts.field_entity_name")}
+              <input
+                type="text"
+                value={createName}
+                onChange={(e) => setCreateName(e.target.value)}
+                disabled={creating}
+                className="mt-1 w-full rounded-md border border-sage-300 bg-white px-3 py-2 text-sm"
+              />
+            </label>
+          ) : (
+            <p className="text-sm text-sage-700">{t("admin_accounts.create_cm_hint")}</p>
+          )}
+          {createError ? <p className="text-sm text-red-700">{createError}</p> : null}
+          <div className="flex flex-wrap gap-2 pt-1">
+            <button type="button" onClick={() => setCreateOpen(false)} className="crm-btn crm-btn-secondary">
+              {t("confirm_dialog.cancel")}
+            </button>
+            <button
+              type="submit"
+              disabled={creating || !createEmail.trim()}
+              className="crm-btn crm-btn-primary"
+            >
+              {creating ? t("admin_accounts.creating_entity") : createSubmit}
+            </button>
+          </div>
+        </form>
+      </CrmModal>
     </div>
   );
 }

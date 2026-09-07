@@ -41,29 +41,28 @@ export function LanguageSwitcher({
   const current = i18n.language;
 
   if (variant === "header") {
-    const btnBase =
-      "crm-font-display px-2 py-0.5 focus:outline-none focus:ring-0 border-none bg-transparent m-0 transition-all duration-100 cursor-pointer rounded active:scale-95 hover:bg-sage-100 text-lg leading-none text-sage-800 md:text-xl";
     const isEn = current === "en" || current.toLowerCase().startsWith("en");
     const isZh = current === "zh-CN" || current.toLowerCase().startsWith("zh");
+    const tab =
+      "min-w-[2.5rem] rounded px-2 py-1 text-sm font-semibold leading-none transition-colors md:text-base";
     return (
-      <div className="crm-font-display flex items-center gap-1 text-lg text-sage-800 md:text-xl" aria-label={t("language.label")}>
+      <div
+        className="inline-flex items-center rounded-md border border-bark/25 bg-petal p-0.5"
+        role="group"
+        aria-label={t("language.label")}
+      >
         <button
           type="button"
-          className={`${btnBase} ${isEn ? "font-semibold" : "font-medium"}`}
-          style={{ textDecoration: "none" }}
-          tabIndex={0}
+          className={`${tab} ${isEn ? "bg-bark text-petal" : "text-bark/55 hover:text-bark"}`}
+          aria-pressed={isEn}
           onClick={() => void (!isEn && setLng("en"))}
         >
           EN
         </button>
-        <span className="mx-0.5 text-sage-700 select-none" aria-hidden>
-          /
-        </span>
         <button
           type="button"
-          className={`${btnBase} ${isZh ? "font-semibold" : "font-medium"}`}
-          style={{ textDecoration: "none" }}
-          tabIndex={0}
+          className={`${tab} ${isZh ? "bg-bark text-petal" : "text-bark/55 hover:text-bark"}`}
+          aria-pressed={isZh}
           onClick={() => void (!isZh && setLng("zh-CN"))}
         >
           CN

@@ -21,7 +21,7 @@ export async function GET(req: Request) {
   const q = searchParams.get("q") ?? "";
   const includeDeleted = searchParams.get("includeDeleted") === "1";
   const page = Math.max(1, Number(searchParams.get("page") ?? "1") || 1);
-  const pageSize = Math.min(50, Math.max(1, Number(searchParams.get("pageSize") ?? "10") || 10));
+  const pageSize = Math.min(100, Math.max(1, Number(searchParams.get("pageSize") ?? "20") || 20));
   try {
     const cmId = await resolveCaseManagerEntityId(session);
     const result = await listCaseManagerParties(kind, cmId, session.userId, {

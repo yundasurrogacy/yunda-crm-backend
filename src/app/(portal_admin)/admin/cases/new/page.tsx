@@ -1,7 +1,5 @@
-"use client";
-
-import { AdminCreateCaseForm } from "@/components/admin/AdminCreateCaseForm";
+import { redirect } from "next/navigation";
 
 export default function AdminCreateCasePage() {
-  return <AdminCreateCaseForm />;
+  redirect("/admin/cases?create=1");
 }

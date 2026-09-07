@@ -250,3 +250,48 @@ export async function addCaseFile(
     return { ok: false, error: "insert_failed" };
   }
 }
+
+const FILE_BY_ID = `
+  query CaseFileById($id: bigint!) {
+    cases_files_by_pk(id: $id) {
+      id
+      case_cases
+    }
+  }
+`;
+
+const DELETE_FILE = `
+  mutation DeleteCaseFile($id: bigint!) {
+    delete_cases_files_by_pk(id: $id) { id }
+  }
+`;
+
+export async function deleteCaseFile(
+  session: CrmSession,
+  caseIdRaw: string,
+  mode: WriteMode,
+  fileId: string,
+): Promise<{ ok: true } | { ok: false; error: "not_found" | "delete_failed" }> {
+  if (!/^\d+$/u.test(caseIdRaw) || !/^\d+$/u.test(fileId)) {
+    return { ok: false, error: "not_found" };
+  }
+  if (!(await assertCaseAccess(session, caseIdRaw, mode))) {
+    return { ok: false, error: "not_found" };
+  }
+  const client = getClient();
+  try {
+    const found = await client.execute<{
+      cases_files_by_pk: { id: string | number; case_cases: string | number } | null;
+    }>({ query: FILE_BY_ID, variables: { id: fileId } });
+    if (!found.cases_files_by_pk || String(found.cases_files_by_pk.case_cases) !== caseIdRaw) {
+      return { ok: false, error: "not_found" };
+    }
+    const deleted = await client.execute<{
+      delete_cases_files_by_pk: { id: string | number } | null;
+    }>({ query: DELETE_FILE, variables: { id: fileId } });
+    if (!deleted.delete_cases_files_by_pk) return { ok: false, error: "delete_failed" };
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "delete_failed" };
+  }
+}

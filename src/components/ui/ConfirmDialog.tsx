@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { useTranslation } from "react-i18next";
+import { OverlayPortal } from "./OverlayPortal";
 
 export type ConfirmOptions = {
   /** 正文；也可直接传 string 给 confirm() */
@@ -72,8 +73,9 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
     <ConfirmDialogContext.Provider value={confirm}>
       {children}
       {pending ? (
+        <OverlayPortal>
         <div
-          className="crm-dialog-backdrop fixed inset-0 z-[100] flex items-center justify-center bg-sage-950/45 p-4 backdrop-blur-[2px]"
+          className="crm-dialog-backdrop fixed inset-0 z-[100] flex items-center justify-center bg-bark/40 p-4"
           role="presentation"
           onMouseDown={(e) => {
             if (e.target === e.currentTarget) close(false);
@@ -110,6 +112,7 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
             </div>
           </div>
         </div>
+        </OverlayPortal>
       ) : null}
     </ConfirmDialogContext.Provider>
   );

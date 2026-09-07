@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { OverlayPortal } from "@/components/ui/OverlayPortal";
 
 export type BindModalKind = "case_manager" | "intended_parent" | "surrogate_mother";
 
@@ -140,8 +141,9 @@ export function BindLoginUserModal({ open, mode, kind, entityId, onClose, onLink
   if (!open) return null;
 
   return (
+    <OverlayPortal>
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/45 p-4"
       role="presentation"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -175,7 +177,7 @@ export function BindLoginUserModal({ open, mode, kind, entityId, onClose, onLink
             type="button"
             onClick={() => void runSearch()}
             disabled={searchLoading}
-            className="shrink-0 rounded-md bg-sage-700 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
+            className="crm-btn crm-btn-primary crm-btn-sm shrink-0"
           >
             {searchLoading ? t("admin_accounts.modal_searching") : t("admin_accounts.modal_search")}
           </button>
@@ -228,7 +230,7 @@ export function BindLoginUserModal({ open, mode, kind, entityId, onClose, onLink
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md border border-sage-300 bg-white px-4 py-2 text-sm font-medium text-sage-800"
+            className="crm-btn crm-btn-secondary"
           >
             {t("admin_accounts.modal_cancel")}
           </button>
@@ -236,12 +238,13 @@ export function BindLoginUserModal({ open, mode, kind, entityId, onClose, onLink
             type="button"
             onClick={() => void confirmLink()}
             disabled={submitting || !selected || isBlockedForEntity(selected, kind, entityId)}
-            className="rounded-md bg-brand-brown px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
+            className="crm-btn crm-btn-primary"
           >
             {submitting ? t("admin_accounts.modal_confirming") : t("admin_accounts.modal_confirm")}
           </button>
         </div>
       </div>
     </div>
+    </OverlayPortal>
   );
 }

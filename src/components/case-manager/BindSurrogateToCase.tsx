@@ -102,7 +102,26 @@ export function BindSurrogateToCase({
   return (
     <div className="mt-3 rounded-lg border border-dashed border-sage-300/90 bg-sage-50/60 p-4">
       <p className="text-sm font-medium text-sage-800">{t(titleKey)}</p>
-      <p className="mt-1 text-xs text-sage-600">{t(introKey)}</p>
+      {mode === "replace" ? (
+        <div className="mt-2">
+          <p className="text-xs font-semibold text-brand-brown">{t("case_detail.replace_gc_steps")}</p>
+          <ol className="mt-2 grid gap-2 text-xs text-sage-700 sm:grid-cols-3">
+            <li className="rounded-md border border-sage-200 bg-white/80 px-2.5 py-2">
+              <span className="font-semibold text-brand-brown">1. </span>
+              {t("case_detail.replace_gc_step1")}
+            </li>
+            <li className="rounded-md border border-sage-200 bg-white/80 px-2.5 py-2">
+              <span className="font-semibold text-brand-brown">2. </span>
+              {t("case_detail.replace_gc_step2")}
+            </li>
+            <li className="rounded-md border border-sage-200 bg-white/80 px-2.5 py-2">
+              <span className="font-semibold text-brand-brown">3. </span>
+              {t("case_detail.replace_gc_step3")}
+            </li>
+          </ol>
+        </div>
+      ) : null}
+      <p className="mt-2 text-xs text-sage-600">{t(introKey)}</p>
       <div className="mt-3 flex flex-wrap items-end gap-2">
         <div className="min-w-[12rem] flex-1">
           <label className="sr-only" htmlFor={`bind-gc-${mode}-${caseId}`}>
@@ -125,7 +144,7 @@ export function BindSurrogateToCase({
           type="button"
           disabled={!selectedId || submitting}
           onClick={() => void handleBind()}
-          className="rounded-md bg-brand-brown px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-95 disabled:opacity-50"
+          className="crm-btn crm-btn-primary"
         >
           {submitting ? t(submittingKey) : t(confirmKey)}
         </button>

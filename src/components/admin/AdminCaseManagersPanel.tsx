@@ -204,7 +204,7 @@ export function AdminCaseManagersPanel({ caseId }: { caseId: string }) {
                 type="button"
                 disabled={busyKey !== null || !primaryPickId}
                 onClick={() => void onSetOrChangePrimary()}
-                className="rounded-md bg-brand-brown px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                className="crm-btn crm-btn-primary crm-btn-sm"
               >
                 {busyKey === "primary"
                   ? t("case_detail.cm_saving")

@@ -3,40 +3,51 @@
 @import "../styles/sage-colors.css";
 @import "../../public/assets/css/fonts.css";
 
-/* 内容区底色：浅奶白 + 轻微氛围 */
+/* 对齐官网规范：Bark / Petal / Sky / Harvest / Maple */
 :root {
-  --background: rgba(250, 241, 224, 0.25);
-  --card-background: rgba(250, 241, 224, 0.2);
+  --bark: #3c2415;
+  --petal: #faf1e0;
+  --sky: #cad3d0;
+  --harvest: #bab58d;
+  --maple: #c17c45;
+  --background: var(--petal);
+  --card-background: #fffdf8;
   --bg-background: var(--background);
-  --foreground: #271f18;
+  --foreground: var(--bark);
   --font-serif: "Source Serif 4", serif;
   --font-family: var(--font-primary);
   --crm-ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --crm-surface: rgba(255, 252, 247, 0.72);
-  --crm-surface-solid: #faf8f4;
-  --crm-ring: rgba(139, 111, 71, 0.35);
+  --crm-surface: #fffdf8;
+  --crm-surface-solid: #fffdf8;
+  --crm-ring: rgba(193, 124, 69, 0.35);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-main-bg: rgba(250, 241, 224, 0.25);
-  --color-page-bg: rgba(250, 241, 224, 0.25);
-  --color-brand-green: #a6a99f;
-  --color-brand-yellow: #e8e2d5;
-  --color-brand-brown: #8b6f47;
-  /* sage 需进 theme，否则 border-sage-200/80 等透明度写法会回退成近黑色 */
-  --color-sage-50: #f3f5f1;
-  --color-sage-100: #e7ebe3;
-  --color-sage-200: #d0d8c9;
-  --color-sage-300: #b8c4af;
-  --color-sage-400: #a1b196;
-  --color-sage-500: #899d7c;
-  --color-sage-600: #6e7e63;
-  --color-sage-700: #525e4a;
-  --color-sage-800: #373f31;
-  --color-sage-900: #1b1f19;
-  --color-sage-950: #172019;
+  --color-main-bg: var(--petal);
+  --color-page-bg: var(--petal);
+  --color-brand-green: var(--sky);
+  --color-brand-yellow: var(--harvest);
+  --color-brand-brown: var(--bark);
+  --color-brand-maple: var(--maple);
+  --color-bark: var(--bark);
+  --color-petal: var(--petal);
+  --color-sky: var(--sky);
+  --color-harvest: var(--harvest);
+  --color-maple: var(--maple);
+  /* sage 映射到 Sky→Bark，旧 class 不再长出第三套绿 */
+  --color-sage-50: #f6f3eb;
+  --color-sage-100: #ece8dc;
+  --color-sage-200: #cad3d0;
+  --color-sage-300: #b3bfbb;
+  --color-sage-400: #97a6a2;
+  --color-sage-500: #7a8884;
+  --color-sage-600: #5c4a3a;
+  --color-sage-700: #3c2415;
+  --color-sage-800: #3c2415;
+  --color-sage-900: #2a1810;
+  --color-sage-950: #1a0f0a;
 }
 
 body {
@@ -68,30 +79,6 @@ body {
   font-family: var(--font-family), var(--font-secondary), var(--font-serif), ui-serif, Georgia, serif;
 }
 
-/* 英文拉丁字视觉偏小：略放大根字号与常用字级，减轻阅读吃力 */
-html[lang="en"] {
-  font-size: 106.25%;
-}
-html[lang="en"] body {
-  letter-spacing: 0.011em;
-  line-height: 1.55;
-}
-html[lang="en"] .crm-font-display {
-  letter-spacing: 0.02em;
-}
-html[lang="en"] .text-xs {
-  font-size: 0.8125rem;
-  line-height: 1.45;
-}
-html[lang="en"] .text-sm {
-  font-size: 0.9375rem;
-  line-height: 1.5;
-}
-html[lang="en"] .text-\[11px\] {
-  font-size: 0.75rem;
-  line-height: 1.4;
-}
-
 /* 列表、表单控件：与旧版后台数据区接近的无衬线 */
 .crm-font-ui,
 .crm-font-ui table,
@@ -108,18 +95,20 @@ html[lang="en"] .text-\[11px\] {
     sans-serif;
 }
 
-/* 兼容旧类名 */
-.ami-ui,
+/* 数据区保持无衬线：ami-ui 只用于兼容旧类名，不再把表格/按钮也改成宋体 */
 .ami-ui table,
 .ami-ui button,
-.ami-ui select {
+.ami-ui select,
+.ami-ui input {
   font-family:
-    var(--font-family),
-    var(--font-secondary),
-    var(--font-serif),
-    ui-serif,
-    Georgia,
-    serif;
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
 }
 
 .card-surface {
@@ -129,16 +118,24 @@ html[lang="en"] .text-\[11px\] {
 /* 内容区统一：页内区块间距 + 卡片内边距 */
 .crm-page {
   display: flex;
+  flex-shrink: 0;
   flex-direction: column;
   gap: 1.5rem;
+  min-height: min-content;
   color: var(--sage-900, #1b1f19);
+}
+
+.crm-card thead {
+  color: var(--sage-800);
 }
 
 .crm-card {
   border-radius: 0.75rem;
-  border: 1px solid color-mix(in srgb, var(--sage-200) 80%, transparent);
-  background: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 1px 2px rgba(39, 31, 24, 0.05);
+  border: 1px solid color-mix(in srgb, var(--sky) 70%, var(--bark) 12%);
+  background: var(--crm-surface);
+  box-shadow:
+    0 1px 2px rgba(39, 31, 24, 0.05),
+    0 10px 28px rgba(39, 31, 24, 0.045);
   padding: 1.25rem;
 }
 
@@ -149,8 +146,259 @@ html[lang="en"] .text-\[11px\] {
 }
 
 .crm-card-soft {
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(1px);
+  background: #faf7f1;
+}
+
+/* 列表页：工具栏 + 表贴边。选择器带 .crm-card，避免 md padding 盖掉 */
+.crm-card.crm-card-list {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.crm-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--sky) 70%, var(--bark) 10%);
+  padding: 1rem 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .crm-toolbar {
+    padding: 1rem 1.5rem;
+  }
+}
+
+.crm-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+.crm-table thead th {
+  padding: 0.7rem 0.9rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--sage-700);
+  background: #eef1ee;
+  border-bottom: 1px solid #d5ddd9;
+}
+
+.crm-table tbody td {
+  padding: 0.7rem 0.9rem;
+  vertical-align: middle;
+  border-bottom: 1px solid #ece8e0;
+}
+
+.crm-table-link,
+button.crm-table-link {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--maple);
+  cursor: pointer;
+}
+
+.crm-table-link:hover,
+button.crm-table-link:hover:not(:disabled) {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: #a86b3c;
+}
+
+button.crm-table-link-muted {
+  color: var(--sage-700);
+}
+
+button.crm-table-link-muted:hover:not(:disabled) {
+  color: var(--bark);
+}
+
+button.crm-table-link-danger {
+  color: #9a4545;
+}
+
+button.crm-table-link-danger:hover:not(:disabled) {
+  color: #7f2d2d;
+}
+
+.crm-btn-sm {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8125rem;
+}
+
+.crm-btn-xs {
+  padding: 0.22rem 0.55rem;
+  font-size: 0.75rem;
+  border-radius: 0.3125rem;
+}
+
+.crm-pager {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-top: 1px solid color-mix(in srgb, var(--sky) 70%, var(--bark) 10%);
+  padding: 0.7rem 1rem;
+  font-size: 0.75rem;
+  color: var(--sage-700);
+}
+
+@media (min-width: 768px) {
+  .crm-pager {
+    padding: 0.75rem 1.25rem;
+  }
+}
+
+/* 列表页：标题/筛选占固定高度，表格吃剩余空间，只留一条滚动条 */
+.crm-fill-page {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.crm-fill-page > .crm-card.crm-card-list {
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.crm-toolbar {
+  position: relative;
+  z-index: 20;
+  flex-shrink: 0;
+}
+
+.crm-table-scroll {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: auto;
+  background: #fff;
+  overscroll-behavior: contain;
+}
+
+/* 工作台：表格随内容增高，避免 flex:1 把行高挤成 0 */
+.crm-table-scroll-auto {
+  flex: 0 0 auto;
+  min-height: 0;
+  max-height: none;
+  overflow-x: auto;
+  overflow-y: visible;
+  overscroll-behavior: auto;
+}
+
+.crm-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+.crm-table tbody td {
+  background: #fffdf8;
+}
+
+.crm-table tbody tr:hover td {
+  background: #f3eee4;
+}
+
+.crm-table tbody tr.is-deleted td {
+  background: #f6f3eb;
+}
+
+.crm-freeze-check,
+.crm-freeze-id,
+.crm-freeze-start,
+.crm-freeze-end {
+  position: sticky;
+  background: inherit;
+}
+
+.crm-freeze-check {
+  left: 0;
+  width: 2.75rem;
+  min-width: 2.75rem;
+  max-width: 2.75rem;
+  z-index: 2;
+}
+
+.crm-freeze-id {
+  left: 2.75rem;
+  width: 4.75rem;
+  min-width: 4.75rem;
+  z-index: 2;
+  box-shadow: 6px 0 8px -6px rgba(60, 36, 21, 0.18);
+}
+
+.crm-freeze-id-first {
+  left: 0;
+}
+
+.crm-freeze-start {
+  left: 0;
+  z-index: 2;
+  box-shadow: 6px 0 8px -6px rgba(60, 36, 21, 0.18);
+}
+
+.crm-freeze-end {
+  right: 0;
+  z-index: 2;
+  min-width: 9rem;
+  box-shadow: -6px 0 8px -6px rgba(60, 36, 21, 0.18);
+}
+
+.crm-table thead th.crm-freeze-check,
+.crm-table thead th.crm-freeze-id,
+.crm-table thead th.crm-freeze-id-first,
+.crm-table thead th.crm-freeze-start,
+.crm-table thead th.crm-freeze-end {
+  z-index: 5;
+  background: #eef1ee;
+}
+
+.crm-table tbody td.crm-freeze-check,
+.crm-table tbody td.crm-freeze-id,
+.crm-table tbody td.crm-freeze-start,
+.crm-table tbody td.crm-freeze-end {
+  z-index: 2;
+}
+
+.crm-table tbody td.crm-freeze-check,
+.crm-table tbody td.crm-freeze-id,
+.crm-table tbody td.crm-freeze-start {
+  background: #fffdf8;
+}
+
+.crm-table tbody td.crm-freeze-end {
+  background: #fffdf8;
+}
+
+.crm-table tbody tr:hover td.crm-freeze-check,
+.crm-table tbody tr:hover td.crm-freeze-id,
+.crm-table tbody tr:hover td.crm-freeze-start,
+.crm-table tbody tr:hover td.crm-freeze-end {
+  background: #f3eee4;
+}
+
+.crm-table tbody tr.is-deleted td.crm-freeze-check,
+.crm-table tbody tr.is-deleted td.crm-freeze-id,
+.crm-table tbody tr.is-deleted td.crm-freeze-start,
+.crm-table tbody tr.is-deleted td.crm-freeze-end {
+  background: #f6f3eb;
 }
 
 .card-bg,
@@ -163,11 +411,9 @@ html[lang="en"] .text-\[11px\] {
   @keyframes crm-page-enter {
     from {
       opacity: 0;
-      transform: translateY(10px);
     }
     to {
       opacity: 1;
-      transform: none;
     }
   }
 
@@ -233,25 +479,32 @@ html[lang="en"] .text-\[11px\] {
 }
 
 .crm-btn-primary {
-  border: 1px solid #8b6f47;
-  background: #8b6f47;
-  color: #fff;
+  border: 1px solid #b56f3b;
+  background: var(--maple);
+  color: var(--petal);
+  box-shadow: 0 1px 2px rgba(60, 36, 21, 0.14);
 }
 
 .crm-btn-primary:hover:not(:disabled) {
-  background: #735a38;
-  border-color: #735a38;
+  background: #a86b3c;
+  border-color: #a86b3c;
+}
+
+a.crm-btn {
+  text-decoration: none;
 }
 
 .crm-btn-secondary {
-  border: 1px solid var(--sage-400);
-  background: rgba(255, 255, 255, 0.85);
-  color: var(--sage-800);
+  border: 1px solid color-mix(in srgb, var(--sky) 45%, var(--bark) 28%);
+  background: #fffdf8;
+  color: var(--bark);
+  box-shadow: 0 1px 1px rgba(60, 36, 21, 0.06);
 }
 
 .crm-btn-secondary:hover:not(:disabled) {
-  background: #fff;
-  border-color: var(--sage-500);
+  background: var(--sky);
+  border-color: color-mix(in srgb, var(--sky) 35%, var(--bark) 40%);
+  color: var(--bark);
 }
 
 .crm-btn-ghost {
@@ -263,8 +516,8 @@ html[lang="en"] .text-\[11px\] {
 }
 
 .crm-btn-ghost:hover:not(:disabled) {
-  color: #8b6f47;
-  background: rgba(255, 255, 255, 0.35);
+  color: var(--maple);
+  background: rgba(255, 253, 248, 0.55);
 }
 
 .crm-btn-danger {
@@ -275,6 +528,21 @@ html[lang="en"] .text-\[11px\] {
 
 .crm-btn-danger:hover:not(:disabled) {
   background: #991b1b;
+}
+
+/* 未改成 crm-btn 的旧主按钮，跟 Maple，避免再冒出近黑褐块 */
+button.bg-brand-brown,
+button.bg-sage-700,
+a.bg-brand-brown,
+a.bg-sage-700 {
+  background-color: var(--maple);
+  color: var(--petal);
+}
+button.bg-brand-brown:hover:not(:disabled),
+button.bg-sage-700:hover:not(:disabled),
+a.bg-brand-brown:hover:not(:disabled),
+a.bg-sage-700:hover:not(:disabled) {
+  background-color: #a86b3c;
 }
 
 /* 分区线：裸 hr 用 sage，避免默认 currentColor 近黑 */
@@ -297,7 +565,7 @@ main input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
 main select:focus,
 main textarea:focus {
   outline: none;
-  border-color: #8b6f47;
+  border-color: var(--maple);
   box-shadow: 0 0 0 3px var(--crm-ring);
 }
 
@@ -342,8 +610,7 @@ main::-webkit-scrollbar-thumb:hover {
   justify-content: center;
   padding: 1.5rem;
   background:
-    radial-gradient(ellipse 70% 55% at 15% 10%, rgba(191, 201, 191, 0.55), transparent 60%),
-    radial-gradient(ellipse 55% 45% at 95% 0%, rgba(232, 226, 213, 0.85), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 12% 0%, rgba(167, 180, 164, 0.35), transparent 58%),
     var(--background);
 }
 
@@ -351,11 +618,10 @@ main::-webkit-scrollbar-thumb:hover {
   width: 100%;
   max-width: 26rem;
   border-radius: 1rem;
-  border: 1px solid rgba(176, 188, 169, 0.55);
+  border: 1px solid rgba(155, 166, 148, 0.55);
   background: var(--crm-surface);
   box-shadow: 0 18px 40px rgba(39, 31, 24, 0.08);
   padding: 1.75rem 1.5rem;
-  backdrop-filter: blur(8px);
 }
 
 @media (prefers-reduced-motion: no-preference) {

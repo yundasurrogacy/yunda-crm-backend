@@ -23,7 +23,13 @@ export function isPortalNavActive(pathname: string, href: string): boolean {
   }
 
   if (h === "/intended_parent") {
-    return p === "/intended_parent" || (p.startsWith("/intended_parent/") && !p.startsWith("/intended_parent/my-cases") && !p.startsWith("/intended_parent/cases"));
+    return (
+      p === "/intended_parent" ||
+      (p.startsWith("/intended_parent/") &&
+        !p.startsWith("/intended_parent/my-cases") &&
+        !p.startsWith("/intended_parent/cases") &&
+        !p.startsWith("/intended_parent/help"))
+    );
   }
   if (h === "/intended_parent/my-cases") {
     return p.startsWith("/intended_parent/my-cases") || p.startsWith("/intended_parent/cases");
@@ -34,7 +40,8 @@ export function isPortalNavActive(pathname: string, href: string): boolean {
       (p.startsWith("/surrogate_mother/") &&
         !p.startsWith("/surrogate_mother/my-cases") &&
         !p.startsWith("/surrogate_mother/cases") &&
-        !p.startsWith("/surrogate_mother/profile"))
+        !p.startsWith("/surrogate_mother/profile") &&
+        !p.startsWith("/surrogate_mother/help"))
     );
   }
   if (h === "/surrogate_mother/my-cases") {

@@ -33,7 +33,8 @@
       "case_managers": "案例经理",
       "intended_parents": "准父母",
       "surrogates": "代孕母"
-    }
+    },
+    "help": "使用帮助"
   },
   "switch_portal": "切换业务端口",
   "logout": "退出登录",
@@ -41,6 +42,12 @@
     "title": "请确认",
     "confirm": "确定",
     "cancel": "取消"
+  },
+  "pager": {
+    "prev": "上一页",
+    "next": "下一页",
+    "page_size": "每页",
+    "page_size_option": "{{n}} 条/页"
   },
   "account_bar": {
     "title": "当前账号",
@@ -208,7 +215,7 @@
   },
   "admin_cm_workload": {
     "title": "案例经理工作量",
-    "intro": "每位案例经理当前负责的活跃案例数（主负责 ∪ 共同负责，已去重；不含已软删案例）。未分配案例经理的案例单独列出，不会计入各经理合计。",
+    "intro": "每位案例经理当前负责多少个活跃案例。已软删除的案例不计入。没有案例经理的案例单独列在最后一行。",
     "summary": "活跃案例 {{total}}：已分配 {{assigned}}，未分配 {{unassigned}}（与下方「全部案例」一致）。各经理行内按人统计；同一案例多人负责时会分别计入，行数字相加可能大于「已分配」。",
     "unassigned_label": "未分配案例经理",
     "manage_link": "管理案例经理",
@@ -282,9 +289,13 @@
     "error_link_user_conflict": "该登录账号已绑定另一条同类业务记录，请先解绑或换用其他邮箱。",
     "error_link": "绑定失败，请稍后重试。",
     "create_entity_title": "直接新建档案",
+    "create_ip_title": "新建准父母档案",
+    "create_gc_title": "新建孕妈档案",
     "field_entity_email": "联系邮箱",
     "field_entity_name": "姓名（可选）",
     "create_entity_submit": "创建档案",
+    "create_ip_submit": "创建准父母档案",
+    "create_gc_submit": "创建孕妈档案",
     "creating_entity": "创建中…",
     "created_entity": "已创建档案 #{{id}}",
     "error_create_entity": "创建档案失败。",
@@ -306,18 +317,20 @@
     "col_updated": "最后更新",
     "col_action": "操作",
     "view_detail": "查看详情",
+    "list_stats": "当前筛选共 {{total}} 条（本页 {{from}}–{{to}}）",
     "empty": "暂无关联案例。如有疑问请联系案例经理。",
     "error_unauthorized": "请先登录。",
     "error_load": "加载失败，请稍后重试。",
     "error_not_found": "未找到该案例或您无权查看。",
     "section_progress": "案例进度",
-    "progress_intro": "以下为当前流程阶段（只读）。阶段明细字段仅案例经理可见。",
+    "progress_intro": "以下为您的案例当前进度。各阶段详细信息由案例经理进行更新。",
     "progress_label": "进度",
     "progress_current": "当前阶段",
     "progress_unknown_stage": "当前状态「{{stage}}」不在标准流程中，请联系案例经理。",
-    "progress_docs_title": "进度相关附件",
-    "progress_docs_intro": "管理员/案例经理设为「客户可见」的上传文件会出现在这里。",
-    "progress_docs_empty": "暂无对您可见的进度附件。",
+    "progress_docs_title": "相关文件",
+    "progress_docs_intro": "与当前案例进度相关的文件将显示在这里。",
+    "progress_docs_empty": "暂无相关文件。",
+    "progress_fields_empty": "此阶段尚未填写明细。",
     "section_files": "对我可见的附件",
     "files_intro": "仅展示案例经理设为客户可见的文件（产检/门诊照片、产检报告、信托/法律合同等）。",
     "files_empty": "暂无对客附件。",
@@ -474,6 +487,7 @@
     "page_title": "案例详情",
     "subtitle": "上方查看代母/准父母档案；本页维护各阶段案例专属信息（不与个人档案重复）。",
     "back_my_cases": "返回我的案例",
+    "back_list": "返回案例列表",
     "section_summary": "案例概要",
     "section_surrogate": "代孕母亲",
     "section_intended_parents": "准父母",
@@ -547,7 +561,11 @@
     "bind_gc_error": "绑定失败，请稍后重试。",
     "bind_gc_error_taken": "绑定失败，请稍后重试。",
     "replace_gc_title": "更换代孕母（匹配后可换）",
-    "replace_gc_intro": "本案例已绑定代孕母时可在此更换（同一案例内换绑，无需删除案例再建）。解绑当前代孕母并绑定新的；旧代孕母将立即失去本案例门户访问权限，更换记录会写入下方历史。",
+    "replace_gc_intro": "在同一案例内换绑即可，不要删除案例再建。步骤：1）搜索并选择新的代孕妈妈；2）确认更换（旧孕妈立刻失去本案例访问权）；3）下方历史会留下记录。",
+    "replace_gc_steps": "同案换绑 · 三步完成",
+    "replace_gc_step1": "搜索并选择新的代孕妈妈",
+    "replace_gc_step2": "确认更换 — 旧孕妈立刻失去本案例访问权",
+    "replace_gc_step3": "在卡片下方核对更换历史",
     "replace_gc_submit": "确认更换",
     "replace_gc_submitting": "更换中…",
     "replace_gc_confirm": "确定更换代孕母？这不会删除本案例，只是换绑孕妈。旧代孕母将立刻无法再访问本案例。",
@@ -631,6 +649,10 @@
       "edit_save": "保存",
       "edit_saving": "保存中…",
       "edit_cancel": "取消",
+      "edit_locked_hint": "编辑只能改收款人、可见范围和备注，不能改类型或金额。需要改账请删除后重新登记。",
+      "delete": "删除",
+      "confirm_delete": "确定删除这笔流水？案例余额会按该笔金额冲回。",
+      "error_delete": "删除流水失败，请稍后重试。",
       "field_voucher": "付款凭证附件",
       "col_voucher": "凭证",
       "voucher_link": "查看"
@@ -648,6 +670,11 @@
       "loading": "加载附件…",
       "error_load": "加载附件失败。",
       "error_save": "保存失败，请稍后重试。",
+      "error_delete": "删除附件失败，请稍后重试。",
+      "confirm_delete": "确定删除这份附件记录？",
+      "delete": "删除",
+      "deleting": "删除中…",
+      "col_actions": "操作",
       "error_url": "请先上传或填入文件链接。",
       "field_visibility": "可见范围",
       "visibility_manager": "仅内部",
@@ -738,5 +765,163 @@
     "error_email_taken": "该联系邮箱已存在，请换一个或先恢复已软删除的档案。",
     "error_cm_not_bound": "当前账号未绑定案例经理主体，请联系管理员。",
     "error_soft_delete": "软删除/恢复失败，请稍后重试。"
+  },
+  "help": {
+    "on_this_page": "本页目录",
+    "faq": "常见问题",
+    "screenshot_note": "配图截自英文界面。切到中文后，请对照图里的英文按钮名（例如 Sign in、Create case）。",
+    "admin": {
+      "title": "管理端使用说明",
+      "subtitle": "账号、案例操作、信托、附件，以及在同一案例内更换代孕母。",
+      "login": {
+        "title": "登录并选择入口",
+        "s1_title": "打开登录页",
+        "s1_body": "打开 /login，用邮箱和密码登录。密码以哈希保存，包括管理员在内都看不到明文。忘记密码请在「账号管理」里重设。",
+        "s2_title": "进入管理端",
+        "s2_body": "在选择入口页点 Open admin console（进入管理后台）。如果账号还绑了其他角色，之后可在侧栏底部 Switch portal 切换。"
+      },
+      "accounts": {
+        "title": "创建登录账号并绑定档案",
+        "s1_title": "先创建登录账号",
+        "s1_body": "打开 Account management（账号管理）。先创建邮箱和密码，再把它绑到案例经理、准父母或孕妈档案。",
+        "s2_title": "再建业务档案",
+        "s2_body": "在 Case manager / Intended parent / Surrogate 下创建档案（姓名 + 邮箱），可以还没有登录账号。列表里的 Name 来自档案全名。",
+        "s3_title": "绑定或换绑",
+        "s3_body": "用 Link / Change binding 绑定登录账号。Soft delete 只是从默认列表隐藏，数据还在。"
+      },
+      "cases": {
+        "title": "创建并跟进案例",
+        "s1_title": "新建案例",
+        "s1_body": "必须搜索并点选案例经理和准父母，不要依赖默认人选。孕妈可以以后再绑。信托余额可以填 0。创建成功后会进入该案例详情。",
+        "s2_title": "填写案例进度",
+        "s2_body": "在案例详情更新各阶段。字段可以留空。准父母能看到你填的内容，但 Medical Screening 的心理医生姓名和邮箱是内部字段。",
+        "s3_title": "信托流水",
+        "s3_body": "登记收入/支出。Edit 只能改收款人、可见范围和备注，不能改类型和金额。Delete 会冲回案例余额。需要给家庭看的条目请标成 Client-visible。",
+        "s4_title": "案例附件",
+        "s4_body": "上传文件并设置可见范围。Client-visible 的文件会出现在家庭进度页。传错了可以删除记录。"
+      },
+      "replace": {
+        "title": "更换代孕母（同一案例）",
+        "s1_title": "不要删除案例",
+        "s1_body": "始终在现有案例上换绑。软删除再建会丢掉信托、附件和阶段数据。",
+        "s2_title": "搜索并选择新的代孕母",
+        "s2_body": "在孕妈卡片里用 Replace gestational carrier，按姓名搜索并选择另一个档案。",
+        "s3_title": "确认更换",
+        "s3_body": "确认弹窗。旧代孕母会立刻失去本案例访问权。更换记录会留在卡片下方历史里。"
+      },
+      "faq": {
+        "q1": "忘记密码了，管理员能看见旧密码吗？",
+        "a1": "不能。密码只存哈希。在账号管理里用 Edit 设一个新密码，再私下告诉对方一次。",
+        "q2": "为什么 Create case 是灰色的？",
+        "a2": "必须先搜索并点选案例经理和准父母。系统不会再自动选名单里的第一个人。",
+        "q3": "家里人看不到心理医生姓名/邮箱？",
+        "a3": "这是故意的。Medical Screening 的心理医生字段是 Internal only。你填的其他阶段字段准父母都能看到。",
+        "q4": "信托金额记错了怎么办？",
+        "a4": "Edit 不能改类型和金额。Delete 该条（余额会冲回），再 Post entry 记一笔正确的。",
+        "q5": "Save file record 点不了？",
+        "a5": "先 Choose file 选本地文件（或粘贴文件链接），再设可见范围并保存。",
+        "q6": "换孕妈要不要把案例删掉再建？",
+        "a6": "不要。展开孕妈卡片，在同一案例里 Replace gestational carrier。删案例会丢掉信托、附件和阶段记录。",
+        "q7": "案例经理登录后看不到案子？",
+        "a7": "登录账号必须绑到正确的案例经理档案，并且案例要分给该档案。到账号管理 → Case manager → Link / Change binding，再核对案例列表。"
+      }
+    },
+    "cm": {
+      "title": "案例经理端使用说明",
+      "subtitle": "日常办案：阶段、信托、附件、留言，以及更换代孕母。",
+      "dashboard": {
+        "title": "工作台和案例列表",
+        "s1_title": "按阶段筛选",
+        "s1_body": "工作台按旅程阶段分组。My cases / Case list 显示你负责的全部案子，不按阶段拆开。",
+        "s2_title": "打开案例",
+        "s2_body": "名单上的名字来自档案。如果名字是空的，先去编辑准父母或孕妈档案。"
+      },
+      "progress": {
+        "title": "更新案例进度",
+        "s1_title": "保存或进入下一阶段",
+        "s1_body": "填当前阶段，然后 Save this stage 或 Go to next stage。选填字段可以留空。标了 Internal only 的字段家庭看不到。",
+        "s2_title": "家庭能看到什么",
+        "s2_body": "准父母能看到你在已完成/当前阶段填写的内容，但 Medical Screening 的心理医生联系方式除外。"
+      },
+      "trust": {
+        "title": "信托和附件",
+        "s1_title": "记账和修改",
+        "s1_body": "记完后不能改类型和金额。Edit 只能改收款人/可见范围/备注；要改金额请 Delete 冲回后再记。",
+        "s2_title": "分享文件",
+        "s2_body": "默认对客可见。内部材料改成 manager-only。Delete 会从本案例去掉该记录。"
+      },
+      "replace": {
+        "title": "更换代孕母",
+        "s1_title": "只在同一案例操作",
+        "s1_body": "在案例上用 Replace，不要归档后再新建一个案例。",
+        "s2_title": "三步完成",
+        "s2_body": "1）搜索新的代孕母。2）确认更换——旧孕妈立刻失去访问权。3）在卡片下方核对更换历史。"
+      },
+      "faq": {
+        "q1": "我的案例列表是空的？",
+        "a1": "请管理员把登录账号绑到正确的案例经理档案，并把案例分给你。Created by me 和 Assigned to me 不是同一份名单。",
+        "q2": "家里人能看到心理医生吗？",
+        "a2": "不能。那些 Medical Screening 字段留给医疗团队。你在阶段上保存的其他内容准父母都能看到。",
+        "q3": "信托金额记错了？",
+        "a3": "Delete 该行（余额冲回），再记一笔。Edit 只能改收款人、可见范围和备注。"
+      }
+    },
+    "ip": {
+      "title": "准父母端使用说明",
+      "subtitle": "查看旅程进度、共享附件、信托动态和留言。",
+      "home": {
+        "title": "首页和我的案例",
+        "s1_title": "查看当前旅程",
+        "s1_body": "首页显示当前案例摘要。My cases 列出绑到你档案上的全部案例。",
+        "s2_title": "打开案例详情",
+        "s2_body": "进度列表和案例经理用的是同一套阶段。他们填写的内容会出现在已完成或当前阶段下面。"
+      },
+      "privacy": {
+        "title": "你能看到和不能看到的",
+        "s1_title": "孕妈联系方式是隐藏的",
+        "s1_body": "你能看到代孕母的姓名和公开档案，看不到电话、邮箱、家庭住址或紧急联系人。",
+        "s2_title": "心理医生是内部信息",
+        "s2_body": "Medical Screening 的心理医生姓名和邮箱只给医疗团队。经理填写的其他进度字段你都能看到。",
+        "s3_title": "附件和信托",
+        "s3_body": "只有标成 client-visible 的项目会出现在这里。缺了请让案例经理处理。"
+      },
+      "messages": {
+        "title": "留言",
+        "s1_title": "写一条备注",
+        "s1_body": "用案例页上的留言框。你的案例经理能看到同一条对话。"
+      },
+      "faq": {
+        "q1": "我看到 “No linked cases yet”（还没有关联案例）？",
+        "a1": "登录账号还没绑到有进行中案例的档案。联系案例经理，不要自己再注册一个号。",
+        "q2": "为什么看不到心理医生的名字？",
+        "a2": "该联系方式留给医疗团队。经理填写的其他 Medical Screening 及后续阶段内容你仍然能看到。",
+        "q3": "某个文件或信托流水不见了？",
+        "a3": "这里只显示标成 client-visible 的项目。请案例经理改可见范围或重新上传。"
+      }
+    },
+    "sm": {
+      "title": "孕妈端使用说明",
+      "subtitle": "保持个人资料最新，并查看共享的案例旅程。",
+      "profile": {
+        "title": "我的资料",
+        "s1_title": "先填全名",
+        "s1_body": "列表和案例卡片用的是 Full name。协调员需要照片的话再补上。",
+        "s2_title": "生育史",
+        "s2_body": "每一次既往生产占一行（日期、孕周、体重、性别、生产方式）。不止一次请点 Add another birth。"
+      },
+      "case": {
+        "title": "我的案例",
+        "s1_title": "进度和附件",
+        "s1_body": "你能看到旅程阶段，以及团队标成 client-visible 的文件。内部医疗联系方式保持隐藏。",
+        "s2_title": "留言",
+        "s2_body": "用案例留言框给团队写信。准父母和案例经理的对话在同一个案例上。"
+      },
+      "faq": {
+        "q1": "以前生过孩子，可以填多次生育史吗？",
+        "a1": "可以。每一次既往分娩点一次 Add another birth，然后保存资料。多出来的空行保存时会被忽略。",
+        "q2": "资料填了，列表上名字还是空的？",
+        "a2": "案例卡片用的是 Full name 字段。填好后点保存。"
+      }
+    }
   }
 }

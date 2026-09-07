@@ -1,7 +1,5 @@
-"use client";
-
-import { CaseManagerCreateCaseForm } from "@/components/case-manager/CaseManagerCreateCaseForm";
+import { redirect } from "next/navigation";
 
 export default function CaseManagerCreateCasePage() {
-  return <CaseManagerCreateCaseForm />;
+  redirect("/case_manager/my-cases?create=1");
 }

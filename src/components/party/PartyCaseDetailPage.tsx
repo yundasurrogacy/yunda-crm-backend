@@ -1,7 +1,6 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { ListBackLink } from "@/components/ui/ListBackLink";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CaseEntityProfileCard } from "@/components/case-manager/CaseEntityProfileCard";
@@ -84,13 +83,9 @@ export function PartyCaseDetailPage({
   return (
     <div className="ami-ui crm-font-ui crm-page">
       <div className="flex flex-wrap items-start gap-4">
-        <Link
-          href={listHref}
-          className="ami-ui inline-flex items-center gap-1.5 rounded-md border border-sage-300 bg-white/80 px-3 py-1.5 text-xs font-semibold text-sage-800 shadow-sm hover:bg-white"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" aria-hidden strokeWidth={2} />
+        <ListBackLink fallbackHref={listHref}>
           {t("party_cases.back_list")}
-        </Link>
+        </ListBackLink>
         <div className="min-w-0 flex-1">
           <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">
             {t("party_cases.detail_title")}
@@ -148,6 +143,7 @@ export function PartyCaseDetailPage({
 
           <PartyCaseProgressTimeline
             processStatus={data.process_status}
+            stageData={data.stage_data}
             caseId={caseId}
             apiBase={apiBase}
           />

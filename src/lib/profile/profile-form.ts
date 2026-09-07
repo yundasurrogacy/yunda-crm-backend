@@ -1,6 +1,11 @@
 import type { ProfileFieldDef, ProfileSectionDef } from "@/constants/gc-profile-schema";
 import { GC_PROFILE_LEGACY_KEY_MAP } from "@/constants/gc-profile-schema";
 import { flattenProfileSources, formatProfileValue } from "@/lib/profile/display-profile";
+import {
+  BIRTH_HISTORY_ENTRIES_KEY,
+  writeBirthHistoryIntoProfile,
+  type BirthHistoryEntry,
+} from "@/lib/profile/birth-history";
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
   return v != null && typeof v === "object" && !Array.isArray(v);
@@ -50,11 +55,24 @@ export function mergeProfileDataFromForm(
     : {};
 
   for (const [key, raw] of Object.entries(formValues)) {
+    if (key === BIRTH_HISTORY_ENTRIES_KEY) continue;
     const v = raw.trim();
     if (v) base[key] = v;
     else delete base[key];
     const legacy = legacyKeyFor(key);
     if (legacy) delete base[legacy];
+  }
+
+  const rawEntries = formValues[BIRTH_HISTORY_ENTRIES_KEY];
+  if (rawEntries != null) {
+    let parsed: BirthHistoryEntry[] = [];
+    try {
+      const json = JSON.parse(rawEntries) as unknown;
+      parsed = Array.isArray(json) ? (json as BirthHistoryEntry[]) : [];
+    } catch {
+      parsed = [];
+    }
+    writeBirthHistoryIntoProfile(base, parsed);
   }
 
   return base;

@@ -3,12 +3,17 @@
 import { Check, Circle, ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { getFieldsForStage } from "@/constants/am-stage-field-groups";
 import {
   CANONICAL_CASE_STAGES,
   canonicalStageIndex,
   isCanonicalCaseStage,
+  type CanonicalCaseStage,
 } from "@/constants/case-stages";
 import type { CaseFileRow } from "@/lib/case-manager/case-files";
+import type { AmWorkspacePayload } from "@/lib/case-manager/am-workspace-model";
+import { isAmStageFieldVisible } from "@/lib/case-manager/am-workspace-model";
+import { translateAmStageFieldLabel } from "@/lib/i18n/translate-am-stage-field";
 import { translateProcessStatus } from "@/lib/i18n/translate-process-status";
 
 function formatDt(iso: string, lng: string) {
@@ -23,12 +28,29 @@ function formatDt(iso: string, lng: string) {
   }
 }
 
+function stageFilledRows(
+  stage: CanonicalCaseStage,
+  stageData: AmWorkspacePayload | undefined,
+  language: string,
+) {
+  const row = stageData?.byStage[stage] ?? {};
+  return getFieldsForStage(stage)
+    .filter((def) => !def.internalOnly && isAmStageFieldVisible(def, row))
+    .map((def) => {
+      const value = String(row[def.key] ?? "").trim();
+      return { key: def.key, label: translateAmStageFieldLabel(def, language), value };
+    })
+    .filter((r) => r.value);
+}
+
 export function PartyCaseProgressTimeline({
   processStatus,
+  stageData,
   caseId,
   apiBase,
 }: {
   processStatus: string | null;
+  stageData?: AmWorkspacePayload;
   caseId?: string;
   apiBase?: string;
 }) {
@@ -120,6 +142,27 @@ export function PartyCaseProgressTimeline({
                     {t("party_cases.progress_current")}
                   </span>
                 ) : null}
+                {(() => {
+                  if (upcoming) return null;
+                  const rows = stageFilledRows(stage, stageData, i18n.language);
+                  if (rows.length === 0) {
+                    return current ? (
+                      <p className="mt-2 text-xs font-normal text-sage-600">
+                        {t("party_cases.progress_fields_empty")}
+                      </p>
+                    ) : null;
+                  }
+                  return (
+                    <dl className="mt-2 grid gap-1.5 text-xs font-normal text-sage-800 sm:grid-cols-2">
+                      {rows.map((r) => (
+                        <div key={r.key}>
+                          <dt className="text-[11px] font-semibold text-sage-600">{r.label}</dt>
+                          <dd className="break-words text-sage-900">{r.value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  );
+                })()}
               </span>
             </li>
           );

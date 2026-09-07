@@ -57,8 +57,15 @@ export function EntitySearchSelect({
     const onDoc = (e: MouseEvent) => {
       if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
     };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
     document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
   }, [open]);
 
   const filtered = useMemo(() => {
@@ -92,7 +99,7 @@ export function EntitySearchSelect({
         <ul
           id={listId}
           role="listbox"
-          className="absolute z-40 mt-1 max-h-56 w-full overflow-auto rounded-md border border-sage-200 bg-white py-1 text-sm shadow-lg ring-1 ring-sage-900/5"
+          className="absolute z-50 mt-1 max-h-56 w-full overflow-auto rounded-md border border-sage-200 bg-white py-1 text-sm shadow-lg ring-1 ring-sage-900/5"
         >
           {canEmpty ? (
             <li>

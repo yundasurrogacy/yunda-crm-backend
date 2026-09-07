@@ -4,8 +4,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { AdminEntityProfileDetail } from "@/lib/admin/entity-profile";
 import { GC_PROFILE_PHOTO_KEYS, looksLikeImageUrl, parseGcAlbumUrls } from "@/lib/profile/gc-photos";
+import { BIRTH_HISTORY_ENTRIES_KEY, readBirthHistoryEntries } from "@/lib/profile/birth-history";
 import { buildProfileFormValues } from "@/lib/profile/profile-form";
 import { AmQiniuFileInput } from "@/components/case-manager/AmQiniuFileInput";
+import { BirthHistoryEditor } from "@/components/profile/BirthHistoryEditor";
 import { ProfileFieldControl } from "@/components/profile/ProfileFieldControl";
 
 function joinPhotoUrls(urls: string[]): string {
@@ -13,7 +15,9 @@ function joinPhotoUrls(urls: string[]): string {
 }
 
 function formFromProfileDetail(detail: AdminEntityProfileDetail): Record<string, string> {
-  return buildProfileFormValues(detail.sections, [detail.profile_data], GC_PROFILE_PHOTO_KEYS);
+  const form = buildProfileFormValues(detail.sections, [detail.profile_data], GC_PROFILE_PHOTO_KEYS);
+  form[BIRTH_HISTORY_ENTRIES_KEY] = JSON.stringify(readBirthHistoryEntries(detail.profile_data));
+  return form;
 }
 
 export function SurrogateSelfProfilePage() {
@@ -126,6 +130,27 @@ export function SurrogateSelfProfilePage() {
                 {zh ? section.titleZh : section.titleEn}
               </h2>
               <div className="grid gap-3 md:grid-cols-2">
+                {section.id === "birth_history" ? (
+                  <BirthHistoryEditor
+                    entries={readBirthHistoryEntries({
+                      [BIRTH_HISTORY_ENTRIES_KEY]: (() => {
+                        try {
+                          return JSON.parse(form[BIRTH_HISTORY_ENTRIES_KEY] || "[]");
+                        } catch {
+                          return [];
+                        }
+                      })(),
+                    })}
+                    onChange={(entries) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        [BIRTH_HISTORY_ENTRIES_KEY]: JSON.stringify(entries),
+                      }))
+                    }
+                    zh={zh}
+                    disabled={saving}
+                  />
+                ) : null}
                 {section.fields.map((f) => (
                   <label key={f.key} className="block text-xs font-semibold uppercase tracking-wide text-sage-600">
                     {zh ? f.labelZh : f.labelEn}
@@ -251,7 +276,7 @@ export function SurrogateSelfProfilePage() {
           <button
             type="submit"
             disabled={saving}
-            className="rounded-md bg-brand-brown px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+            className="crm-btn crm-btn-primary"
           >
             {saving ? t("sm_profile.saving") : t("sm_profile.save")}
           </button>

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import type { BindRoleKind } from "@/lib/admin/bind-user-role";
+import { OverlayPortal } from "@/components/ui/OverlayPortal";
 
 type Option = { id: string; label: string };
 
@@ -132,8 +133,9 @@ export function BindEntityToUserModal({
   if (!open) return null;
 
   return (
+    <OverlayPortal>
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/45 p-4"
       role="presentation"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -169,7 +171,7 @@ export function BindEntityToUserModal({
             type="button"
             onClick={() => void fetchOptions(q)}
             disabled={loading}
-            className="shrink-0 rounded-md bg-sage-700 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
+            className="crm-btn crm-btn-primary crm-btn-sm shrink-0"
           >
             {loading ? t("admin_users.bind_modal_searching") : t("admin_users.bind_modal_search")}
           </button>
@@ -212,7 +214,7 @@ export function BindEntityToUserModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md border border-sage-300 bg-white px-4 py-2 text-sm font-medium text-sage-800"
+            className="crm-btn crm-btn-secondary"
           >
             {t("admin_users.bind_modal_cancel")}
           </button>
@@ -220,7 +222,7 @@ export function BindEntityToUserModal({
             type="button"
             disabled={submitting}
             onClick={() => void confirm("create")}
-            className="rounded-md border border-sage-500 bg-sage-50 px-4 py-2 text-sm font-semibold text-sage-900 disabled:opacity-40"
+            className="crm-btn crm-btn-secondary"
           >
             {submitting ? t("admin_users.bind_modal_saving") : t("admin_users.bind_modal_create_new")}
           </button>
@@ -228,12 +230,13 @@ export function BindEntityToUserModal({
             type="button"
             disabled={submitting || !selectedId}
             onClick={() => void confirm("select")}
-            className="rounded-md bg-brand-brown px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
+            className="crm-btn crm-btn-primary"
           >
             {submitting ? t("admin_users.bind_modal_saving") : t("admin_users.bind_modal_confirm")}
           </button>
         </div>
       </div>
     </div>
+    </OverlayPortal>
   );
 }

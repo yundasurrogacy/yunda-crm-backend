@@ -2,16 +2,27 @@
 
 import { RefreshCw } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { EntitySearchSelect } from "@/components/ui/EntitySearchSelect";
 import { SelectMenu } from "@/components/ui/SelectMenu";
+import { CrmModal } from "@/components/ui/CrmModal";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
+import { AdminCreateCaseForm } from "@/components/admin/AdminCreateCaseForm";
+import { CaseManagerCreateCaseForm } from "@/components/case-manager/CaseManagerCreateCaseForm";
 import { AM_STAGE_ICON_COMPONENTS } from "@/constants/am-stage-icons";
 import { CANONICAL_CASE_STAGES, isCanonicalCaseStage, type CanonicalCaseStage } from "@/constants/case-stages";
 import type { AmCaseRow } from "@/lib/case-manager/fetch-dashboard-data";
 import { translateProcessStatus } from "@/lib/i18n/translate-process-status";
+import {
+  cacheListPayload,
+  readCachedListPayload,
+  rememberListReturn,
+  restoreMainScroll,
+} from "@/lib/crm-list-return";
+import { DEFAULT_PAGE_SIZE, parsePageSize, type PageSizeOption } from "@/lib/crm-pagination";
+import { ListPager } from "@/components/ui/ListPager";
 
 type SelectOption = { id: string; label: string };
 type MyCaseScope = "all" | "created" | "assigned";
@@ -24,9 +35,18 @@ function readMyCaseScope(sp: URLSearchParams | null): MyCaseScope {
 }
 
 const CARD_ACCENT = [
-  "border border-sage-200/90 bg-[var(--card-background)] text-brand-brown shadow-sm hover:border-brand-brown/30 hover:shadow",
-  "border border-sage-300/75 bg-white/85 text-brand-brown shadow-sm hover:border-brand-brown/30 hover:shadow",
+  "border border-sage-200 bg-[var(--card-background)] text-brand-brown shadow-sm hover:border-maple/35 hover:bg-[#f7f1e6]",
+  "border border-sage-300 bg-[#faf7f1] text-brand-brown shadow-sm hover:border-maple/35 hover:bg-[#f7f1e6]",
 ] as const;
+
+function stageCardClass(active: boolean, accent: string) {
+  return [
+    "flex min-h-[7.25rem] flex-col rounded-xl px-3 py-3 text-left transition md:min-h-[7.75rem] md:px-3.5 md:py-3.5",
+    active
+      ? "border border-maple/35 bg-[#f3e2cc] text-bark shadow-sm"
+      : accent,
+  ].join(" ");
+}
 
 type DashboardPayload = {
   stage: string;
@@ -67,6 +87,8 @@ export function CaseManagerAmDashboard({
   detailHrefBase = "/case_manager/cases",
   headingMode = "case_manager",
   headerExtra,
+  hidePageHeading = false,
+  createCaseMode = false,
 }: {
   /**
    * full：阶段卡片 + 按阶段表格（工作台）
@@ -77,8 +99,12 @@ export function CaseManagerAmDashboard({
   apiPath?: string;
   detailHrefBase?: string;
   headingMode?: "case_manager" | "admin";
-  /** 标题行右侧附加内容（如管理端案例列表上的「创建案例」） */
+  /** 标题行右侧附加内容 */
   headerExtra?: ReactNode;
+  /** 管理端首页已在上方放了标题时，避免重复 H1 */
+  hidePageHeading?: boolean;
+  /** 案例列表：在表格上方打开创建弹窗 */
+  createCaseMode?: false | "admin" | "case_manager";
 }) {
   const { t, i18n } = useTranslation("portal");
   const confirm = useConfirm();
@@ -94,6 +120,7 @@ export function CaseManagerAmDashboard({
     readStageFromSearch(searchParams),
   );
   const [page, setPage] = useState(Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1));
+  const [pageSize, setPageSize] = useState<PageSizeOption>(() => parsePageSize(searchParams.get("pageSize")));
   const [q, setQ] = useState(() => readTextParam(searchParams, "q"));
   const [processStatus, setProcessStatus] = useState(() => readTextParam(searchParams, "processStatus"));
   const [caseManagerId, setCaseManagerId] = useState(() => readTextParam(searchParams, "caseManagerId"));
@@ -102,10 +129,13 @@ export function CaseManagerAmDashboard({
   );
   const [surrogateId, setSurrogateId] = useState(() => readTextParam(searchParams, "surrogateId"));
   const [qInput, setQInput] = useState(() => readTextParam(searchParams, "q"));
-  const [includeArchived, setIncludeArchived] = useState(false);
+  const [includeArchived, setIncludeArchived] = useState(
+    () => searchParams.get("includeArchived") === "1",
+  );
   const [archiveBusyId, setArchiveBusyId] = useState<string | null>(null);
   const [data, setData] = useState<DashboardPayload | null>(null);
   const [loading, setLoading] = useState(true);
+  const [createOpen, setCreateOpen] = useState(() => searchParams.get("create") === "1");
   const [errorKey, setErrorKey] = useState<string | null>(null);
   const [caseManagerOptions, setCaseManagerOptions] = useState<SelectOption[]>([]);
   const [intendedParentOptions, setIntendedParentOptions] = useState<SelectOption[]>([]);
@@ -118,6 +148,8 @@ export function CaseManagerAmDashboard({
   const [reassignCmId, setReassignCmId] = useState("");
   const [reassigning, setReassigning] = useState(false);
   const [reassignMsg, setReassignMsg] = useState<string | null>(null);
+  const dataRef = useRef<DashboardPayload | null>(null);
+  dataRef.current = data;
 
   const syncUrl = useCallback(
     (
@@ -128,10 +160,14 @@ export function CaseManagerAmDashboard({
       nextCm: string,
       nextIp: string,
       nextSm: string,
+      nextPageSize?: number,
     ) => {
       const q = new URLSearchParams(searchParams?.toString() ?? "");
       q.set("stage", nextStage);
       q.set("page", String(nextPage));
+      const size = nextPageSize ?? pageSize;
+      if (size !== DEFAULT_PAGE_SIZE) q.set("pageSize", String(size));
+      else q.delete("pageSize");
       if (nextQ.trim()) q.set("q", nextQ.trim());
       else q.delete("q");
       if (nextProcessStatus.trim()) q.set("processStatus", nextProcessStatus.trim());
@@ -144,7 +180,7 @@ export function CaseManagerAmDashboard({
       else q.delete("surrogateId");
       router.replace(`${pathname}?${q.toString()}`, { scroll: false });
     },
-    [pathname, router, searchParams],
+    [pathname, router, searchParams, pageSize],
   );
 
   const syncMyCasesUrl = useCallback(
@@ -156,10 +192,14 @@ export function CaseManagerAmDashboard({
       nextCm: string,
       nextIp: string,
       nextSm: string,
+      nextPageSize?: number,
     ) => {
       const q = new URLSearchParams(searchParams?.toString() ?? "");
       q.set("page", String(nextPage));
       q.set("scope", nextScope);
+      const size = nextPageSize ?? pageSize;
+      if (size !== DEFAULT_PAGE_SIZE) q.set("pageSize", String(size));
+      else q.delete("pageSize");
       if (nextQ.trim()) q.set("q", nextQ.trim());
       else q.delete("q");
       if (nextProcessStatus.trim()) q.set("processStatus", nextProcessStatus.trim());
@@ -173,13 +213,14 @@ export function CaseManagerAmDashboard({
       q.delete("stage");
       router.replace(`${pathname}?${q}`, { scroll: false });
     },
-    [pathname, router, searchParams],
+    [pathname, router, searchParams, pageSize],
   );
 
   useEffect(() => {
     const p = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
     setMyCaseScope(readMyCaseScope(searchParams));
     setPage(p);
+    setPageSize(parsePageSize(searchParams.get("pageSize")));
     const nextQ = readTextParam(searchParams, "q");
     const nextProcessStatus = readTextParam(searchParams, "processStatus");
     const nextCm = readTextParam(searchParams, "caseManagerId");
@@ -192,7 +233,17 @@ export function CaseManagerAmDashboard({
     setIntendedParentId(nextIp);
     setSurrogateId(nextSm);
     if (!isMyCases) setStage(readStageFromSearch(searchParams));
+    setIncludeArchived(searchParams.get("includeArchived") === "1");
   }, [searchParams, isMyCases]);
+
+  useEffect(() => {
+    if (searchParams.get("create") !== "1" || !createCaseMode) return;
+    setCreateOpen(true);
+    const q = new URLSearchParams(searchParams.toString());
+    q.delete("create");
+    const qs = q.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [createCaseMode, pathname, router, searchParams]);
 
   /** 工作台 / 案例列表由上方阶段卡片决定 pipeline stage，忽略 URL 里遗留的 processStatus，避免与卡片不一致 */
   useEffect(() => {
@@ -252,15 +303,15 @@ export function CaseManagerAmDashboard({
   }, [apiPath, headingMode, isMyCases]);
 
   const load = useCallback(async () => {
-    setLoading(true);
     setErrorKey(null);
+    setLoading((prev) => (dataRef.current ? prev : true));
     try {
       const stageParam = isMyCases || stage === "all" ? "all" : stage;
       const countsParam = variant === "full" ? "" : "&counts=0";
       const url = new URL(apiPath, window.location.origin);
       url.searchParams.set("stage", stageParam);
       url.searchParams.set("page", String(page));
-      url.searchParams.set("pageSize", "10");
+      url.searchParams.set("pageSize", String(pageSize));
       if (countsParam) url.searchParams.set("counts", "0");
       if (q.trim()) url.searchParams.set("q", q.trim());
       if (isMyCases && processStatus.trim()) url.searchParams.set("processStatus", processStatus.trim());
@@ -282,6 +333,7 @@ export function CaseManagerAmDashboard({
       }
       const json = (await res.json()) as DashboardPayload;
       setData(json);
+      cacheListPayload(`crm:list:${window.location.pathname}${window.location.search}`, json);
     } catch {
       setErrorKey("am_dash.error_data");
       setData(null);
@@ -291,6 +343,7 @@ export function CaseManagerAmDashboard({
   }, [
     stage,
     page,
+    pageSize,
     variant,
     isMyCases,
     q,
@@ -306,6 +359,23 @@ export function CaseManagerAmDashboard({
   useEffect(() => {
     void load();
   }, [load]);
+
+  const didRestoreScroll = useRef(false);
+  useEffect(() => {
+    if (didRestoreScroll.current || !data) return;
+    didRestoreScroll.current = true;
+    restoreMainScroll(`${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`);
+  }, [data, pathname, searchParams]);
+
+  useEffect(() => {
+    const cached = readCachedListPayload<DashboardPayload>(
+      `crm:list:${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`,
+    );
+    if (cached && !dataRef.current) {
+      setData(cached);
+      setLoading(false);
+    }
+  }, [pathname, searchParams]);
 
   const totalPages = useMemo(() => {
     if (!data) return 1;
@@ -325,7 +395,16 @@ export function CaseManagerAmDashboard({
     if (isMyCases)
       syncMyCasesUrl(p, myCaseScope, q, processStatus, caseManagerId, intendedParentId, surrogateId);
     else syncUrl(stage, p, q, "", caseManagerId, intendedParentId, surrogateId);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    document.querySelector(".crm-table-scroll")?.scrollTo({ top: 0 });
+  }
+
+  function onPageSizeChange(next: PageSizeOption) {
+    setPageSize(next);
+    setPage(1);
+    if (isMyCases)
+      syncMyCasesUrl(1, myCaseScope, q, processStatus, caseManagerId, intendedParentId, surrogateId, next);
+    else syncUrl(stage, 1, q, "", caseManagerId, intendedParentId, surrogateId, next);
+    document.querySelector(".crm-table-scroll")?.scrollTo({ top: 0 });
   }
 
   function onApplyFilters() {
@@ -452,74 +531,84 @@ export function CaseManagerAmDashboard({
     }
   }
 
+  const filterFieldClass = "flex min-w-0 flex-col gap-1 text-xs font-medium text-sage-700";
+
   return (
-    <div className="ami-ui crm-font-ui crm-page">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0 flex-1">
-          {variant === "full" ? (
+    <div className={variant === "full" ? "ami-ui crm-font-ui flex w-full shrink-0 flex-col gap-4" : "ami-ui crm-font-ui crm-fill-page"}>
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          {variant === "full" && !hidePageHeading ? (
             <>
               <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">
                 {headingMode === "admin" ? t("pages.admin_dashboard_heading") : t("pages.dashboard_heading")}
               </h1>
-              <p className="mt-1 text-sm text-sage-700">
+              <p className="mt-0.5 text-sm text-sage-700">
                 {headingMode === "admin" ? t("admin_dash.welcome_sub") : t("am_dash.welcome_sub")}
               </p>
             </>
           ) : null}
           {variant === "stageList" ? (
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">
-                {headingMode === "admin" ? t("pages.admin_cases_heading") : t("pages.cases_heading")}
-              </h1>
-              {headerExtra}
-            </div>
+            <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">
+              {headingMode === "admin" ? t("pages.admin_cases_heading") : t("pages.cases_heading")}
+            </h1>
           ) : null}
           {variant === "myCases" ? (
             <>
-              <div className="flex flex-wrap items-center gap-3">
-                <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">{t("pages.my_cases_heading")}</h1>
-                {headerExtra}
-              </div>
-              <p className="mt-1 text-sm text-sage-700">{t("am_dash.my_cases_intro")}</p>
-              <div className="mt-3 inline-flex rounded-md border border-sage-300 bg-white p-1">
-                <button
-                  type="button"
-                  onClick={() => onSwitchMyScope("all")}
-                  className={`rounded px-3 py-1 text-xs font-semibold ${myCaseScope === "all" ? "bg-sage-700 text-white" : "text-sage-700"}`}
-                >
-                  {t("am_dash.scope_all")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onSwitchMyScope("created")}
-                  className={`rounded px-3 py-1 text-xs font-semibold ${myCaseScope === "created" ? "bg-sage-700 text-white" : "text-sage-700"}`}
-                >
-                  {t("am_dash.scope_created")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onSwitchMyScope("assigned")}
-                  className={`rounded px-3 py-1 text-xs font-semibold ${myCaseScope === "assigned" ? "bg-sage-700 text-white" : "text-sage-700"}`}
-                >
-                  {t("am_dash.scope_assigned")}
-                </button>
-              </div>
+              <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">{t("pages.my_cases_heading")}</h1>
+              {headerExtra}
+              <p className="mt-0.5 text-sm text-sage-700">{t("am_dash.my_cases_intro")}</p>
             </>
           ) : null}
         </div>
-        <button
-          type="button"
-          onClick={() => void load()}
-          disabled={loading}
-          className="ami-ui shrink-0 inline-flex items-center gap-1 rounded-full border border-sage-300 bg-white/95 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-sage-800 shadow-sm hover:bg-white disabled:opacity-50"
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} aria-hidden />
-          {t("am_dash.refresh")}
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {isMyCases ? (
+            <div className="inline-flex rounded-md border border-sage-300 bg-white p-0.5">
+              <button
+                type="button"
+                onClick={() => onSwitchMyScope("all")}
+                className={`rounded px-2.5 py-1.5 text-xs font-semibold ${myCaseScope === "all" ? "bg-bark text-petal" : "text-bark"}`}
+              >
+                {t("am_dash.scope_all")}
+              </button>
+              <button
+                type="button"
+                onClick={() => onSwitchMyScope("created")}
+                className={`rounded px-2.5 py-1.5 text-xs font-semibold ${myCaseScope === "created" ? "bg-bark text-petal" : "text-bark"}`}
+              >
+                {t("am_dash.scope_created")}
+              </button>
+              <button
+                type="button"
+                onClick={() => onSwitchMyScope("assigned")}
+                className={`rounded px-2.5 py-1.5 text-xs font-semibold ${myCaseScope === "assigned" ? "bg-bark text-petal" : "text-bark"}`}
+              >
+                {t("am_dash.scope_assigned")}
+              </button>
+            </div>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => void load()}
+            disabled={loading}
+            className="crm-btn crm-btn-secondary crm-btn-sm"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} aria-hidden />
+            {t("am_dash.refresh")}
+          </button>
+          {createCaseMode ? (
+            <button
+              type="button"
+              onClick={() => setCreateOpen(true)}
+              className="crm-btn crm-btn-primary crm-btn-sm"
+            >
+              {t(createCaseMode === "admin" ? "nav.admin.create_case" : "cm_case.create_submit")}
+            </button>
+          ) : null}
+        </div>
       </div>
 
       {variant === "full" ? (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+        <div className="grid shrink-0 grid-cols-2 gap-3 p-0.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
           {(() => {
             const totalAll =
               data?.counts &&
@@ -528,7 +617,7 @@ export function CaseManagerAmDashboard({
               <button
                 type="button"
                 onClick={() => onSelectStage("all")}
-                className={`flex flex-col rounded-xl px-3 py-3 text-left transition hover:shadow md:px-4 md:py-4 ${CARD_ACCENT[0]} ${stage === "all" ? "ring-2 ring-brand-brown ring-offset-2 ring-offset-background" : ""}`}
+                className={stageCardClass(stage === "all", CARD_ACCENT[0])}
               >
                 <span className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-brown/80">
                   {t("am_dash.stage_all_eyebrow")}
@@ -552,7 +641,7 @@ export function CaseManagerAmDashboard({
                 key={s}
                 type="button"
                 onClick={() => onSelectStage(s)}
-                className={`flex flex-col rounded-xl px-3 py-3 text-left transition hover:shadow md:px-4 md:py-4 ${CARD_ACCENT[(i + 1) % CARD_ACCENT.length]} ${active ? "ring-2 ring-brand-brown ring-offset-2 ring-offset-background" : ""}`}
+                className={stageCardClass(active, CARD_ACCENT[(i + 1) % CARD_ACCENT.length])}
               >
                 <span className="mb-2 text-brand-brown/90">
                   <Icon className="h-6 w-6" aria-hidden strokeWidth={1.75} />
@@ -567,47 +656,30 @@ export function CaseManagerAmDashboard({
         </div>
       ) : null}
 
-      {variant === "stageList" ? (
-        <div>
-          <label className="flex max-w-sm flex-col gap-1 text-xs font-medium text-sage-700">
-            <span>{t("am_dash.filter_stage")}</span>
-            <SelectMenu
-              searchable
-              value={stage}
-              onChange={(v) => {
-                onSelectStage(v === "all" || isCanonicalCaseStage(v) ? v : "all");
-              }}
-              options={[
-                { value: "all", label: t("am_dash.stage_all") },
-                ...CANONICAL_CASE_STAGES.map((s) => ({
-                  value: s,
-                  label: translateProcessStatus(s, tStage),
-                })),
-              ]}
-            />
-          </label>
-        </div>
-      ) : null}
-
-      <section className="crm-card crm-card-soft">
-        <div className="mb-4 space-y-3">
-          {variant !== "myCases" ? (
-            <p className="crm-font-display text-sm font-medium text-brand-brown md:text-base">
-              {stage === "all"
-                ? t("am_dash.filter_heading_all")
-                : t("am_dash.filter_heading", {
-                    stage: translateProcessStatus(stage, tStage),
-                  })}
-            </p>
-          ) : (
-            <p className="crm-font-display text-sm font-medium text-brand-brown md:text-base">
-              {t("am_dash.my_cases_section_note")}
-            </p>
-          )}
-
-          <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
+      <section className={variant === "full" ? "crm-card !p-0" : "crm-card crm-card-list !p-0 overflow-hidden"}>
+        <div className="crm-toolbar">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {variant === "stageList" ? (
+              <label className={filterFieldClass}>
+                <span>{t("am_dash.filter_stage")}</span>
+                <SelectMenu
+                  searchable
+                  value={stage}
+                  onChange={(v) => {
+                    onSelectStage(v === "all" || isCanonicalCaseStage(v) ? v : "all");
+                  }}
+                  options={[
+                    { value: "all", label: t("am_dash.stage_all") },
+                    ...CANONICAL_CASE_STAGES.map((s) => ({
+                      value: s,
+                      label: translateProcessStatus(s, tStage),
+                    })),
+                  ]}
+                />
+              </label>
+            ) : null}
             {headingMode === "admin" && variant !== "myCases" ? (
-              <label className="flex flex-col gap-1 text-xs font-medium text-sage-700">
+              <label className={filterFieldClass}>
                 <span>{t("am_dash.filter_case_manager")}</span>
                 <EntitySearchSelect
                   options={caseManagerOptions}
@@ -619,7 +691,7 @@ export function CaseManagerAmDashboard({
                 />
               </label>
             ) : null}
-            <label className="flex flex-col gap-1 text-xs font-medium text-sage-700">
+            <label className={filterFieldClass}>
               <span>{t("am_dash.filter_intended_parent")}</span>
               <EntitySearchSelect
                 options={intendedParentOptions}
@@ -630,7 +702,7 @@ export function CaseManagerAmDashboard({
                 allowEmpty
               />
             </label>
-            <label className="flex flex-col gap-1 text-xs font-medium text-sage-700">
+            <label className={filterFieldClass}>
               <span>{t("am_dash.filter_surrogate")}</span>
               <EntitySearchSelect
                 options={surrogateOptions}
@@ -642,7 +714,7 @@ export function CaseManagerAmDashboard({
               />
             </label>
             {isMyCases ? (
-              <label className="flex flex-col gap-1 text-xs font-medium text-sage-700">
+              <label className={filterFieldClass}>
                 <span>{t("am_dash.filter_status")}</span>
                 <SelectMenu
                   searchable
@@ -660,62 +732,66 @@ export function CaseManagerAmDashboard({
             ) : null}
           </div>
 
-          <div className="grid gap-2 lg:grid-cols-[1fr_auto_auto_auto]">
+          <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
             <input
               value={qInput}
               onChange={(e) => setQInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") onApplyFilters();
+              }}
               placeholder={t("am_dash.search_placeholder")}
-              className="rounded-md border border-sage-300 bg-white px-3 py-2 text-sm text-sage-900"
+              className="min-w-0 flex-1 rounded-md border border-sage-300 bg-white px-3 py-2 text-sm text-sage-900"
             />
-            <button
-              type="button"
-              onClick={onApplyFilters}
-              className="rounded-md bg-sage-700 px-3 py-2 text-sm font-semibold text-white hover:bg-sage-800"
-            >
-              {t("am_dash.search")}
-            </button>
-            <button
-              type="button"
-              onClick={onResetFilters}
-              className="rounded-md border border-sage-300 bg-white px-3 py-2 text-sm font-semibold text-sage-800 hover:bg-sage-50"
-            >
-              {t("am_dash.reset")}
-            </button>
-            <label className="inline-flex items-center gap-2 self-center text-xs text-sage-700">
-              <input
-                type="checkbox"
-                checked={includeArchived}
-                onChange={(e) => {
-                  setIncludeArchived(e.target.checked);
-                  setPage(1);
-                }}
-              />
-              {t("am_dash.show_deleted")}
-            </label>
+            <div className="flex flex-wrap items-center gap-2">
+              <button type="button" onClick={onApplyFilters} className="crm-btn crm-btn-primary crm-btn-sm">
+                {t("am_dash.search")}
+              </button>
+              <button type="button" onClick={onResetFilters} className="crm-btn crm-btn-secondary crm-btn-sm">
+                {t("am_dash.reset")}
+              </button>
+              <label className="inline-flex items-center gap-2 text-xs text-sage-700">
+                <input
+                  type="checkbox"
+                  checked={includeArchived}
+                  onChange={(e) => {
+                    setIncludeArchived(e.target.checked);
+                    setPage(1);
+                    const next = new URLSearchParams(searchParams.toString());
+                    if (e.target.checked) next.set("includeArchived", "1");
+                    else next.delete("includeArchived");
+                    next.set("page", "1");
+                    router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+                  }}
+                />
+                {t("am_dash.show_deleted")}
+              </label>
+            </div>
           </div>
         </div>
 
-        {headingMode === "admin" ? (
-          <div className="mb-4 flex flex-wrap items-end gap-2 rounded-md border border-sage-200 bg-sage-50/70 p-3">
-            <p className="w-full text-xs font-medium text-sage-700">
+        {headingMode === "admin" && (selectedCaseIds.length > 0 || reassignMsg) ? (
+          <div className="flex flex-wrap items-center gap-2 border-b border-sage-200 bg-petal/70 px-4 py-2.5 md:px-6">
+            <p className="mr-auto text-xs font-medium text-sage-700">
               {t("am_dash.reassign_hint", { count: selectedCaseIds.length })}
             </p>
-            <label className="flex min-w-[12rem] flex-1 flex-col gap-1 text-xs font-medium text-sage-700">
-              <span>{t("am_dash.reassign_to")}</span>
-              <EntitySearchSelect
-                options={caseManagerOptions}
-                value={reassignCmId}
-                onChange={setReassignCmId}
-                placeholder={t("entity_search.placeholder")}
-                emptyLabel={t("am_dash.pick_cm")}
-                allowEmpty
-              />
+            <label className="flex min-w-[12rem] max-w-sm flex-1 items-center gap-2 text-xs font-medium text-sage-700">
+              <span className="shrink-0">{t("am_dash.reassign_to")}</span>
+              <div className="min-w-0 flex-1">
+                <EntitySearchSelect
+                  options={caseManagerOptions}
+                  value={reassignCmId}
+                  onChange={setReassignCmId}
+                  placeholder={t("entity_search.placeholder")}
+                  emptyLabel={t("am_dash.pick_cm")}
+                  allowEmpty
+                />
+              </div>
             </label>
             <button
               type="button"
               disabled={reassigning || selectedCaseIds.length === 0 || !reassignCmId}
               onClick={() => void bulkReassign()}
-              className="rounded-md bg-brand-brown px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
+              className="crm-btn crm-btn-primary crm-btn-sm"
             >
               {reassigning ? t("am_dash.reassigning") : t("am_dash.reassign_submit")}
             </button>
@@ -724,17 +800,17 @@ export function CaseManagerAmDashboard({
         ) : null}
 
         {errorKey ? (
-          <p className="text-sm text-red-700">{t(errorKey)}</p>
+          <p className="px-4 py-6 text-sm text-red-700 md:px-6">{t(errorKey)}</p>
         ) : loading && !data ? (
-          <p className="text-sm text-sage-600">{tCommon("loading")}</p>
+          <p className="px-4 py-6 text-sm text-sage-600 md:px-6">{tCommon("loading")}</p>
         ) : (
           <>
-            <div className="overflow-x-auto rounded-lg border border-sage-200/80 bg-white">
-              <table className="w-full min-w-[720px] border-collapse text-left text-sm">
+            <div className={variant === "full" ? "crm-table-scroll crm-table-scroll-auto" : "crm-table-scroll"}>
+              <table className="crm-table w-full min-w-[880px]">
                 <thead>
-                  <tr className="border-b border-sage-200 bg-sage-100 text-xs font-semibold uppercase tracking-wide text-sage-700">
+                  <tr>
                     {headingMode === "admin" ? (
-                      <th className="px-3 py-3">
+                      <th className="crm-freeze-check">
                         <input
                           type="checkbox"
                           checked={allSelected}
@@ -743,15 +819,17 @@ export function CaseManagerAmDashboard({
                         />
                       </th>
                     ) : null}
-                    <th className="px-4 py-3">{t("am_dash.col_case_id")}</th>
-                    <th className="px-4 py-3">{t("am_dash.col_surrogate")}</th>
-                    <th className="px-4 py-3">{t("am_dash.col_parents")}</th>
+                    <th className={headingMode === "admin" ? "crm-freeze-id" : "crm-freeze-id crm-freeze-id-first"}>
+                      {t("am_dash.col_case_id")}
+                    </th>
+                    <th>{t("am_dash.col_surrogate")}</th>
+                    <th>{t("am_dash.col_parents")}</th>
                     {stage === "all" || isMyCases ? (
-                      <th className="px-4 py-3">{t("am_dash.col_stage")}</th>
+                      <th>{t("am_dash.col_stage")}</th>
                     ) : null}
-                    <th className="px-4 py-3">{t("am_dash.col_updated")}</th>
-                    <th className="px-4 py-3">{t("am_dash.col_status")}</th>
-                    <th className="px-4 py-3">{t("am_dash.col_action")}</th>
+                    <th>{t("am_dash.col_updated")}</th>
+                    <th>{t("am_dash.col_status")}</th>
+                    <th className="crm-freeze-end">{t("am_dash.col_action")}</th>
                   </tr>
                 </thead>
                 <tbody className="text-sage-900">
@@ -761,7 +839,7 @@ export function CaseManagerAmDashboard({
                         colSpan={
                           (headingMode === "admin" ? 7 : 6) + (stage === "all" || isMyCases ? 1 : 0)
                         }
-                        className="px-4 py-8 text-center text-sage-600"
+                        className="px-4 py-10 text-center text-sage-600"
                       >
                         {t("am_dash.empty")}
                       </td>
@@ -773,12 +851,12 @@ export function CaseManagerAmDashboard({
                         <tr
                           key={row.id}
                           className={[
-                            "border-b border-sage-100 hover:bg-sage-50/80",
-                            isDeleted ? "bg-sage-50/80 text-sage-500" : "",
+                            "hover:bg-sage-50/80",
+                            isDeleted ? "is-deleted text-sage-500" : "",
                           ].join(" ")}
                         >
                           {headingMode === "admin" ? (
-                            <td className="px-3 py-3">
+                            <td className="crm-freeze-check">
                               <input
                                 type="checkbox"
                                 checked={selectedCaseIds.includes(row.id)}
@@ -788,35 +866,44 @@ export function CaseManagerAmDashboard({
                               />
                             </td>
                           ) : null}
-                          <td className="px-4 py-3 tabular-nums">{row.id}</td>
-                          <td className="px-4 py-3">{row.surrogateName}</td>
-                          <td className="px-4 py-3">{row.intendedParentName}</td>
+                          <td
+                            className={`tabular-nums ${headingMode === "admin" ? "crm-freeze-id" : "crm-freeze-id crm-freeze-id-first"}`}
+                          >
+                            {row.id}
+                          </td>
+                          <td>{row.surrogateName}</td>
+                          <td>{row.intendedParentName}</td>
                           {stage === "all" || isMyCases ? (
-                            <td className="px-4 py-3 text-xs text-sage-800">
+                            <td className="text-xs text-sage-800">
                               {translateProcessStatus(row.process_status ?? "", tStage) ||
                                 row.process_status ||
                                 "—"}
                             </td>
                           ) : null}
-                          <td className="px-4 py-3 text-xs text-sage-700">
+                          <td className="whitespace-nowrap text-xs text-sage-700">
                             {formatDt(row.updated_at, i18n.language)}
                           </td>
-                          <td className="px-4 py-3">
+                          <td>
                             {isDeleted ? (
                               <span className="rounded bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-800">
                                 {t("am_dash.status_deleted")}
                               </span>
                             ) : (
-                              <span className="rounded bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-800">
+                              <span className="rounded bg-harvest/40 px-2 py-0.5 text-xs font-semibold text-bark">
                                 {t("am_dash.status_active")}
                               </span>
                             )}
                           </td>
-                          <td className="px-4 py-3">
-                            <div className="flex flex-wrap items-center gap-2">
+                          <td className="crm-freeze-end">
+                            <div className="flex flex-wrap items-center gap-1.5">
                               <Link
                                 href={`${detailHrefBase}/${row.id}`}
-                                className="inline-flex rounded-md bg-sage-700 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-white hover:bg-sage-800"
+                                onClick={() =>
+                                  rememberListReturn(
+                                    `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`,
+                                  )
+                                }
+                                className="crm-btn crm-btn-secondary crm-btn-xs"
                               >
                                 {t("am_dash.view_case")}
                               </Link>
@@ -825,7 +912,7 @@ export function CaseManagerAmDashboard({
                                   type="button"
                                   disabled={archiveBusyId === row.id}
                                   onClick={() => void softDeleteCase(row.id, false)}
-                                  className="inline-flex rounded-md border border-emerald-700 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-900 disabled:opacity-50"
+                                  className="crm-btn crm-btn-secondary crm-btn-xs"
                                 >
                                   {t("am_dash.btn_restore")}
                                 </button>
@@ -834,7 +921,7 @@ export function CaseManagerAmDashboard({
                                   type="button"
                                   disabled={archiveBusyId === row.id}
                                   onClick={() => void softDeleteCase(row.id, true)}
-                                  className="inline-flex rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-800 hover:bg-red-50 disabled:opacity-50"
+                                  className="crm-btn crm-btn-danger crm-btn-xs"
                                 >
                                   {t("am_dash.btn_soft_delete")}
                                 </button>
@@ -843,14 +930,14 @@ export function CaseManagerAmDashboard({
                                 <button
                                   type="button"
                                   onClick={() => void assignCaseManagerToMe(row.id)}
-                                  className="inline-flex rounded-md border border-sage-400 bg-white px-3 py-1.5 text-xs font-semibold text-sage-800 hover:bg-sage-50"
+                                  className="crm-btn crm-btn-secondary crm-btn-xs"
                                 >
                                   {t("am_dash.assign_case_manager_to_me")}
                                 </button>
                               ) : null}
                               {!isDeleted && !row.surrogateId ? (
                                 gcAssignTarget === row.id ? (
-                                  <div className="inline-flex min-w-[14rem] max-w-[20rem] items-center gap-1">
+                                  <div className="inline-flex min-w-[14rem] max-w-[20rem] items-center gap-2">
                                     <EntitySearchSelect
                                       className="min-w-0 flex-1"
                                       options={gcOptions}
@@ -863,7 +950,7 @@ export function CaseManagerAmDashboard({
                                     <button
                                       type="button"
                                       onClick={() => void assignGc(row.id)}
-                                      className="shrink-0 rounded-md border border-sage-400 bg-white px-2 py-1 text-xs font-semibold text-sage-800 hover:bg-sage-50"
+                                      className="crm-btn crm-btn-primary crm-btn-xs shrink-0"
                                     >
                                       {t("am_dash.confirm_gc_match")}
                                     </button>
@@ -875,7 +962,7 @@ export function CaseManagerAmDashboard({
                                       setGcAssignTarget(row.id);
                                       setGcAssignValue("");
                                     }}
-                                    className="inline-flex rounded-md border border-sage-400 bg-white px-3 py-1.5 text-xs font-semibold text-sage-800 hover:bg-sage-50"
+                                    className="crm-btn crm-btn-secondary crm-btn-xs"
                                   >
                                     {t("am_dash.gc_match")}
                                   </button>
@@ -891,39 +978,49 @@ export function CaseManagerAmDashboard({
               </table>
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-sage-700">
-              <p className="min-w-0">
-                {t("am_dash.list_stats", {
-                  total: data?.total ?? 0,
-                  from: !data || data.total === 0 ? 0 : (page - 1) * data.pageSize + 1,
-                  to: data ? Math.min(page * data.pageSize, data.total) : 0,
-                })}
-              </p>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  disabled={page <= 1 || loading}
-                  onClick={() => onPageChange(page - 1)}
-                  className="rounded border border-sage-300 bg-white px-3 py-1 disabled:opacity-40"
-                >
-                  {t("am_dash.prev")}
-                </button>
-                <span className="px-2">
-                  {page} / {totalPages}
-                </span>
-                <button
-                  type="button"
-                  disabled={page >= totalPages || loading}
-                  onClick={() => onPageChange(page + 1)}
-                  className="rounded border border-sage-300 bg-white px-3 py-1 disabled:opacity-40"
-                >
-                  {t("am_dash.next")}
-                </button>
-              </div>
-            </div>
+            <ListPager
+              page={page}
+              totalPages={totalPages}
+              pageSize={pageSize}
+              disabled={loading}
+              stats={t("am_dash.list_stats", {
+                total: data?.total ?? 0,
+                from: !data || data.total === 0 ? 0 : (page - 1) * data.pageSize + 1,
+                to: data ? Math.min(page * data.pageSize, data.total) : 0,
+              })}
+              onPageChange={onPageChange}
+              onPageSizeChange={onPageSizeChange}
+            />
           </>
         )}
       </section>
+      {createCaseMode ? (
+        <CrmModal
+          open={createOpen}
+          onClose={() => setCreateOpen(false)}
+          title={t("admin_case.create_title")}
+        >
+          {createCaseMode === "admin" ? (
+            <AdminCreateCaseForm
+              variant="dialog"
+              onCancel={() => setCreateOpen(false)}
+              onCreated={() => {
+                setCreateOpen(false);
+                void load();
+              }}
+            />
+          ) : (
+            <CaseManagerCreateCaseForm
+              variant="dialog"
+              onCancel={() => setCreateOpen(false)}
+              onCreated={() => {
+                setCreateOpen(false);
+                void load();
+              }}
+            />
+          )}
+        </CrmModal>
+      ) : null}
     </div>
   );
 }

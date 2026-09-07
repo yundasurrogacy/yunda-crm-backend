@@ -7,7 +7,7 @@ import type { ReactNode } from "react";
 export function PageEnter({ children }: { children: ReactNode }) {
   const pathname = usePathname() ?? "/";
   return (
-    <div key={pathname} className="crm-page-enter mx-auto w-full max-w-6xl">
+    <div key={pathname} className="crm-page-enter flex h-full min-h-0 w-full flex-col overflow-y-auto">
       {children}
     </div>
   );

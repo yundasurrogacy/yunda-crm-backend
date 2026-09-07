@@ -24,7 +24,7 @@ export async function GET(req: Request) {
   }
 
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
-  const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get("pageSize") ?? "10", 10) || 10));
+  const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get("pageSize") ?? "20", 10) || 20));
   const skipCounts = searchParams.get("counts") === "0";
   const scopeRaw = searchParams.get("scope");
   const listScope: CasesListScope = (() => {

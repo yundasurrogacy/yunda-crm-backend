@@ -141,16 +141,6 @@ export function PartyHomePage({
 
   return (
     <div className="ami-ui relative mx-auto max-w-3xl space-y-10 text-sage-900">
-      {/* 氛围底：柔和 sage 径向，不抢内容 */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-[-1.5rem] top-[-1rem] h-[22rem] -z-10 md:inset-x-[-2rem]"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 70% at 20% 0%, rgba(191,201,191,0.55), transparent 65%), radial-gradient(ellipse 60% 50% at 90% 10%, rgba(232,226,213,0.7), transparent 55%)",
-        }}
-      />
-
       {/* 首屏：品牌 + 一句说明 + CTA */}
       <header className="pt-2" style={rise(0)}>
         <p className="crm-font-display text-4xl font-semibold tracking-[0.12em] text-brand-brown md:text-5xl">
@@ -165,14 +155,14 @@ export function PartyHomePage({
         <div className="mt-5 flex flex-wrap gap-3">
           <Link
             href={casesHref}
-            className="inline-flex items-center rounded-md bg-brand-brown px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-sage-800"
+            className="crm-btn crm-btn-primary"
           >
             {t("party_home.cta_cases")}
           </Link>
           {!isIp && profileHref ? (
             <Link
               href={profileHref}
-              className="inline-flex items-center rounded-md border border-sage-400 bg-white/60 px-4 py-2.5 text-sm font-semibold text-sage-800 transition-colors hover:bg-white"
+              className="crm-btn crm-btn-secondary"
             >
               {t("party_home.cta_profile")}
             </Link>
@@ -326,7 +316,7 @@ export function PartyHomePage({
           <p className="mt-2 text-sm text-sage-700">{t("party_home.profile_body")}</p>
           <Link
             href={profileHref}
-            className="mt-4 inline-flex rounded-md border border-sage-400 bg-white/60 px-4 py-2 text-sm font-semibold text-sage-800 transition-colors hover:bg-white"
+            className="mt-4 inline-flex rounded-md border border-sage-400 bg-white px-4 py-2 text-sm font-semibold text-sage-800 transition-colors hover:bg-[#fffcf8]"
           >
             {t("party_home.cta_profile")}
           </Link>
@@ -368,7 +358,7 @@ export function PartyHomePage({
                 </div>
                 <Link
                   href={`${detailBase}/${row.id}`}
-                  className="shrink-0 rounded-md bg-sage-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sage-800"
+                  className="crm-btn crm-btn-primary crm-btn-xs shrink-0"
                 >
                   {t("party_cases.view_detail")}
                 </Link>

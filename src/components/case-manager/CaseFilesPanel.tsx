@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AmQiniuFileInput } from "@/components/case-manager/AmQiniuFileInput";
 import { CollapsibleCard } from "@/components/ui/CollapsibleCard";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { SelectMenu } from "@/components/ui/SelectMenu";
 import {
   CASE_FILE_CATEGORIES,
@@ -41,7 +42,9 @@ function isImageUrl(url: string) {
 
 export function CaseFilesPanel({ caseId, apiPathBase }: Props) {
   const { t, i18n } = useTranslation("portal");
+  const confirm = useConfirm();
   const [files, setFiles] = useState<CaseFileRow[]>([]);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [errorKey, setErrorKey] = useState<string | null>(null);
@@ -120,14 +123,37 @@ export function CaseFilesPanel({ caseId, apiPathBase }: Props) {
     }
   };
 
+  async function onDelete(fileId: string) {
+    const ok = await confirm({
+      message: t("case_detail.files.confirm_delete"),
+      danger: true,
+    });
+    if (!ok) return;
+    setDeletingId(fileId);
+    setErrorKey(null);
+    try {
+      const res = await fetch(filesApi, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileId }),
+      });
+      const json = (await res.json().catch(() => null)) as { files?: CaseFileRow[] } | null;
+      if (!res.ok) {
+        setErrorKey("case_detail.files.error_delete");
+        return;
+      }
+      setFiles(json?.files ?? []);
+    } catch {
+      setErrorKey("case_detail.files.error_delete");
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   return (
     <CollapsibleCard
       title={t("case_detail.files.section_title")}
-      summary={
-        loading
-          ? t("case_detail.files.loading")
-          : t("case_detail.files.summary_count", { count: files.length })
-      }
+      summary={t("case_detail.files.summary_count", { count: files.length })}
       storageKey={`crm-case-detail-files-${caseId}`}
       defaultOpen={false}
     >
@@ -235,7 +261,8 @@ export function CaseFilesPanel({ caseId, apiPathBase }: Props) {
                 <th className="py-2 pr-3 font-semibold">{t("case_detail.files.field_about")}</th>
                 <th className="py-2 pr-3 font-semibold">{t("case_detail.col_link")}</th>
                 <th className="py-2 pr-3 font-semibold">{t("case_detail.col_note")}</th>
-                <th className="py-2 font-semibold">{t("case_detail.col_updated")}</th>
+                <th className="py-2 pr-3 font-semibold">{t("case_detail.col_updated")}</th>
+                <th className="py-2 font-semibold">{t("case_detail.files.col_actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -247,7 +274,13 @@ export function CaseFilesPanel({ caseId, apiPathBase }: Props) {
                       ? t("case_detail.files.visibility_all")
                       : t("case_detail.files.visibility_manager")}
                   </td>
-                  <td className="py-2 pr-3">{f.about_role || "—"}</td>
+                  <td className="py-2 pr-3">
+                    {f.about_role === "intended_parent"
+                      ? t("case_detail.role_intended_parent")
+                      : f.about_role === "surrogate_mother"
+                        ? t("case_detail.role_surrogate")
+                        : t("case_detail.files.about_none")}
+                  </td>
                   <td className="py-2 pr-3">
                     {f.file_url ? (
                       <div className="flex flex-col gap-1">
@@ -274,8 +307,20 @@ export function CaseFilesPanel({ caseId, apiPathBase }: Props) {
                     )}
                   </td>
                   <td className="py-2 pr-3">{f.note || "—"}</td>
-                  <td className="py-2 whitespace-nowrap text-sage-700">
+                  <td className="py-2 pr-3 whitespace-nowrap text-sage-700">
                     {formatDt(f.created_at, i18n.language)}
+                  </td>
+                  <td className="py-2">
+                    <button
+                      type="button"
+                      disabled={deletingId === f.id}
+                      onClick={() => void onDelete(f.id)}
+                      className="rounded border border-red-300 bg-red-50 px-2 py-1 text-xs font-semibold text-red-800 hover:bg-red-100 disabled:opacity-50"
+                    >
+                      {deletingId === f.id
+                        ? t("case_detail.files.deleting")
+                        : t("case_detail.files.delete")}
+                    </button>
                   </td>
                 </tr>
               ))}

@@ -33,7 +33,8 @@
       "case_managers": "Case manager",
       "intended_parents": "Intended parent",
       "surrogates": "Surrogate"
-    }
+    },
+    "help": "Help"
   },
   "switch_portal": "Switch portal",
   "logout": "Log out",
@@ -41,6 +42,12 @@
     "title": "Please confirm",
     "confirm": "Confirm",
     "cancel": "Cancel"
+  },
+  "pager": {
+    "prev": "Previous",
+    "next": "Next",
+    "page_size": "Per page",
+    "page_size_option": "{{n}} / page"
   },
   "account_bar": {
     "title": "Current account",
@@ -208,7 +215,7 @@
   },
   "admin_cm_workload": {
     "title": "Case manager workload",
-    "intro": "Active cases per case manager (primary ∪ co-assigned, deduped; excludes soft-deleted cases). Unassigned cases are listed separately and are not included in each manager’s total.",
+    "intro": "How many active cases each case manager is responsible for. Soft-deleted cases are not counted. Cases with no manager appear on the last row.",
     "summary": "Active cases {{total}}: assigned {{assigned}}, unassigned {{unassigned}} (matches “All cases” below). Per-manager counts can overlap when a case has multiple managers, so summing the table may exceed “assigned”.",
     "unassigned_label": "Unassigned (no case manager)",
     "manage_link": "Manage case managers",
@@ -282,9 +289,13 @@
     "error_link_user_conflict": "That login is already linked to another record of this type.",
     "error_link": "Link failed. Try again later.",
     "create_entity_title": "Create profile directly",
+    "create_ip_title": "Create intended parent",
+    "create_gc_title": "Create gestational carrier",
     "field_entity_email": "Contact email",
     "field_entity_name": "Name (optional)",
     "create_entity_submit": "Create profile",
+    "create_ip_submit": "Create intended parent",
+    "create_gc_submit": "Create gestational carrier",
     "creating_entity": "Creating…",
     "created_entity": "Created profile #{{id}}",
     "error_create_entity": "Failed to create profile.",
@@ -306,18 +317,20 @@
     "col_updated": "Updated",
     "col_action": "Action",
     "view_detail": "View detail",
+    "list_stats": "{{total}} matching · showing {{from}}–{{to}}",
     "empty": "No cases are linked to your account yet. Contact your case manager if you need help.",
     "error_unauthorized": "Please sign in first.",
     "error_load": "Could not load data. Try again later.",
     "error_not_found": "Case not found or you cannot access it.",
     "section_progress": "Case progress",
-    "progress_intro": "Read-only journey stages. Stage form fields are only visible to your case manager.",
+    "progress_intro": "This is your current case progress. Stage details are updated by your case manager.",
     "progress_label": "Progress",
     "progress_current": "Current stage",
     "progress_unknown_stage": "Status “{{stage}}” is outside the standard flow. Please contact your case manager.",
-    "progress_docs_title": "Progress documents",
-    "progress_docs_intro": "Uploads marked client-visible by your team appear here.",
-    "progress_docs_empty": "No shared progress documents yet.",
+    "progress_docs_title": "Related files",
+    "progress_docs_intro": "Files related to the current case progress appear here.",
+    "progress_docs_empty": "No related files yet.",
+    "progress_fields_empty": "No details have been entered for this stage yet.",
     "section_files": "Files shared with you",
     "files_intro": "Only files marked client-visible (visit photos, prenatal reports, escrow/legal contracts, etc.).",
     "files_empty": "No shared files yet.",
@@ -474,6 +487,7 @@
     "page_title": "Case detail",
     "subtitle": "GC/IP profiles are shown above; use this page for stage-specific case data only (not duplicated from personal profiles).",
     "back_my_cases": "Back to my cases",
+    "back_list": "Back to case list",
     "section_summary": "Summary",
     "section_surrogate": "Gestational carrier",
     "section_intended_parents": "Intended parent(s)",
@@ -547,7 +561,11 @@
     "bind_gc_error": "Could not link carrier. Try again.",
     "bind_gc_error_taken": "Could not link that carrier. Try again.",
     "replace_gc_title": "Replace gestational carrier (after match)",
-    "replace_gc_intro": "Use this when the case already has a carrier. This replaces the carrier on the same case (do not soft-delete and recreate the case). Unlink the current one and link another; the previous carrier loses portal access immediately. The change is recorded in history below.",
+    "replace_gc_intro": "Replace the carrier on this same case — do not delete and recreate the case. Steps: 1) Search and select the new gestational carrier; 2) Confirm replace (the previous carrier loses access immediately); 3) The change is recorded in history below.",
+    "replace_gc_steps": "Same-case replace · 3 steps",
+    "replace_gc_step1": "Search and select the new gestational carrier",
+    "replace_gc_step2": "Confirm replace — the previous carrier loses access immediately",
+    "replace_gc_step3": "Check replacement history under this card",
     "replace_gc_submit": "Confirm replace",
     "replace_gc_submitting": "Replacing…",
     "replace_gc_confirm": "Replace the gestational carrier? This does not delete the case — only the carrier binding changes. The previous carrier will lose access immediately.",
@@ -631,6 +649,10 @@
       "edit_save": "Save",
       "edit_saving": "Saving…",
       "edit_cancel": "Cancel",
+      "edit_locked_hint": "Edit can change payee, visibility, and note only — not type or amount. To correct a posting, delete it and add a new entry.",
+      "delete": "Delete",
+      "confirm_delete": "Delete this ledger entry? The case balance will be reversed by this amount.",
+      "error_delete": "Could not delete the entry. Try again.",
       "field_voucher": "Payment voucher",
       "col_voucher": "Voucher",
       "voucher_link": "Open"
@@ -648,6 +670,11 @@
       "loading": "Loading files…",
       "error_load": "Could not load files.",
       "error_save": "Could not save. Try again.",
+      "error_delete": "Could not delete the file. Try again.",
+      "confirm_delete": "Delete this file record?",
+      "delete": "Delete",
+      "deleting": "Deleting…",
+      "col_actions": "Actions",
       "error_url": "Upload or paste a file URL first.",
       "field_visibility": "Visibility",
       "visibility_manager": "Internal only",
@@ -738,5 +765,163 @@
     "error_email_taken": "That contact email already exists. Use another, or restore a soft-deleted profile.",
     "error_cm_not_bound": "Your account is not linked to a case manager entity.",
     "error_soft_delete": "Soft delete / restore failed."
+  },
+  "help": {
+    "on_this_page": "On this page",
+    "faq": "FAQ",
+    "screenshot_note": "Screenshots are from the English interface. Button names in the pictures stay in English even if you switch the rest of the page to Chinese.",
+    "admin": {
+      "title": "Admin portal guide",
+      "subtitle": "Accounts, case operations, trust, files, and replacing a gestational carrier.",
+      "login": {
+        "title": "Sign in and choose a portal",
+        "s1_title": "Open the login page",
+        "s1_body": "Go to /login and sign in with your email and password. Passwords are stored as hashes — nobody, including admins, can view a saved password. Reset it from Account management if needed.",
+        "s2_title": "Pick Admin",
+        "s2_body": "On Select portal, choose Open admin console. If your login is also bound to other roles, you can switch later from the sidebar footer."
+      },
+      "accounts": {
+        "title": "Create logins and bind profiles",
+        "s1_title": "Create a login",
+        "s1_body": "Open Account management. Create the email/password first, then bind it to a case manager, intended parent, or surrogate record.",
+        "s2_title": "Create a business profile",
+        "s2_body": "Under Case managers / Intended parents / Surrogates, create the profile (name + email) even before a login exists. The Name column comes from the profile full name.",
+        "s3_title": "Bind or rebind",
+        "s3_body": "Use Bind / Change binding to attach a login. Soft-delete hides a record from default lists without destroying data."
+      },
+      "cases": {
+        "title": "Create and run a case",
+        "s1_title": "Create a case",
+        "s1_body": "Create case requires a case manager and an intended parent. Fields start empty — search and pick; do not rely on a default person. A gestational carrier can be bound later. Starting trust balance can be 0. After create, you land on the new case.",
+        "s2_title": "Fill case progress",
+        "s2_body": "On the case detail page, update each stage. Blank fields are allowed. Intended parents can see these details except Medical Screening psychologist name and email (internal only).",
+        "s3_title": "Trust ledger",
+        "s3_body": "Post income/expense entries. Edit can change payee, visibility, and note only — not type or amount. Delete reverses the case balance. Mark an entry Client-visible if the family should see it.",
+        "s4_title": "Case files",
+        "s4_body": "Upload files and set visibility. Client-visible files appear on the family progress page. You can delete a file record if it was added by mistake."
+      },
+      "replace": {
+        "title": "Replace a gestational carrier (same case)",
+        "s1_title": "Do not delete the case",
+        "s1_body": "Always replace the carrier on the existing case. Soft-deleting and recreating the case loses trust history, files, and stage data.",
+        "s2_title": "Search and select the new carrier",
+        "s2_body": "In the surrogate card, use Replace gestational carrier. Search by name and pick a different profile.",
+        "s3_title": "Confirm replace",
+        "s3_body": "Confirm the dialog. The previous carrier loses portal access to this case immediately. The change is stored in replacement history."
+      },
+      "faq": {
+        "q1": "I forgot my password. Can an admin read it?",
+        "a1": "No. Passwords are stored as hashes. On Account management, use Edit and set a new password, then tell the person the new password once.",
+        "q2": "Why is Create case greyed out?",
+        "a2": "You must search and select a case manager and an intended parent. The form no longer auto-picks the first names in the list.",
+        "q3": "The family cannot see psychologist name / email.",
+        "a3": "That is intended. Medical Screening psychologist fields are Internal only. Other stage fields you fill are visible to the intended parent.",
+        "q4": "I posted the wrong trust amount.",
+        "a4": "Edit cannot change type or amount. Delete the entry (this reverses the balance), then Post entry again.",
+        "q5": "Save file record is greyed out.",
+        "a5": "Choose a local file first (or paste a file URL). Then set visibility and save.",
+        "q6": "Should I delete a case to change the gestational carrier?",
+        "a6": "No. Expand the surrogate card and use Replace gestational carrier on the same case. Deleting the case throws away trust, files, and stage history.",
+        "q7": "A case manager logs in and sees no cases.",
+        "a7": "The login must be linked to the correct case-manager profile, and cases must be assigned to that profile. Check Account management → Case manager → Link / Change binding, then Case list."
+      }
+    },
+    "cm": {
+      "title": "Case manager portal guide",
+      "subtitle": "Daily case work: stages, trust, files, messages, and replacing a carrier.",
+      "dashboard": {
+        "title": "Dashboard and case list",
+        "s1_title": "Filter by stage",
+        "s1_body": "The dashboard groups cases by journey stage. My cases shows every case you own, without splitting by stage.",
+        "s2_title": "Open a case",
+        "s2_body": "Names come from profiles. If a name is missing, edit the intended-parent or surrogate profile first."
+      },
+      "progress": {
+        "title": "Update case progress",
+        "s1_title": "Save or advance",
+        "s1_body": "Fill the current stage, then Save this stage or Go to next stage. Optional fields can stay blank. Fields tagged Internal only stay hidden from families.",
+        "s2_title": "What families see",
+        "s2_body": "Intended parents see the values you enter on each completed/current stage, except psychologist contact on Medical Screening."
+      },
+      "trust": {
+        "title": "Trust and files",
+        "s1_title": "Post and edit trust",
+        "s1_body": "Type and amount cannot be changed after posting. Use Edit for payee / visibility / note, or Delete to reverse the balance and post again.",
+        "s2_title": "Share files",
+        "s2_body": "Default visibility is client-visible. Switch to manager-only for internal paperwork. Delete removes the record from the case."
+      },
+      "replace": {
+        "title": "Replace a gestational carrier",
+        "s1_title": "Same case only",
+        "s1_body": "Use Replace on the case. Do not archive the case and start a new one.",
+        "s2_title": "Three steps",
+        "s2_body": "1) Search the new carrier. 2) Confirm replace — the previous carrier loses access immediately. 3) Check replacement history under the card."
+      },
+      "faq": {
+        "q1": "My case list is empty.",
+        "a1": "Ask an admin to link your login to the correct case-manager profile and assign cases to you. Created by me vs Assigned to me filters are different lists.",
+        "q2": "Can the family see the psychologist?",
+        "a2": "No. Leave those Medical Screening fields for the care team. Everything else you save on a stage is visible to the intended parent.",
+        "q3": "Wrong trust amount?",
+        "a3": "Delete the line (balance reverses) and post a new one. Edit only changes payee, visibility, and note."
+      }
+    },
+    "ip": {
+      "title": "Intended parent portal guide",
+      "subtitle": "Follow your journey, shared files, trust activity, and messages.",
+      "home": {
+        "title": "Home and my cases",
+        "s1_title": "See your journey",
+        "s1_body": "Home shows the current case snapshot. My cases lists every case linked to your profile.",
+        "s2_title": "Open case details",
+        "s2_body": "The progress list uses the same stages as your case manager. Details they enter appear under each completed or current stage."
+      },
+      "privacy": {
+        "title": "What you can and cannot see",
+        "s1_title": "Carrier contact is hidden",
+        "s1_body": "You will see the carrier’s name and public profile, not phone, email, home address, or emergency contacts.",
+        "s2_title": "Psychologist is internal",
+        "s2_body": "On Medical Screening, psychologist name and email stay with the care team. Other progress fields your manager fills are visible.",
+        "s3_title": "Files and trust",
+        "s3_body": "Only items marked client-visible appear here. Ask your case manager if something is missing."
+      },
+      "messages": {
+        "title": "Messages",
+        "s1_title": "Leave a note",
+        "s1_body": "Use the message box on the case page. Your case manager sees the same thread."
+      },
+      "faq": {
+        "q1": "I see “No linked cases yet”.",
+        "a1": "Your login is not linked to a profile that has an active case. Contact your case manager — do not create a second login.",
+        "q2": "I cannot see the psychologist’s name.",
+        "a2": "That contact stays with the medical team. You still see the other Medical Screening and later-stage details your manager fills in.",
+        "q3": "A file or trust line is missing.",
+        "a3": "Only items marked client-visible appear here. Ask your case manager to switch visibility or upload again."
+      }
+    },
+    "sm": {
+      "title": "Gestational carrier portal guide",
+      "subtitle": "Keep your profile current and follow the shared case journey.",
+      "profile": {
+        "title": "My profile",
+        "s1_title": "Fill your name first",
+        "s1_body": "Lists and case cards use Full name. Add photos if your coordinator asked for them.",
+        "s2_title": "Birth history",
+        "s2_body": "Add one row for each prior birth (date, weeks, weight, sex, delivery method). Use Add another birth for additional pregnancies."
+      },
+      "case": {
+        "title": "My case",
+        "s1_title": "Progress and files",
+        "s1_body": "You can see journey stages and files the team marked client-visible. Internal medical-team contacts stay hidden.",
+        "s2_title": "Messages",
+        "s2_body": "Use the case message box to write your team. The intended-parent and case-manager threads are on the same case."
+      },
+      "faq": {
+        "q1": "I already had a baby before — can I add more than one birth?",
+        "a1": "Yes. Use Add another birth for each prior delivery, then Save the profile. Empty extra rows are ignored when you save.",
+        "q2": "I filled the profile but lists still show a blank name.",
+        "a2": "The Full name field is what case cards use. Fill it, then Save."
+      }
+    }
   }
 }

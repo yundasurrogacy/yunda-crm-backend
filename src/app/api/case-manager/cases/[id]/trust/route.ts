@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import {
   appendTrustLedgerEntry,
+  deleteTrustLedgerEntry,
   listTrustLedger,
   TRUST_CHANGE_TYPES,
   TRUST_VISIBILITIES,
@@ -132,6 +133,34 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
     if (!result.ok) {
       const status =
         result.error === "not_found" ? 404 : result.error === "update_failed" ? 503 : 400;
+      return NextResponse.json({ error: result.error }, { status });
+    }
+    const data = await listTrustLedger(session, id, "case_manager_api");
+    return NextResponse.json(data);
+  } catch {
+    return NextResponse.json({ error: "data_unavailable" }, { status: 503 });
+  }
+}
+
+export async function DELETE(req: Request, context: { params: Promise<{ id: string }> }) {
+  const session = await getServerSession();
+  if (!session?.portals.includes("case_manager")) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+  const { id } = await context.params;
+  let body: { entryId?: unknown };
+  try {
+    body = (await req.json()) as { entryId?: unknown };
+  } catch {
+    return NextResponse.json({ error: "bad_json" }, { status: 400 });
+  }
+  const entryId = typeof body.entryId === "string" ? body.entryId.trim() : "";
+  if (!entryId) return NextResponse.json({ error: "bad_entry" }, { status: 400 });
+
+  try {
+    const result = await deleteTrustLedgerEntry(session, id, "case_manager_api", entryId);
+    if (!result.ok) {
+      const status = result.error === "not_found" ? 404 : 503;
       return NextResponse.json({ error: result.error }, { status });
     }
     const data = await listTrustLedger(session, id, "case_manager_api");

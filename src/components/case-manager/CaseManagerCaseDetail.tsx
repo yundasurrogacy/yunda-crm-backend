@@ -1,7 +1,6 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { ListBackLink } from "@/components/ui/ListBackLink";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { AmCaseDetail } from "@/lib/case-manager/fetch-case-detail";
@@ -137,13 +136,9 @@ export function CaseManagerCaseDetail({
   return (
     <div className="ami-ui crm-font-ui crm-page">
       <div className="flex flex-wrap items-start gap-4">
-        <Link
-          href={backHref}
-          className="ami-ui inline-flex items-center gap-1.5 rounded-md border border-sage-300 bg-white/80 px-3 py-1.5 text-xs font-semibold text-sage-800 shadow-sm hover:bg-white"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" aria-hidden strokeWidth={2} />
-          {t("case_detail.back_my_cases")}
-        </Link>
+        <ListBackLink fallbackHref={backHref}>
+          {t(partyProfileMode === "admin" ? "case_detail.back_list" : "case_detail.back_my_cases")}
+        </ListBackLink>
         <div className="min-w-0 flex-1">
           <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">{t("case_detail.page_title")}</h1>
           <p className="mt-1 text-sm text-sage-700">{t("case_detail.subtitle")}</p>

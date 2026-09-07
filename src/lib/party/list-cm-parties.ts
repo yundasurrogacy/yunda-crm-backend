@@ -54,7 +54,7 @@ export async function listCaseManagerParties(
   opts?: { q?: string; limit?: number; includeDeleted?: boolean; page?: number; pageSize?: number },
 ): Promise<{ rows: PartyListRow[]; total: number; page: number; pageSize: number }> {
   const fetchLimit = Math.min(500, Math.max(1, opts?.limit ?? 200));
-  const pageSize = Math.min(50, Math.max(1, opts?.pageSize ?? 10));
+  const pageSize = Math.min(100, Math.max(1, opts?.pageSize ?? 20));
   const page = Math.max(1, opts?.page ?? 1);
   const q = opts?.q?.trim().toLowerCase() ?? "";
   const includeDeleted = opts?.includeDeleted === true;

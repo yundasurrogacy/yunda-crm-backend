@@ -221,7 +221,7 @@ export function CaseP1OpsPanel({
                 }
               })();
             }}
-            className="rounded-md bg-brand-brown px-3 py-2 text-sm font-semibold text-white"
+            className="crm-btn crm-btn-primary crm-btn-sm"
           >
             {t("case_detail.p1.fail_cycle")}
           </button>
@@ -280,7 +280,7 @@ export function CaseP1OpsPanel({
           type="button"
           disabled={busy || !messageBody.trim()}
           onClick={() => void sendMessage()}
-          className="rounded-md bg-sage-700 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
+          className="crm-btn crm-btn-primary crm-btn-sm"
         >
           {t("case_detail.p1.send_message")}
         </button>

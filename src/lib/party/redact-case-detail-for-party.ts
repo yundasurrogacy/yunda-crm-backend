@@ -1,4 +1,6 @@
-import { emptyWorkspace, type AmWorkspacePayload } from "@/lib/case-manager/am-workspace-model";
+import { AM_STAGE_FIELD_GROUPS } from "@/constants/am-stage-field-groups";
+import type { CanonicalCaseStage } from "@/constants/case-stages";
+import { type AmWorkspacePayload } from "@/lib/case-manager/am-workspace-model";
 import { surrogateDisplayName } from "@/lib/case-manager/display-names";
 import type { AmCaseDetail } from "@/lib/case-manager/fetch-case-detail";
 import { GC_PROFILE_SECTIONS } from "@/constants/gc-profile-schema";
@@ -47,20 +49,36 @@ function stripHiddenIpProfileKeys(profileData: unknown): unknown {
   return next;
 }
 
+function stripInternalOnlyStageData(payload: AmWorkspacePayload): AmWorkspacePayload {
+  const hidden = new Set<string>();
+  for (const group of AM_STAGE_FIELD_GROUPS) {
+    for (const field of group.fields) {
+      if (field.internalOnly) hidden.add(field.key);
+    }
+  }
+  const byStage: AmWorkspacePayload["byStage"] = {};
+  for (const [stage, row] of Object.entries(payload.byStage)) {
+    if (!row) continue;
+    const next = { ...row };
+    for (const key of hidden) delete next[key];
+    byStage[stage as CanonicalCaseStage] = next;
+  }
+  return { v: 1, byStage };
+}
+
 /**
  * IP/GC 门户详情脱敏：
- * - 不返回阶段表单字段（含心理师姓名/邮箱等 internalOnly 字段）
+ * - 阶段字段对客可见，但去掉 internalOnly（心理医生姓名/邮箱）
  * - 去掉 GC 内部备注分区字段
  * - 去掉 GC 电话/邮箱等联系方式（对客默认隐藏）
  * - 去掉 IP referral_source
  * - 案例卡片副标题不再回退到孕妈邮箱
  */
 export function redactCaseDetailForParty(detail: AmCaseDetail): AmCaseDetail {
-  const emptyStages: AmWorkspacePayload = emptyWorkspace();
   const gcProfile = stripHiddenGcProfileKeys(detail.surrogate.profile_data);
   return {
     ...detail,
-    stage_data: emptyStages,
+    stage_data: stripInternalOnlyStageData(detail.stage_data),
     surrogate: {
       ...detail.surrogate,
       email: null,

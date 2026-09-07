@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CANONICAL_CASE_STAGES } from "@/constants/case-stages";
@@ -9,7 +10,16 @@ import { translateProcessStatus } from "@/lib/i18n/translate-process-status";
 
 type Option = { id: string; label: string };
 
-export function CaseManagerCreateCaseForm() {
+export function CaseManagerCreateCaseForm({
+  variant = "page",
+  onCreated,
+  onCancel,
+}: {
+  variant?: "page" | "dialog";
+  onCreated?: (id: string) => void;
+  onCancel?: () => void;
+}) {
+  const router = useRouter();
   const { t } = useTranslation("portal");
   const { t: tStage } = useTranslation("caseStage");
   const [intendedParents, setIntendedParents] = useState<Option[]>([]);
@@ -40,7 +50,6 @@ export function CaseManagerCreateCaseForm() {
         setIntendedParents(json.intendedParents ?? []);
         setForm((prev) => ({
           ...prev,
-          intendedParentId: json.intendedParents?.[0]?.id ?? "",
           processStatus:
             json.defaultStage &&
             CANONICAL_CASE_STAGES.includes(json.defaultStage as (typeof CANONICAL_CASE_STAGES)[number])
@@ -88,6 +97,14 @@ export function CaseManagerCreateCaseForm() {
       }
       setMsgIsError(false);
       setMsg(t("cm_case.success_created", { id: json.id ?? "" }));
+      if (json.id) {
+        if (onCreated) {
+          onCreated(json.id);
+          return;
+        }
+        router.push(`/case_manager/cases/${encodeURIComponent(json.id)}`);
+        return;
+      }
     } catch {
       setMsgIsError(true);
       setMsg(t("cm_case.error_create"));
@@ -97,9 +114,15 @@ export function CaseManagerCreateCaseForm() {
   }
 
   return (
-    <section className="crm-card">
-      <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">{t("cm_case.create_title")}</h1>
-      <p className="mt-1 text-sm text-sage-700">{t("cm_case.create_intro")}</p>
+    <section className={variant === "dialog" ? "space-y-3" : "crm-card"}>
+      {variant === "page" ? (
+        <>
+          <h1 className="crm-font-display text-2xl font-semibold text-brand-brown">{t("cm_case.create_title")}</h1>
+          <p className="mt-1 text-sm text-sage-700">{t("cm_case.create_intro")}</p>
+        </>
+      ) : (
+        <p className="text-sm text-sage-700">{t("cm_case.create_intro")}</p>
+      )}
       {loading ? <p className="mt-4 text-sm text-sage-600">{t("cm_case.loading_options")}</p> : null}
       <form className="mt-4 space-y-4" onSubmit={onSubmit}>
         <label className="block">
@@ -129,13 +152,20 @@ export function CaseManagerCreateCaseForm() {
             }))}
           />
         </label>
-        <button
-          type="submit"
-          disabled={saving || loading || !form.intendedParentId}
-          className="rounded-md bg-brand-brown px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
-        >
-          {saving ? t("cm_case.creating") : t("cm_case.create_submit")}
-        </button>
+        <div className="flex flex-wrap gap-2">
+          {onCancel ? (
+            <button type="button" onClick={onCancel} className="crm-btn crm-btn-secondary">
+              {t("confirm_dialog.cancel")}
+            </button>
+          ) : null}
+          <button
+            type="submit"
+            disabled={saving || loading || !form.intendedParentId}
+            className="crm-btn crm-btn-primary"
+          >
+            {saving ? t("cm_case.creating") : t("cm_case.create_submit")}
+          </button>
+        </div>
       </form>
       {msg ? (
         <p className={`mt-4 text-sm ${msgIsError ? "text-red-800" : "text-emerald-900"}`}>{msg}</p>

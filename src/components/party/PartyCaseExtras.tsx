@@ -170,7 +170,7 @@ export function PartyCaseExtras({
             type="button"
             disabled={busy || !body.trim()}
             onClick={() => void send()}
-            className="rounded-md bg-brand-brown px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
+            className="crm-btn crm-btn-primary crm-btn-sm"
           >
             {t("case_detail.p1.send_message")}
           </button>

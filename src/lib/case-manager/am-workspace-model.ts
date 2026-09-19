@@ -1,4 +1,4 @@
-import { STAGE_DATA_LEGACY_KEYS, STAGE_FIELD_LEGACY_KEYS, type CanonicalCaseStage } from "@/constants/case-stages";
+import { STAGE_DATA_LEGACY_KEYS, STAGE_FIELD_CROSS_MOVES, STAGE_FIELD_LEGACY_KEYS, type CanonicalCaseStage } from "@/constants/case-stages";
 import type { AmStageFieldDef } from "@/constants/am-stage-fields-types";
 import { isAmStageFieldRequired } from "@/lib/case-manager/am-stage-field-required";
 
@@ -57,6 +57,27 @@ export function migrateWorkspaceStageKeys(payload: AmWorkspacePayload): AmWorksp
       changed = true;
     }
     if (changed) byStage[canonical] = merged;
+  }
+  // 跨阶段搬字段（如 NT/NIPT/Anatomy 从 Third Trimester → IVF Graduation）
+  for (const move of STAGE_FIELD_CROSS_MOVES) {
+    const src = byStage[move.from as CanonicalCaseStage];
+    const dst = { ...(byStage[move.to] ?? {}) };
+    let changed = false;
+    for (const key of move.keys) {
+      const val = String(src?.[key] ?? "").trim();
+      if (val && String(dst[key] ?? "").trim() === "") {
+        dst[key] = src![key]!;
+        changed = true;
+      }
+      if (src && key in src) {
+        delete src[key];
+        changed = true;
+      }
+    }
+    if (changed) {
+      byStage[move.to] = dst;
+      if (src) byStage[move.from as CanonicalCaseStage] = src;
+    }
   }
   for (const [stage, row] of Object.entries(byStage) as Array<[CanonicalCaseStage, Record<string, string>]>) {
     byStage[stage] = migrateStageFieldKeys(row);

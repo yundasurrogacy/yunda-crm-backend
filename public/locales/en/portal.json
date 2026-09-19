@@ -353,6 +353,7 @@
     "avatar": "Profile photo",
     "album": "Gallery",
     "open": "Open",
+    "admin_intro": "Profile photo and gallery are saved on the surrogate profile and also shown on the client case page. Upload, then click Save.",
     "empty": "No profile or gallery photos yet. The surrogate can upload them in My profile."
   },
   "sm_profile": {
@@ -653,13 +654,19 @@
       "edit_save": "Save",
       "edit_saving": "Saving…",
       "edit_cancel": "Cancel",
-      "edit_locked_hint": "Edit can change payee, visibility, and note only — not type or amount. To correct a posting, delete it and add a new entry.",
+      "edit_locked_hint": "You can correct type, amount, business date, and vouchers; balances are recalculated automatically by business date.",
       "delete": "Delete",
-      "confirm_delete": "Delete this ledger entry? The case balance will be reversed by this amount.",
+      "confirm_delete": "Delete this ledger entry? The case balance will be recalculated.",
       "error_delete": "Could not delete the entry. Try again.",
       "field_voucher": "Payment voucher",
       "col_voucher": "Voucher",
-      "voucher_link": "Open"
+      "voucher_link": "Open",
+      "field_occurred": "Business date",
+      "voucher_pick": "Choose files (multiple)",
+      "voucher_remove": "Remove",
+      "voucher_manual": "Or paste file URLs (one per line)",
+      "voucher_manual_ph": "https://…",
+      "created_at_hint": "Entered {{time}}"
     },
     "files": {
       "section_title": "Case files",
@@ -674,6 +681,7 @@
       "loading": "Loading files…",
       "error_load": "Could not load files.",
       "error_save": "Could not save. Try again.",
+      "error_save_partial": "Some files could not be saved. Check the list below.",
       "error_delete": "Could not delete the file. Try again.",
       "confirm_delete": "Delete this file record?",
       "delete": "Delete",
@@ -879,7 +887,7 @@
       "trust": {
         "title": "Trust and files",
         "s1_title": "Post and edit trust",
-        "s1_body": "Type and amount cannot be changed after posting. Use Edit for payee / visibility / note, or Delete to reverse the balance and post again.",
+        "s1_body": "Fix a posting by editing the row: type, amount, business date, and vouchers are all editable, and balances recalculate automatically by business date. The system entry time stays on the row.",
         "s2_title": "Share files",
         "s2_body": "Default visibility is client-visible. Switch to manager-only for internal paperwork. Delete removes the record from the case."
       },
@@ -896,7 +904,7 @@
         "q2": "Can the family see the psychologist?",
         "a2": "No. Leave those Medical Screening fields for the care team. Everything else you save on a stage is visible to the intended parent.",
         "q3": "Wrong trust amount?",
-        "a3": "Delete the line (balance reverses) and post a new one. Edit only changes payee, visibility, and note."
+        "a3": "Edit the row directly: type, amount, business date, and vouchers are editable, and the balance recalculates automatically — no need to delete and repost."
       }
     },
     "ip": {

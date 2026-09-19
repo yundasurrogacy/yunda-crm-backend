@@ -324,13 +324,28 @@
         "type": "Date"
       },
       {
+        "key": "pbo_start_date",
+        "label": "PBO Start Date",
+        "type": "Date"
+      },
+      {
         "key": "first_ob_date",
         "label": "First OB Date",
         "type": "Date"
       },
       {
-        "key": "pbo_start_date",
-        "label": "PBO Start Date",
+        "key": "nt_date",
+        "label": "NT Date",
+        "type": "Date"
+      },
+      {
+        "key": "nipt_date",
+        "label": "NIPT Date",
+        "type": "Date"
+      },
+      {
+        "key": "anatomy_scan_date",
+        "label": "Anatomy Scan Date",
         "type": "Date"
       }
     ]
@@ -360,12 +375,12 @@
       },
       {
         "key": "notary_date",
-        "label": "Notary date",
+        "label": "Notary Date",
         "type": "Date"
       },
       {
         "key": "legal_clearance_complete",
-        "label": "Legal Clearance Complete",
+        "label": "Legal Clearance Complete Date",
         "type": "Date"
       }
     ]
@@ -381,12 +396,12 @@
       },
       {
         "key": "psychological_clearance_complete",
-        "label": "Psychological Clearance Complete",
+        "label": "Psychological Clearance Complete Date",
         "type": "Date"
       },
       {
         "key": "medical_clearance_complete",
-        "label": "Medical Clearance Complete",
+        "label": "Medical Clearance Complete Date",
         "type": "Date"
       },
       {
@@ -406,21 +421,6 @@
   {
     "stage": "Third Trimester",
     "fields": [
-      {
-        "key": "nt_date",
-        "label": "NT Date",
-        "type": "Date"
-      },
-      {
-        "key": "nipt_date",
-        "label": "NIPT Date",
-        "type": "Date"
-      },
-      {
-        "key": "anatomy_scan_date",
-        "label": "Anatomy Scan Date",
-        "type": "Date"
-      },
       {
         "key": "glucose_test_date",
         "label": "Glucose Test Date",
@@ -463,7 +463,7 @@
       },
       {
         "key": "hospital_social_worker_pbo",
-        "label": "Hospital Caregiver",
+        "label": "Hospital Social Worker",
         "type": "Text"
       },
       {

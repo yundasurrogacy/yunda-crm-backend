@@ -5,11 +5,21 @@ import {
   listTrustLedger,
   TRUST_CHANGE_TYPES,
   TRUST_VISIBILITIES,
-  updateTrustLedgerMeta,
+  updateTrustLedgerEntry,
   type TrustChangeType,
   type TrustVisibility,
 } from "@/lib/case-manager/trust-ledger";
 import { getServerSession } from "@/lib/auth/session-cookie";
+
+function readVoucherUrls(body: { voucher_urls?: unknown; voucher_url?: unknown }): string[] | undefined {
+  if (Array.isArray(body.voucher_urls)) {
+    return body.voucher_urls.filter((v): v is string => typeof v === "string");
+  }
+  if (typeof body.voucher_url === "string" && body.voucher_url.trim()) {
+    return [body.voucher_url.trim()];
+  }
+  return undefined;
+}
 
 export async function GET(_req: Request, context: { params: Promise<{ id: string }> }) {
   const session = await getServerSession();
@@ -31,8 +41,10 @@ type PostBody = {
   change_type?: unknown;
   receiver?: unknown;
   remark?: unknown;
+  voucher_urls?: unknown;
   voucher_url?: unknown;
   visibility?: unknown;
+  occurred_at?: unknown;
 };
 
 export async function POST(req: Request, context: { params: Promise<{ id: string }> }) {
@@ -70,8 +82,9 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
       change_type,
       receiver: typeof body.receiver === "string" ? body.receiver : undefined,
       remark: typeof body.remark === "string" ? body.remark : undefined,
-      voucher_url: typeof body.voucher_url === "string" ? body.voucher_url : undefined,
+      voucher_urls: readVoucherUrls(body),
       visibility,
+      occurred_at: typeof body.occurred_at === "string" ? body.occurred_at : undefined,
     });
     if (!result.ok) {
       const status =
@@ -89,8 +102,12 @@ type PatchBody = {
   entryId?: unknown;
   receiver?: unknown;
   remark?: unknown;
+  voucher_urls?: unknown;
   voucher_url?: unknown;
   visibility?: unknown;
+  change_type?: unknown;
+  change_amount?: unknown;
+  occurred_at?: unknown;
 };
 
 export async function PATCH(req: Request, context: { params: Promise<{ id: string }> }) {
@@ -116,19 +133,30 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
     return NextResponse.json({ error: "bad_visibility" }, { status: 400 });
   }
 
+  const change_type =
+    body.change_type != null ? (String(body.change_type) as TrustChangeType) : undefined;
+  if (change_type != null && !TRUST_CHANGE_TYPES.includes(change_type)) {
+    return NextResponse.json({ error: "bad_change_type" }, { status: 400 });
+  }
+
+  let change_amount: number | undefined;
+  if (body.change_amount != null && body.change_amount !== "") {
+    const n = typeof body.change_amount === "number" ? body.change_amount : Number(body.change_amount);
+    if (!Number.isFinite(n)) return NextResponse.json({ error: "bad_amount" }, { status: 400 });
+    change_amount = n;
+  }
+
   try {
-    const result = await updateTrustLedgerMeta(session, id, "case_manager_api", {
+    const result = await updateTrustLedgerEntry(session, id, "case_manager_api", {
       entryId,
       receiver:
         typeof body.receiver === "string" ? body.receiver : body.receiver === null ? null : undefined,
       remark: typeof body.remark === "string" ? body.remark : body.remark === null ? null : undefined,
-      voucher_url:
-        typeof body.voucher_url === "string"
-          ? body.voucher_url
-          : body.voucher_url === null
-            ? null
-            : undefined,
+      voucher_urls: readVoucherUrls(body),
       visibility,
+      change_type,
+      change_amount,
+      occurred_at: typeof body.occurred_at === "string" ? body.occurred_at : undefined,
     });
     if (!result.ok) {
       const status =

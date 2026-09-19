@@ -40,6 +40,19 @@ export const STAGE_FIELD_LEGACY_KEYS: Record<string, string> = {
   funds_received_date: "initial_trust_funding_received_date",
 };
 
+/** 跨阶段搬字段：NT / NIPT / Anatomy Scan 从 Third Trimester 归入 IVF Graduation。 */
+export const STAGE_FIELD_CROSS_MOVES: ReadonlyArray<{
+  from: string;
+  to: CanonicalCaseStage;
+  keys: readonly string[];
+}> = [
+  {
+    from: "Third Trimester",
+    to: "IVF Graduation",
+    keys: ["nt_date", "nipt_date", "anatomy_scan_date"],
+  },
+];
+
 const CANONICAL_TO_QUERY_VALUES: Record<CanonicalCaseStage, readonly string[]> = {
   "GC Matching": ["GC Matching"],
   "GC Pre-Screening": ["GC Pre-Screening", "GC Match Completed", "Match Call Scheduled"],

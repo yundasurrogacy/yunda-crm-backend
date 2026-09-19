@@ -3,7 +3,7 @@
 import { ExternalLink } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AmQiniuFileInput } from "@/components/case-manager/AmQiniuFileInput";
+import { AmQiniuFileMultiInput } from "@/components/case-manager/AmQiniuFileMultiInput";
 import { CollapsibleCard } from "@/components/ui/CollapsibleCard";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { SelectMenu } from "@/components/ui/SelectMenu";
@@ -54,7 +54,7 @@ export function CaseFilesPanel({ caseId, apiPathBase }: Props) {
   /** 默认客户可见；内部材料可手动改为仅经理 */
   const [visibility, setVisibility] = useState<"all" | "manager">("all");
   const [note, setNote] = useState("");
-  const [fileUrl, setFileUrl] = useState("");
+  const [fileUrls, setFileUrls] = useState<string[]>([]);
 
   const filesApi = `${apiPathBase}/${encodeURIComponent(caseId)}/files`;
 
@@ -92,31 +92,39 @@ export function CaseFilesPanel({ caseId, apiPathBase }: Props) {
   }, [reload, sectionOpen]);
 
   const onSubmit = async () => {
-    if (saving || !fileUrl.trim()) {
+    if (saving || fileUrls.length === 0) {
       setErrorKey("case_detail.files.error_url");
       return;
     }
     setSaving(true);
     setErrorKey(null);
+    let latest: CaseFileRow[] | null = null;
+    let failed = false;
     try {
-      const res = await fetch(filesApi, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          category,
-          file_url: fileUrl.trim(),
-          about_role: aboutRole || null,
-          note,
-          visibility,
-        }),
-      });
-      const json = (await res.json().catch(() => null)) as { files?: CaseFileRow[] } | null;
-      if (!res.ok) {
-        setErrorKey("case_detail.files.error_save");
-        return;
+      for (const url of fileUrls) {
+        const res = await fetch(filesApi, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            category,
+            file_url: url,
+            about_role: aboutRole || null,
+            note,
+            visibility,
+          }),
+        });
+        const json = (await res.json().catch(() => null)) as { files?: CaseFileRow[] } | null;
+        if (!res.ok) {
+          failed = true;
+          continue;
+        }
+        if (json?.files) latest = json.files;
       }
-      setFiles(json?.files ?? []);
-      setFileUrl("");
+      if (latest) setFiles(latest);
+      if (failed) {
+        setErrorKey("case_detail.files.error_save_partial");
+      }
+      setFileUrls([]);
       setNote("");
     } catch {
       setErrorKey("case_detail.files.error_save");
@@ -211,11 +219,11 @@ export function CaseFilesPanel({ caseId, apiPathBase }: Props) {
           <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-sage-600">
             {t("case_detail.files.field_file")}
           </p>
-          <AmQiniuFileInput
+          <AmQiniuFileMultiInput
             inputId={`case-file-${caseId}`}
             caseId={caseId}
-            value={fileUrl}
-            onChange={setFileUrl}
+            value={fileUrls}
+            onChange={setFileUrls}
             disabled={saving}
           />
           {category === "Photo" ? (
@@ -243,7 +251,7 @@ export function CaseFilesPanel({ caseId, apiPathBase }: Props) {
 
       <button
         type="button"
-        disabled={saving || !fileUrl.trim()}
+        disabled={saving || fileUrls.length === 0}
         onClick={() => void onSubmit()}
         className="ami-ui mb-6 rounded-md border border-brand-brown bg-brand-brown px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
       >

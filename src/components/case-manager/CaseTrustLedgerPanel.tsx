@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AmQiniuFileInput } from "@/components/case-manager/AmQiniuFileInput";
+import { AmQiniuFileMultiInput } from "@/components/case-manager/AmQiniuFileMultiInput";
 import { CollapsibleCard } from "@/components/ui/CollapsibleCard";
 import { SelectMenu } from "@/components/ui/SelectMenu";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
@@ -34,6 +34,27 @@ function formatDt(iso: string, lng: string) {
   } catch {
     return iso;
   }
+}
+
+function formatDay(iso: string, lng: string) {
+  try {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    return lng.toLowerCase().startsWith("zh")
+      ? new Intl.DateTimeFormat("zh-CN", { dateStyle: "medium" }).format(d)
+      : new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(d);
+  } catch {
+    return iso;
+  }
+}
+
+/** date input 需要 yyyy-mm-dd */
+function toDateInputValue(iso: string) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
 function typeLabel(raw: string, t: (k: string) => string): string {
@@ -76,12 +97,17 @@ export function CaseTrustLedgerPanel({
   const [changeType, setChangeType] = useState("SEED");
   const [receiver, setReceiver] = useState("");
   const [remark, setRemark] = useState("");
-  const [voucherUrl, setVoucherUrl] = useState("");
+  const [voucherUrls, setVoucherUrls] = useState<string[]>([]);
+  const [occurredAt, setOccurredAt] = useState("");
   const [visibility, setVisibility] = useState<"all" | "manager">("manager");
 
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editAmount, setEditAmount] = useState("");
+  const [editType, setEditType] = useState("SEED");
+  const [editOccurredAt, setEditOccurredAt] = useState("");
   const [editReceiver, setEditReceiver] = useState("");
   const [editRemark, setEditRemark] = useState("");
+  const [editVoucherUrls, setEditVoucherUrls] = useState<string[]>([]);
   const [editVisibility, setEditVisibility] = useState<"all" | "manager">("manager");
   const [editSaving, setEditSaving] = useState(false);
 
@@ -130,8 +156,12 @@ export function CaseTrustLedgerPanel({
 
   function startEdit(e: TrustLedgerEntry) {
     setEditingId(e.id);
+    setEditAmount(Math.abs(Number(e.change_amount)).toString());
+    setEditType(e.change_type || "OTHER");
+    setEditOccurredAt(toDateInputValue(e.occurred_at));
     setEditReceiver(e.receiver ?? "");
     setEditRemark(e.remark ?? "");
+    setEditVoucherUrls(e.voucher_urls ?? []);
     setEditVisibility(e.visibility === "all" ? "all" : "manager");
     setErrorKey(null);
   }
@@ -165,6 +195,11 @@ export function CaseTrustLedgerPanel({
 
   async function saveEdit() {
     if (!editingId || editSaving) return;
+    const n = Number(editAmount);
+    if (!Number.isFinite(n) || n === 0) {
+      setErrorKey("case_detail.trust.error_amount");
+      return;
+    }
     setEditSaving(true);
     setErrorKey(null);
     try {
@@ -173,8 +208,12 @@ export function CaseTrustLedgerPanel({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           entryId: editingId,
+          change_amount: n,
+          change_type: editType,
+          occurred_at: editOccurredAt || null,
           receiver: editReceiver,
           remark: editRemark,
+          voucher_urls: editVoucherUrls,
           visibility: editVisibility,
         }),
       });
@@ -220,8 +259,9 @@ export function CaseTrustLedgerPanel({
           change_type: changeType,
           receiver,
           remark,
-          voucher_url: voucherUrl,
+          voucher_urls: voucherUrls,
           visibility,
+          occurred_at: occurredAt || undefined,
         }),
       });
       const json = (await res.json().catch(() => null)) as
@@ -240,7 +280,8 @@ export function CaseTrustLedgerPanel({
       setAmount("");
       setRemark("");
       setReceiver("");
-      setVoucherUrl("");
+      setVoucherUrls([]);
+      setOccurredAt("");
     } catch {
       setErrorKey("case_detail.trust.error_save");
     } finally {
@@ -319,6 +360,16 @@ export function CaseTrustLedgerPanel({
           </div>
         </label>
         <label className="block text-xs font-semibold uppercase tracking-wide text-sage-600">
+          {t("case_detail.trust.field_occurred")}
+          <input
+            type="date"
+            className="mt-1 block w-full rounded-md border border-sage-300 bg-white px-3 py-2 text-sm text-sage-900"
+            value={occurredAt}
+            onChange={(e) => setOccurredAt(e.target.value)}
+            disabled={saving}
+          />
+        </label>
+        <label className="block text-xs font-semibold uppercase tracking-wide text-sage-600">
           {t("case_detail.trust.field_visibility")}
           <div className="mt-1">
             <SelectMenu
@@ -356,11 +407,11 @@ export function CaseTrustLedgerPanel({
           <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-sage-600">
             {t("case_detail.trust.field_voucher")}
           </p>
-          <AmQiniuFileInput
+          <AmQiniuFileMultiInput
             inputId={`trust-voucher-${caseId}`}
             caseId={caseId}
-            value={voucherUrl}
-            onChange={setVoucherUrl}
+            value={voucherUrls}
+            onChange={setVoucherUrls}
             disabled={saving}
           />
         </div>
@@ -390,24 +441,26 @@ export function CaseTrustLedgerPanel({
               type="button"
               onClick={() => {
                 const header = [
-                  "time",
+                  "occurred_at",
+                  "created_at",
                   "type",
                   "amount",
                   "balance_after",
                   "receiver",
                   "visibility",
-                  "voucher_url",
+                  "voucher_urls",
                   "remark",
                 ];
                 const rows = entries.map((e) =>
                   [
+                    e.occurred_at,
                     e.created_at,
                     e.change_type,
                     e.change_amount,
                     e.balance_after ?? "",
                     e.receiver ?? "",
                     e.visibility ?? "",
-                    e.voucher_url ?? "",
+                    (e.voucher_urls ?? []).join(" "),
                     e.remark ?? "",
                   ]
                     .map((c) => `"${String(c).replace(/"/g, '""')}"`)
@@ -448,11 +501,58 @@ export function CaseTrustLedgerPanel({
                   return (
                     <tr key={e.id} className="border-b border-sage-100 align-top">
                       <td className="py-2 pr-3 whitespace-nowrap text-sage-700">
-                        {formatDt(e.created_at, lng)}
+                        {isEditing ? (
+                          <input
+                            type="date"
+                            className="w-full min-w-[8rem] rounded border border-sage-300 px-2 py-1 text-sm"
+                            value={editOccurredAt}
+                            onChange={(ev) => setEditOccurredAt(ev.target.value)}
+                            disabled={editSaving}
+                          />
+                        ) : (
+                          <div className="flex flex-col">
+                            <span className="font-medium text-sage-900">
+                              {formatDay(e.occurred_at, lng)}
+                            </span>
+                            <span className="text-[11px] text-sage-500">
+                              {t("case_detail.trust.created_at_hint", {
+                                time: formatDt(e.created_at, lng),
+                              })}
+                            </span>
+                          </div>
+                        )}
                       </td>
-                      <td className="py-2 pr-3 text-sage-800">{typeLabel(e.change_type, t)}</td>
+                      <td className="py-2 pr-3 text-sage-800">
+                        {isEditing ? (
+                          <SelectMenu
+                            value={editType}
+                            onChange={setEditType}
+                            disabled={editSaving}
+                            options={[
+                              { value: "SEED", label: t("case_detail.trust.type_seed") },
+                              { value: "CREDIT", label: t("case_detail.trust.type_credit") },
+                              { value: "DEBIT", label: t("case_detail.trust.type_debit") },
+                              { value: "ADJUSTMENT", label: t("case_detail.trust.type_adjustment") },
+                              { value: "OTHER", label: t("case_detail.trust.type_other") },
+                            ]}
+                          />
+                        ) : (
+                          typeLabel(e.change_type, t)
+                        )}
+                      </td>
                       <td className="py-2 pr-3 tabular-nums font-medium text-sage-900">
-                        {formatMoney(e.change_amount, lng)}
+                        {isEditing ? (
+                          <input
+                            type="number"
+                            step="0.01"
+                            className="w-full min-w-[6rem] rounded border border-sage-300 px-2 py-1 text-sm"
+                            value={editAmount}
+                            onChange={(ev) => setEditAmount(ev.target.value)}
+                            disabled={editSaving}
+                          />
+                        ) : (
+                          formatMoney(e.change_amount, lng)
+                        )}
                       </td>
                       <td className="py-2 pr-3 tabular-nums text-sage-800">
                         {e.balance_after != null ? formatMoney(e.balance_after, lng) : "—"}
@@ -485,15 +585,28 @@ export function CaseTrustLedgerPanel({
                         )}
                       </td>
                       <td className="py-2 pr-3 text-sage-700">
-                        {e.voucher_url ? (
-                          <a
-                            href={e.voucher_url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="font-medium text-brand-brown underline"
-                          >
-                            {t("case_detail.trust.voucher_link")}
-                          </a>
+                        {isEditing ? (
+                          <AmQiniuFileMultiInput
+                            inputId={`trust-voucher-edit-${e.id}`}
+                            caseId={caseId}
+                            value={editVoucherUrls}
+                            onChange={setEditVoucherUrls}
+                            disabled={editSaving}
+                          />
+                        ) : (e.voucher_urls ?? []).length > 0 ? (
+                          <div className="flex flex-col gap-0.5">
+                            {(e.voucher_urls ?? []).map((url, idx) => (
+                              <a
+                                key={`${url}-${idx}`}
+                                href={url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="font-medium text-brand-brown underline"
+                              >
+                                {t("case_detail.trust.voucher_link")} {idx + 1}
+                              </a>
+                            ))}
+                          </div>
                         ) : (
                           "—"
                         )}
@@ -554,7 +667,8 @@ export function CaseTrustLedgerPanel({
                     </tr>
                   );
                 })}
-              </tbody>            </table>
+              </tbody>
+            </table>
           </div>
         </>
       )}

@@ -11,7 +11,7 @@ import { BIRTH_HISTORY_ENTRIES_KEY, readBirthHistoryEntries } from "@/lib/profil
 import { buildProfileFormValues } from "@/lib/profile/profile-form";
 import { BirthHistoryEditor } from "@/components/profile/BirthHistoryEditor";
 import { ProfileFieldControl } from "@/components/profile/ProfileFieldControl";
-import { ProfilePhotosView } from "@/components/profile/ProfilePhotosView";
+import { GcProfilePhotosEditor } from "@/components/profile/GcProfilePhotosEditor";
 
 function formFromDetail(kind: EntityKind, detail: AdminEntityProfileDetail) {
   const form = buildProfileFormValues(
@@ -210,10 +210,16 @@ export function EntityProfilePage({
 
           {kind === "surrogate_mother" ? (
             <section className="crm-card">
-              <ProfilePhotosView
-                profileData={detail.profile_data}
-                className=""
-                emptyMessage={t("profile_photos.empty")}
+              <h2 className="crm-font-display mb-4 text-lg font-semibold text-brand-brown">
+                {t("profile_photos.title")}
+              </h2>
+              <GcProfilePhotosEditor
+                entityId={entityId}
+                avatarUrl={form.profile_photo_url ?? ""}
+                albumRaw={form.photo_urls ?? ""}
+                onChangeAvatar={(v) => setForm((prev) => ({ ...prev, profile_photo_url: v }))}
+                onChangeAlbumRaw={(v) => setForm((prev) => ({ ...prev, photo_urls: v }))}
+                disabled={saving}
               />
             </section>
           ) : null}

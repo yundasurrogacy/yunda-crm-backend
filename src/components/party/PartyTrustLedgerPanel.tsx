@@ -24,6 +24,18 @@ function formatDt(iso: string, lng: string) {
   }
 }
 
+function formatDay(iso: string, lng: string) {
+  try {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    return lng.toLowerCase().startsWith("zh")
+      ? new Intl.DateTimeFormat("zh-CN", { dateStyle: "medium" }).format(d)
+      : new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(d);
+  } catch {
+    return iso;
+  }
+}
+
 function typeLabel(raw: string, t: (k: string) => string): string {
   const map: Record<string, string> = {
     SEED: "case_detail.trust.type_seed",
@@ -95,7 +107,16 @@ export function PartyTrustLedgerPanel({
                 {entries.map((e) => (
                   <tr key={e.id} className="border-b border-sage-100 align-top">
                     <td className="py-2 pr-3 whitespace-nowrap text-sage-700">
-                      {formatDt(e.created_at, lng)}
+                      <div className="flex flex-col">
+                        <span className="font-medium text-sage-900">
+                          {formatDay(e.occurred_at, lng)}
+                        </span>
+                        <span className="text-[11px] text-sage-500">
+                          {t("case_detail.trust.created_at_hint", {
+                            time: formatDt(e.created_at, lng),
+                          })}
+                        </span>
+                      </div>
                     </td>
                     <td className="py-2 pr-3 text-sage-800">{typeLabel(e.change_type, t)}</td>
                     <td className="py-2 pr-3 tabular-nums font-medium text-sage-900">
@@ -106,15 +127,20 @@ export function PartyTrustLedgerPanel({
                     </td>
                     <td className="py-2 pr-3 text-sage-700">{e.receiver || "—"}</td>
                     <td className="py-2 pr-3 text-sage-700">
-                      {e.voucher_url ? (
-                        <a
-                          href={e.voucher_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="font-medium text-brand-brown underline"
-                        >
-                          {t("case_detail.trust.voucher_link")}
-                        </a>
+                      {(e.voucher_urls ?? []).length > 0 ? (
+                        <div className="flex flex-col gap-0.5">
+                          {(e.voucher_urls ?? []).map((url, idx) => (
+                            <a
+                              key={`${url}-${idx}`}
+                              href={url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="font-medium text-brand-brown underline"
+                            >
+                              {t("case_detail.trust.voucher_link")} {idx + 1}
+                            </a>
+                          ))}
+                        </div>
                       ) : (
                         "—"
                       )}

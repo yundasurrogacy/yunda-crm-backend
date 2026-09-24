@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { BindLoginUserModal } from "./BindLoginUserModal";
 import { CrmModal } from "@/components/ui/CrmModal";
 import { ListPager } from "@/components/ui/ListPager";
+import { RecordFilterControl } from "@/components/ui/RecordFilterControl";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { rememberListReturn, restoreMainScroll } from "@/lib/crm-list-return";
 import { hrefWithReturnTo, useSyncedListQuery } from "@/lib/use-synced-list-query";
@@ -26,7 +27,7 @@ type ModalState = { entityId: string; mode: "bind" | "rebind" };
 export function AdminAccountManager({ kind }: { kind: Kind }) {
   const { t } = useTranslation("portal");
   const confirm = useConfirm();
-  const { page, pageSize, q, includeDeleted, href, replaceQuery } = useSyncedListQuery();
+  const { page, pageSize, q, status, href, replaceQuery } = useSyncedListQuery();
   const [rows, setRows] = useState<Row[]>([]);
   const [qInput, setQInput] = useState(q);
   const [total, setTotal] = useState(0);
@@ -53,7 +54,7 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
       url.searchParams.set("page", String(page));
       url.searchParams.set("pageSize", String(pageSize));
       if (q.trim()) url.searchParams.set("q", q.trim());
-      if (includeDeleted) url.searchParams.set("includeDeleted", "1");
+      if (status !== "active") url.searchParams.set("status", status);
       const res = await fetch(url.pathname + url.search);
       if (!res.ok) throw new Error("load_failed");
       const json = (await res.json()) as { rows: Row[]; total: number };
@@ -69,7 +70,7 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
   useEffect(() => {
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kind, page, pageSize, q, includeDeleted]);
+  }, [kind, page, pageSize, q, status]);
 
   useEffect(() => {
     if (didRestoreScroll.current || loading) return;
@@ -234,16 +235,13 @@ export function AdminAccountManager({ kind }: { kind: Kind }) {
           >
             {t("admin_accounts.search")}
           </button>
-          <label className="inline-flex items-center gap-2 text-xs text-sage-700">
-            <input
-              type="checkbox"
-              checked={includeDeleted}
-              onChange={(e) => {
-                replaceQuery({ page: 1, includeDeleted: e.target.checked });
-              }}
-            />
-            {t("admin_accounts.show_deleted")}
-          </label>
+          <RecordFilterControl
+            value={status}
+            disabled={loading}
+            onChange={(next) => {
+              replaceQuery({ page: 1, status: next });
+            }}
+          />
         </div>
         </div>
         <div className="crm-table-scroll">

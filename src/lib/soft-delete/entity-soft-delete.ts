@@ -1,19 +1,52 @@
 import { getClient } from "@/config-lib/graphql-client";
+import type { RecordFilter } from "@/constants/record-filter";
 
 export type SoftDeleteEntityKind = "case_manager" | "intended_parent" | "surrogate_mother";
 
 const ACTIVE = { deleted_at: { _is_null: true } } as const;
+/** Hasura 用 `_is_null: false` 表达「非空」，没有 `_is_not_null` 操作符 */
+const DELETED = { deleted_at: { _is_null: false } } as const;
 
 /** GraphQL where fragment: only non-soft-deleted rows */
 export function notSoftDeletedWhere(): { deleted_at: { _is_null: true } } {
   return { ...ACTIVE };
 }
 
+function combine(
+  base: Record<string, unknown> | null,
+  extra?: Record<string, unknown> | null,
+): Record<string, unknown> {
+  const hasExtra = Boolean(extra && Object.keys(extra).length > 0);
+  if (!base) return hasExtra ? (extra as Record<string, unknown>) : {};
+  if (!hasExtra) return base;
+  return { _and: [base, extra] };
+}
+
 export function mergeActiveWhere(
   extra?: Record<string, unknown> | null,
 ): Record<string, unknown> {
-  if (!extra || Object.keys(extra).length === 0) return { ...ACTIVE };
-  return { _and: [ACTIVE, extra] };
+  return combine({ ...ACTIVE }, extra);
+}
+
+export function mergeDeletedWhere(
+  extra?: Record<string, unknown> | null,
+): Record<string, unknown> {
+  return combine({ ...DELETED }, extra);
+}
+
+/**
+ * 账号类列表的三态筛选（`deleted_at`）：
+ * - active  → 仅未软删除
+ * - deleted → 仅已软删除
+ * - all     → 不加限制
+ */
+export function applyRecordFilterWhere(
+  filter: RecordFilter,
+  extra?: Record<string, unknown> | null,
+): Record<string, unknown> {
+  if (filter === "all") return combine(null, extra);
+  if (filter === "deleted") return mergeDeletedWhere(extra);
+  return mergeActiveWhere(extra);
 }
 
 const MUTATIONS: Record<SoftDeleteEntityKind, string> = {

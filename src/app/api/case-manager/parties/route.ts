@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { parseRecordFilterFromParams } from "@/constants/record-filter";
 import { createPartyEntity } from "@/lib/party/create-party-entity";
 import { listCaseManagerParties } from "@/lib/party/list-cm-parties";
 import { resolveCaseManagerEntityId } from "@/lib/case-manager/fetch-dashboard-data";
@@ -19,14 +20,17 @@ export async function GET(req: Request) {
   const kind = parseKind(searchParams.get("kind"));
   if (!kind) return NextResponse.json({ error: "bad_kind" }, { status: 400 });
   const q = searchParams.get("q") ?? "";
-  const includeDeleted = searchParams.get("includeDeleted") === "1";
+  const status = parseRecordFilterFromParams(
+    searchParams.get("status"),
+    searchParams.get("includeDeleted"),
+  );
   const page = Math.max(1, Number(searchParams.get("page") ?? "1") || 1);
   const pageSize = Math.min(100, Math.max(1, Number(searchParams.get("pageSize") ?? "20") || 20));
   try {
     const cmId = await resolveCaseManagerEntityId(session);
     const result = await listCaseManagerParties(kind, cmId, session.userId, {
       q,
-      includeDeleted,
+      recordFilter: status,
       page,
       pageSize,
     });

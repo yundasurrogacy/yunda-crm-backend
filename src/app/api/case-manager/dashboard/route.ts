@@ -8,6 +8,7 @@ import {
 } from "@/lib/case-manager/fetch-dashboard-data";
 import { fetchCmFilterOptions } from "@/lib/case-manager/fetch-cm-filter-options";
 import { parseIncludeParam } from "@/lib/http/parse-include";
+import { parseRecordFilterFromParams } from "@/constants/record-filter";
 
 import { getServerSession } from "@/lib/auth/session-cookie";
 
@@ -41,7 +42,10 @@ export async function GET(req: Request) {
     caseManagerId: searchParams.get("caseManagerId") ?? undefined,
     intendedParentId: searchParams.get("intendedParentId") ?? undefined,
     surrogateId: searchParams.get("surrogateId") ?? undefined,
-    includeArchived: searchParams.get("includeArchived") === "1",
+    recordFilter: parseRecordFilterFromParams(
+      searchParams.get("status"),
+      searchParams.get("includeArchived"),
+    ),
   };
 
   const resolvedCmId = await resolveCaseManagerEntityId(session);
@@ -66,7 +70,7 @@ export async function GET(req: Request) {
           pageSize,
         }))
       : Promise.all([
-          fetchStageCounts(session, listScope, resolvedCmId, filters.includeArchived),
+          fetchStageCounts(session, listScope, resolvedCmId, filters.recordFilter),
           fetchCasesPage(session, listStage, page, pageSize, filters, listScope, resolvedCmId),
         ]).then(([counts, list]) => ({
           stage: listStage,

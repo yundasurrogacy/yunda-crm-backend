@@ -24,6 +24,12 @@ import {
 import { hrefWithReturnTo } from "@/lib/use-synced-list-query";
 import { DEFAULT_PAGE_SIZE, parsePageSize, type PageSizeOption } from "@/lib/crm-pagination";
 import { ListPager } from "@/components/ui/ListPager";
+import { RecordFilterControl } from "@/components/ui/RecordFilterControl";
+import {
+  parseRecordFilterFromParams,
+  recordFilterParam,
+  type RecordFilter,
+} from "@/constants/record-filter";
 import { AdminCaseManagerWorkload } from "@/components/admin/AdminCaseManagerWorkload";
 import type { AdminCmWorkloadPayload } from "@/lib/admin/case-manager-caseload";
 
@@ -133,8 +139,8 @@ export function CaseManagerAmDashboard({
   );
   const [surrogateId, setSurrogateId] = useState(() => readTextParam(searchParams, "surrogateId"));
   const [qInput, setQInput] = useState(() => readTextParam(searchParams, "q"));
-  const [includeArchived, setIncludeArchived] = useState(
-    () => searchParams.get("includeArchived") === "1",
+  const [status, setStatus] = useState<RecordFilter>(() =>
+    parseRecordFilterFromParams(searchParams.get("status"), searchParams.get("includeArchived")),
   );
   const [archiveBusyId, setArchiveBusyId] = useState<string | null>(null);
   const [data, setData] = useState<DashboardPayload | null>(null);
@@ -227,10 +233,26 @@ export function CaseManagerAmDashboard({
     [pathname, router, searchParams, pageSize],
   );
 
+  /** 切换「记录状态」三态：写 URL 并回到第 1 页 */
+  const onChangeStatus = useCallback(
+    (next: RecordFilter) => {
+      setStatus(next);
+      setPage(1);
+      setSelectedCaseIds([]);
+      const q = new URLSearchParams(searchParams?.toString() ?? "");
+      q.set("page", "1");
+      const param = recordFilterParam(next);
+      if (param) q.set("status", param);
+      else q.delete("status");
+      q.delete("includeArchived");
+      router.replace(`${pathname}?${q.toString()}`, { scroll: false });
+    },
+    [pathname, router, searchParams],
+  );
+
   useEffect(() => {
     const p = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
-    setMyCaseScope(readMyCaseScope(searchParams));
-    setPage(p);
+    setMyCaseScope(readMyCaseScope(searchParams));    setPage(p);
     setPageSize(parsePageSize(searchParams.get("pageSize")));
     const nextQ = readTextParam(searchParams, "q");
     const nextProcessStatus = readTextParam(searchParams, "processStatus");
@@ -244,7 +266,9 @@ export function CaseManagerAmDashboard({
     setIntendedParentId(nextIp);
     setSurrogateId(nextSm);
     if (!isMyCases) setStage(readStageFromSearch(searchParams));
-    setIncludeArchived(searchParams.get("includeArchived") === "1");
+    setStatus(
+      parseRecordFilterFromParams(searchParams.get("status"), searchParams.get("includeArchived")),
+    );
   }, [searchParams, isMyCases]);
 
   useEffect(() => {
@@ -283,7 +307,7 @@ export function CaseManagerAmDashboard({
       if (caseManagerId.trim()) url.searchParams.set("caseManagerId", caseManagerId.trim());
       if (intendedParentId.trim()) url.searchParams.set("intendedParentId", intendedParentId.trim());
       if (surrogateId.trim()) url.searchParams.set("surrogateId", surrogateId.trim());
-      if (includeArchived) url.searchParams.set("includeArchived", "1");
+      if (status !== "active") url.searchParams.set("status", status);
       if (!extrasLoadedRef.current) {
         const bits = ["options"];
         if (headingMode === "admin" && variant === "full") bits.push("workload");
@@ -351,7 +375,7 @@ export function CaseManagerAmDashboard({
     caseManagerId,
     intendedParentId,
     surrogateId,
-    includeArchived,
+    status,
     apiPath,
     headingMode,
     syncUrl,
@@ -806,22 +830,11 @@ export function CaseManagerAmDashboard({
               <button type="button" onClick={onResetFilters} className="crm-btn crm-btn-secondary crm-btn-sm">
                 {t("am_dash.reset")}
               </button>
-              <label className="inline-flex items-center gap-2 text-xs text-sage-700">
-                <input
-                  type="checkbox"
-                  checked={includeArchived}
-                  onChange={(e) => {
-                    setIncludeArchived(e.target.checked);
-                    setPage(1);
-                    const next = new URLSearchParams(searchParams.toString());
-                    if (e.target.checked) next.set("includeArchived", "1");
-                    else next.delete("includeArchived");
-                    next.set("page", "1");
-                    router.replace(`${pathname}?${next.toString()}`, { scroll: false });
-                  }}
-                />
-                {t("am_dash.show_deleted")}
-              </label>
+              <RecordFilterControl
+                value={status}
+                disabled={loading}
+                onChange={onChangeStatus}
+              />
             </div>
           </div>
         </div>

@@ -6,6 +6,7 @@ import {
   normalizeCanonicalCaseStage,
   type CanonicalCaseStage,
 } from "@/constants/case-stages";
+import { DEFAULT_RECORD_FILTER, type RecordFilter } from "@/constants/record-filter";
 import { intendedParentDisplay, surrogateDisplayName } from "@/lib/case-manager/display-names";
 import { resolveProcessStatusForWorkflow } from "@/lib/case-manager/process-status";
 import {
@@ -76,8 +77,8 @@ export type CasesQueryFilters = {
   caseManagerId?: string;
   intendedParentId?: string;
   surrogateId?: string;
-  /** 默认 false：列表排除已软归档案例 */
-  includeArchived?: boolean;
+  /** 记录状态三态：全部 / 正常 / 已删除（案例以 archived_at 表示软删除），默认只看正常 */
+  recordFilter?: RecordFilter;
 };
 
 /** 案例经理端 API：全部（创建∪负责）/ 我负责 / 我创建；管理端列表用 `admin_all`。 */
@@ -205,8 +206,11 @@ export function buildCasesWhere(
     clauses.push(scope);
   }
   clauses.push(...buildQueryClauses(filters));
-  if (!filters.includeArchived) {
+  const recordFilter = filters.recordFilter ?? DEFAULT_RECORD_FILTER;
+  if (recordFilter === "active") {
     clauses.push({ archived_at: { _is_null: true } });
+  } else if (recordFilter === "deleted") {
+    clauses.push({ archived_at: { _is_null: false } });
   }
   if (clauses.length === 0) return {};
   if (clauses.length === 1) return clauses[0]!;
@@ -217,7 +221,7 @@ export async function fetchStageCounts(
   session: CrmSession,
   listScope: CasesListScope,
   resolvedCaseManagerEntityId?: string | null,
-  includeArchived = false,
+  recordFilter: RecordFilter = DEFAULT_RECORD_FILTER,
 ): Promise<Record<CanonicalCaseStage, number>> {
   const client = getClient();
   const variables: Record<string, unknown> = {};
@@ -225,7 +229,7 @@ export async function fetchStageCounts(
   const fields: string[] = [];
   CANONICAL_CASE_STAGES.forEach((stage, i) => {
     variables[`w${i}`] = buildCasesWhere(
-      { stage, includeArchived },
+      { stage, recordFilter },
       listScope,
       resolvedCaseManagerEntityId,
       session.userId,

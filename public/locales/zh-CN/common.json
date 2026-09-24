@@ -5,6 +5,12 @@
   "select_placeholder": "请选择",
   "select_search": "搜索…",
   "select_no_matches": "无匹配项",
+  "record_filter": {
+    "label": "记录状态",
+    "all": "全部",
+    "active": "正常",
+    "deleted": "已删除"
+  },
   "language": {
     "label": "语言",
     "zhCN": "中文",

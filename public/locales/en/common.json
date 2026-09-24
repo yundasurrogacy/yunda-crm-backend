@@ -5,6 +5,12 @@
   "select_placeholder": "Select…",
   "select_search": "Search…",
   "select_no_matches": "No matches",
+  "record_filter": {
+    "label": "Records",
+    "all": "All",
+    "active": "Active",
+    "deleted": "Deleted"
+  },
   "language": {
     "label": "Language",
     "zhCN": "中文",

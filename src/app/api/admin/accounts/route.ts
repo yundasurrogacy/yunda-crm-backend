@@ -7,7 +7,8 @@ import { fetchCaseManagerCaseloads } from "@/lib/admin/case-manager-caseload";
 import { createCaseManagerEntity } from "@/lib/admin/create-case-manager-entity";
 import { createPartyEntity } from "@/lib/party/create-party-entity";
 import { intendedParentDisplay, surrogateDisplayName } from "@/lib/case-manager/display-names";
-import { mergeActiveWhere } from "@/lib/soft-delete/entity-soft-delete";
+import { applyRecordFilterWhere } from "@/lib/soft-delete/entity-soft-delete";
+import { parseRecordFilterFromParams } from "@/constants/record-filter";
 import type { EntityKind } from "@/lib/admin/entity-profile";
 
 type AccountKind = "case_manager" | "intended_parent" | "surrogate_mother";
@@ -97,7 +98,10 @@ export async function GET(req: Request) {
   const kind = parseKind(searchParams.get("kind"));
   if (!kind) return NextResponse.json({ error: "bad_kind" }, { status: 400 });
   const q = (searchParams.get("q") ?? "").trim();
-  const includeDeleted = searchParams.get("includeDeleted") === "1";
+  const status = parseRecordFilterFromParams(
+    searchParams.get("status"),
+    searchParams.get("includeDeleted"),
+  );
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
   const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get("pageSize") ?? "20", 10) || 20));
   const limit = pageSize;
@@ -105,9 +109,7 @@ export async function GET(req: Request) {
   try {
     const client = getClient();
     if (kind === "case_manager") {
-      const where = includeDeleted
-        ? searchWhereCaseManagers(q)
-        : mergeActiveWhere(searchWhereCaseManagers(q));
+      const where = applyRecordFilterWhere(status, searchWhereCaseManagers(q));
       const data = await client.execute<{
         case_managers_aggregate: { aggregate: { count: number } | null };
         case_managers: {
@@ -136,9 +138,7 @@ export async function GET(req: Request) {
       });
     }
     if (kind === "intended_parent") {
-      const where = includeDeleted
-        ? searchWhereIpOrSm(q)
-        : mergeActiveWhere(searchWhereIpOrSm(q));
+      const where = applyRecordFilterWhere(status, searchWhereIpOrSm(q));
       const data = await client.execute<{
         intended_parents_aggregate: { aggregate: { count: number } | null };
         intended_parents: {
@@ -166,9 +166,7 @@ export async function GET(req: Request) {
         pageSize,
       });
     }
-    const where = includeDeleted
-      ? searchWhereIpOrSm(q)
-      : mergeActiveWhere(searchWhereIpOrSm(q));
+    const where = applyRecordFilterWhere(status, searchWhereIpOrSm(q));
     const data = await client.execute<{
       surrogate_mothers_aggregate: { aggregate: { count: number } | null };
       surrogate_mothers: {

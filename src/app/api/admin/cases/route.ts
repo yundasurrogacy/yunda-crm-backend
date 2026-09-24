@@ -10,6 +10,7 @@ import { getServerSession } from "@/lib/auth/session-cookie";
 import { fetchAdminCaseOptions } from "@/lib/admin/fetch-admin-case-options";
 import { fetchAdminWorkloadPayload } from "@/lib/admin/case-manager-caseload";
 import { parseIncludeParam } from "@/lib/http/parse-include";
+import { parseRecordFilterFromParams } from "@/constants/record-filter";
 import { fetchSurrogatesAvailableForMatch } from "@/lib/case-manager/match-gc";
 
 const ADMIN_SCOPE = "admin_all" satisfies CasesListScope;
@@ -93,13 +94,17 @@ export async function GET(req: Request) {
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
   const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get("pageSize") ?? "20", 10) || 20));
   const skipCounts = searchParams.get("counts") === "0";
+  const recordFilter = parseRecordFilterFromParams(
+    searchParams.get("status"),
+    searchParams.get("includeArchived"),
+  );
   const filters = {
     q: searchParams.get("q") ?? undefined,
     processStatus: searchParams.get("processStatus") ?? undefined,
     caseManagerId: searchParams.get("caseManagerId") ?? undefined,
     intendedParentId: searchParams.get("intendedParentId") ?? undefined,
     surrogateId: searchParams.get("surrogateId") ?? undefined,
-    includeArchived: searchParams.get("includeArchived") === "1",
+    recordFilter,
   };
   const include = parseIncludeParam(searchParams.get("include"));
   try {
@@ -112,7 +117,7 @@ export async function GET(req: Request) {
           pageSize,
         }))
       : Promise.all([
-          fetchStageCounts(session, ADMIN_SCOPE, null, filters.includeArchived),
+          fetchStageCounts(session, ADMIN_SCOPE, null, filters.recordFilter),
           fetchCasesPage(session, stage, page, pageSize, filters, ADMIN_SCOPE),
         ]).then(([counts, list]) => ({ stage, counts, ...list, page, pageSize }));
 

@@ -3,6 +3,13 @@ import { getClient } from "@/config-lib/graphql-client";
 import { bindUserToBusinessRole, type BindRoleKind } from "@/lib/admin/bind-user-role";
 import { md5PasswordHexLower } from "@/lib/auth/password";
 import { getServerSession } from "@/lib/auth/session-cookie";
+import {
+  BINDING_RELATION,
+  parseUserBindingFilter,
+  parseUserRoleFilter,
+  type UserBindingFilter,
+  type UserRoleFilter,
+} from "@/constants/user-filters";
 
 const LIST_USERS = `
   query AdminListUsers($where: users_bool_exp!, $limit: Int!, $offset: Int!) {
@@ -64,6 +71,40 @@ function parseBindKinds(raw: unknown): BindRoleKind[] {
   return [...new Set(out)];
 }
 
+/**
+ * 由「角色 + 绑定状态」拼出 users 的 GraphQL where。
+ *
+ * 说明：users → case_manager / intended_parent / surrogate_mother 都是对象关系
+ * （反向 FK 上有唯一约束），因此：
+ * - 「绑 X」 用 { rel: { id: { _is_null: false } } }
+ * - 「未绑定」用 _not + _or 组合（对象关系不支持 { _is_null: true }）
+ */
+function buildUsersWhere(
+  q: string,
+  role: UserRoleFilter,
+  binding: UserBindingFilter,
+): Record<string, unknown> {
+  const clauses: Record<string, unknown>[] = [];
+  if (q) clauses.push({ email: { _ilike: `%${q}%` } });
+  if (role !== "all") clauses.push({ role: { _eq: role } });
+
+  if (binding === "unbound") {
+    clauses.push({
+      _not: {
+        _or: (Object.values(BINDING_RELATION) as (keyof typeof BINDING_RELATION)[]).map((rel) => ({
+          [rel]: { id: { _is_null: false } },
+        })),
+      },
+    });
+  } else if (binding !== "all") {
+    clauses.push({ [BINDING_RELATION[binding]]: { id: { _is_null: false } } });
+  }
+
+  if (clauses.length === 0) return {};
+  if (clauses.length === 1) return clauses[0]!;
+  return { _and: clauses };
+}
+
 export async function GET(req: Request) {
   const session = await getServerSession();
   if (!session || session.role !== "admin") {
@@ -71,11 +112,13 @@ export async function GET(req: Request) {
   }
   const { searchParams } = new URL(req.url);
   const q = (searchParams.get("q") ?? "").trim();
+  const role = parseUserRoleFilter(searchParams.get("role"));
+  const binding = parseUserBindingFilter(searchParams.get("binding"));
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
   const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get("pageSize") ?? "20", 10) || 20));
   const limit = pageSize;
   const offset = (page - 1) * limit;
-  const where = q ? { email: { _ilike: `%${q}%` } } : {};
+  const where = buildUsersWhere(q, role, binding);
   try {
     const client = getClient();
     const data = await client.execute<{

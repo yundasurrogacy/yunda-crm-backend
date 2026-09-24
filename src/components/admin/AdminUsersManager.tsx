@@ -9,8 +9,26 @@ import { ListPager } from "@/components/ui/ListPager";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { SelectMenu } from "@/components/ui/SelectMenu";
 import { useSyncedListQuery } from "@/lib/use-synced-list-query";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import {
+  USER_BINDING_FILTERS,
+  USER_BINDING_LABEL_KEY,
+  USER_ROLE_FILTERS,
+  USER_ROLE_LABEL_KEY,
+  bindingFilterParam,
+  parseUserBindingFilter,
+  parseUserRoleFilter,
+  roleFilterParam,
+  type UserBindingFilter,
+  type UserRoleFilter,
+} from "@/constants/user-filters";
 
 const ROLE_VALUES = ["user", "admin", "operator"] as const;
+
+/** 表格里展示角色中文名；未知角色原样回退 */
+function roleKeyOf(raw: string): UserRoleFilter {
+  return (USER_ROLE_FILTERS as readonly string[]).includes(raw) ? (raw as UserRoleFilter) : "user";
+}
 
 type UserRow = {
   userId: string;
@@ -53,7 +71,12 @@ function RoleField({
 export function AdminUsersManager() {
   const { t } = useTranslation("portal");
   const confirm = useConfirm();
-  const { page, pageSize, q, replaceQuery } = useSyncedListQuery();
+  const { page, pageSize, q, href, replaceQuery } = useSyncedListQuery();
+  const router = useRouter();
+  const pathname = usePathname() ?? "";
+  const searchParams = useSearchParams();
+  const role = parseUserRoleFilter(searchParams.get("role"));
+  const binding = parseUserBindingFilter(searchParams.get("binding"));
   const [rows, setRows] = useState<UserRow[]>([]);
   const [qInput, setQInput] = useState(q);
   const [total, setTotal] = useState(0);
@@ -85,6 +108,8 @@ export function AdminUsersManager() {
       url.searchParams.set("page", String(page));
       url.searchParams.set("pageSize", String(pageSize));
       if (q.trim()) url.searchParams.set("q", q.trim());
+      if (role !== "all") url.searchParams.set("role", role);
+      if (binding !== "all") url.searchParams.set("binding", binding);
       const res = await fetch(url.pathname + url.search);
       if (!res.ok) throw new Error("load");
       const json = (await res.json()) as { rows: UserRow[]; total: number };
@@ -95,7 +120,20 @@ export function AdminUsersManager() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, q]);
+  }, [page, pageSize, q, role, binding, t]);
+
+  /** 切换角色 / 绑定状态筛选：写 URL 并回到第 1 页 */
+  const setFilterParam = useCallback(
+    (key: "role" | "binding", value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (value === "all") params.delete(key);
+      else params.set(key, value);
+      params.delete("page");
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [pathname, router, searchParams],
+  );
 
   useEffect(() => {
     setQInput(q);
@@ -249,6 +287,36 @@ export function AdminUsersManager() {
             >
               {t("admin_users.search_btn")}
             </button>
+            <div className="flex items-center gap-1.5 text-xs text-sage-700">
+              <span className="shrink-0">{t("admin_users.filter_role")}</span>
+              <SelectMenu
+                id="users-filter-role"
+                compact
+                className="min-w-[7.5rem]"
+                value={role}
+                disabled={loading}
+                onChange={(v) => setFilterParam("role", v)}
+                options={USER_ROLE_FILTERS.map((r) => ({
+                  value: r,
+                  label: t(USER_ROLE_LABEL_KEY[r]),
+                }))}
+              />
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-sage-700">
+              <span className="shrink-0">{t("admin_users.filter_binding")}</span>
+              <SelectMenu
+                id="users-filter-binding"
+                compact
+                className="min-w-[8.5rem]"
+                value={binding}
+                disabled={loading}
+                onChange={(v) => setFilterParam("binding", v)}
+                options={USER_BINDING_FILTERS.map((b) => ({
+                  value: b,
+                  label: t(USER_BINDING_LABEL_KEY[b]),
+                }))}
+              />
+            </div>
           </div>
         </div>
         </div>
@@ -284,7 +352,7 @@ export function AdminUsersManager() {
                   <tr key={r.userId}>
                     <td className="crm-freeze-start tabular-nums">{r.userId}</td>
                     <td className="break-all">{r.email}</td>
-                    <td>{r.role}</td>
+                    <td>{t(USER_ROLE_LABEL_KEY[roleKeyOf(r.role)])}</td>
                     <td className="tabular-nums">{r.caseManagerId ?? "—"}</td>
                     <td className="tabular-nums">{r.intendedParentId ?? "—"}</td>
                     <td className="tabular-nums">{r.surrogateId ?? "—"}</td>

@@ -42,18 +42,24 @@ export function useSyncedListQuery() {
       const nextPageSize = patch.pageSize ?? pageSize;
       const nextQ = (patch.q !== undefined ? patch.q : q).trim();
       const nextStatus = patch.status ?? status;
-      const params = new URLSearchParams();
+      // 以现有参数为基础改写，保留本 hook 不认识的参数（如账号列表的 role / binding），
+      // 避免翻页或搜索时把其他筛选条件冲掉。
+      const params = new URLSearchParams(searchParams.toString());
       if (nextPage > 1) params.set("page", String(nextPage));
+      else params.delete("page");
       if (nextPageSize !== DEFAULT_PAGE_SIZE) params.set("pageSize", String(nextPageSize));
+      else params.delete("pageSize");
       if (nextQ) params.set("q", nextQ);
+      else params.delete("q");
       const statusParam = recordFilterParam(nextStatus);
       if (statusParam) params.set("status", statusParam);
+      else params.delete("status");
       const qs = params.toString();
       const next = qs ? `${pathname}?${qs}` : pathname;
       if (next === href) return;
       router.replace(next, { scroll: false });
     },
-    [href, page, pageSize, pathname, q, router, status],
+    [href, page, pageSize, pathname, q, router, searchParams, status],
   );
 
   return { page, pageSize, q, status, href, replaceQuery, pathname };

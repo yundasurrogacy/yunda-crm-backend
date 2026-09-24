@@ -17,6 +17,7 @@ export default function SurrogateMotherCaseDetailPage() {
         ["/surrogate_mother"],
         "/surrogate_mother/my-cases",
       )}
+      viewer="surrogate_mother"
       canPostMessages
     />
   );

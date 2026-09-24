@@ -1,43 +1,40 @@
-import { AM_STAGE_FIELD_GROUPS } from "@/constants/am-stage-field-groups";
 import type { CanonicalCaseStage } from "@/constants/case-stages";
 import { type AmWorkspacePayload } from "@/lib/case-manager/am-workspace-model";
 import { surrogateDisplayName } from "@/lib/case-manager/display-names";
 import type { AmCaseDetail } from "@/lib/case-manager/fetch-case-detail";
-import { GC_PROFILE_SECTIONS } from "@/constants/gc-profile-schema";
-import { IP_PROFILE_SECTIONS } from "@/constants/ip-profile-schema";
-import type { ProfileSectionDef } from "@/constants/gc-profile-schema";
-
-/** 门户不可见的 GC profile 分区（内部流程 / CM 备注） */
-const PARTY_HIDDEN_GC_SECTION_IDS = new Set(["internal", "remark_overview"]);
+import { GC_PROFILE_SECTIONS, type ProfileSectionDef } from "@/constants/gc-profile-schema";
+import {
+  PARTY_HIDDEN_GC_SECTION_IDS,
+  PARTY_HIDDEN_IP_FIELD_KEYS,
+  clientViewGcProfileSections,
+  clientViewOfGcProfileData,
+  gcViewIpProfileSections,
+  ipViewIpProfileSections,
+  ipViewOfIpProfileData,
+  isStageFieldVisibleToParty,
+  type PartyViewer,
+} from "@/constants/portal-exposure";
 
 /**
- * 对客（尤其 IP）默认隐藏的 GC 联系方式字段。
- * 孕妈自助资料页仍用完整可见分区，不经过此集合。
+ * 对客（准父母 / 代孕母）门户脱敏。
+ *
+ * 可见性规则集中在 `@/constants/portal-exposure`（显式白名单 + 默认不开放），
+ * 本文件只负责「把规则应用到案例详情」。注意 IP 端与 GC 端共用同一个案例页组件，
+ * 所以这里必须按 `viewer` 分流，否则会误伤（例如 GC 看自己档案被当成对客视角裁剪）。
  */
-export const PARTY_HIDDEN_GC_CONTACT_KEYS = new Set([
-  "phone",
-  "email",
-  "home_address",
-  "partner_contact",
-  "gc_emergency_contact",
-]);
 
-/** 客户端不可见的 IP profile 字段（管理端保留） */
-const PARTY_HIDDEN_IP_FIELD_KEYS = new Set(["referral_source"]);
-
-function stripHiddenGcProfileKeys(profileData: unknown): unknown {
-  if (!profileData || typeof profileData !== "object" || Array.isArray(profileData)) {
-    return profileData;
+/** 阶段字段脱敏：只保留对客白名单内的字段（未列入的一律丢弃） */
+function stripStageDataToWhitelist(payload: AmWorkspacePayload): AmWorkspacePayload {
+  const byStage: AmWorkspacePayload["byStage"] = {};
+  for (const [stage, row] of Object.entries(payload.byStage)) {
+    if (!row) continue;
+    const next = { ...row };
+    for (const key of Object.keys(next)) {
+      if (!isStageFieldVisibleToParty(stage, key)) delete next[key];
+    }
+    byStage[stage as CanonicalCaseStage] = next;
   }
-  const hiddenKeys = new Set<string>(PARTY_HIDDEN_GC_CONTACT_KEYS);
-  for (const section of GC_PROFILE_SECTIONS) {
-    if (!PARTY_HIDDEN_GC_SECTION_IDS.has(section.id)) continue;
-    for (const f of section.fields) hiddenKeys.add(f.key);
-  }
-  if (hiddenKeys.size === 0) return profileData;
-  const next: Record<string, unknown> = { ...(profileData as Record<string, unknown>) };
-  for (const key of hiddenKeys) delete next[key];
-  return next;
+  return { v: 1, byStage };
 }
 
 function stripHiddenIpProfileKeys(profileData: unknown): unknown {
@@ -49,36 +46,26 @@ function stripHiddenIpProfileKeys(profileData: unknown): unknown {
   return next;
 }
 
-function stripInternalOnlyStageData(payload: AmWorkspacePayload): AmWorkspacePayload {
-  const hidden = new Set<string>();
-  for (const group of AM_STAGE_FIELD_GROUPS) {
-    for (const field of group.fields) {
-      if (field.internalOnly) hidden.add(field.key);
-    }
-  }
-  const byStage: AmWorkspacePayload["byStage"] = {};
-  for (const [stage, row] of Object.entries(payload.byStage)) {
-    if (!row) continue;
-    const next = { ...row };
-    for (const key of hidden) delete next[key];
-    byStage[stage as CanonicalCaseStage] = next;
-  }
-  return { v: 1, byStage };
-}
-
 /**
- * IP/GC 门户详情脱敏：
- * - 阶段字段对客可见，但去掉 internalOnly（心理医生姓名/邮箱）
- * - 去掉 GC 内部备注分区字段
- * - 去掉 GC 电话/邮箱等联系方式（对客默认隐藏）
- * - 去掉 IP referral_source
- * - 案例卡片副标题不再回退到孕妈邮箱
+ * 门户案例详情脱敏（按 viewer 分流）：
+ * - 阶段字段：只保留 `PARTY_VISIBLE_STAGE_FIELDS` 白名单（IP/GC 共用同一套对客清单）
+ * - 代孕母档案：去内部分区与联系方式，保留完整资料（客户已确认要保留，不做收窄）
+ * - IP 视角的准父母档案：只留下单清单里的分区（不含项目偏好），避免报文带出未开放数据
+ * - 无论哪种视角，都不回退到邮箱，避免泄露联系方式
  */
-export function redactCaseDetailForParty(detail: AmCaseDetail): AmCaseDetail {
-  const gcProfile = stripHiddenGcProfileKeys(detail.surrogate.profile_data);
+export function redactCaseDetailForParty(
+  detail: AmCaseDetail,
+  viewer: PartyViewer,
+): AmCaseDetail {
+  const gcProfile = clientViewOfGcProfileData(detail.surrogate.profile_data);
+  const ipProfile =
+    viewer === "intended_parent"
+      ? ipViewOfIpProfileData(detail.intended_parent.profile_data)
+      : stripHiddenIpProfileKeys(detail.intended_parent.profile_data);
+
   return {
     ...detail,
-    stage_data: stripInternalOnlyStageData(detail.stage_data),
+    stage_data: stripStageDataToWhitelist(detail.stage_data),
     surrogate: {
       ...detail.surrogate,
       email: null,
@@ -88,30 +75,26 @@ export function redactCaseDetailForParty(detail: AmCaseDetail): AmCaseDetail {
     },
     intended_parent: {
       ...detail.intended_parent,
-      profile_data: stripHiddenIpProfileKeys(detail.intended_parent.profile_data),
+      profile_data: ipProfile,
     },
   };
 }
 
-/** 孕妈自助编辑：去掉内部分区，保留本人联系方式 */
+/** 案例页代孕母档案分区（IP 与 GC 本人一致） */
+export function partyGcProfileSections(): ProfileSectionDef[] {
+  return clientViewGcProfileSections();
+}
+
+/** 案例页准父母档案分区：IP 与 GC 视角不同 */
+export function partyIpProfileSectionsFor(viewer: PartyViewer): ProfileSectionDef[] {
+  return viewer === "intended_parent"
+    ? ipViewIpProfileSections()
+    : gcViewIpProfileSections();
+}
+
+/** 孕妈自助资料页：去掉内部分区，保留本人联系方式 */
 export function partyVisibleGcProfileSections() {
   return GC_PROFILE_SECTIONS.filter((s) => !PARTY_HIDDEN_GC_SECTION_IDS.has(s.id));
 }
 
-/** 案例详情对客展示 GC：再隐藏电话/邮箱等联系字段 */
-export function partyVisibleGcProfileSectionsForClient(): ProfileSectionDef[] {
-  return partyVisibleGcProfileSections()
-    .map((section) => ({
-      ...section,
-      fields: section.fields.filter((f) => !PARTY_HIDDEN_GC_CONTACT_KEYS.has(f.key)),
-    }))
-    .filter((section) => section.fields.length > 0);
-}
-
-/** 门户 IP 档案：去掉推荐来源等仅管理端字段 */
-export function partyVisibleIpProfileSections(): ProfileSectionDef[] {
-  return IP_PROFILE_SECTIONS.map((section) => ({
-    ...section,
-    fields: section.fields.filter((f) => !PARTY_HIDDEN_IP_FIELD_KEYS.has(f.key)),
-  })).filter((section) => section.fields.length > 0);
-}
+export type { PartyViewer };

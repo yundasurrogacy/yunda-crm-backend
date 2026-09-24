@@ -171,6 +171,11 @@
         "key": "monitoring_clinic_fax",
         "label": "Monitoring Clinic Fax",
         "type": "Fax / Text"
+      },
+      {
+        "key": "anticipated_day_1",
+        "label": "Anticipated Day 1",
+        "type": "Date"
       }
     ]
   },

@@ -12,8 +12,9 @@ import type { CaseFileRow } from "@/lib/case-manager/case-files";
 import type { CaseMessageRow } from "@/lib/case-manager/case-messages";
 import type { PartyTrustSnapshot } from "@/lib/party/fetch-party-case-page";
 import {
-  partyVisibleGcProfileSectionsForClient,
-  partyVisibleIpProfileSections,
+  partyGcProfileSections,
+  partyIpProfileSectionsFor,
+  type PartyViewer,
 } from "@/lib/party/redact-case-detail-for-party";
 import { translateProcessStatus } from "@/lib/i18n/translate-process-status";
 
@@ -33,12 +34,15 @@ export function PartyCaseDetailPage({
   caseId,
   apiBase,
   listHref,
+  viewer,
   canPostMessages = false,
   showTrust = false,
 }: {
   caseId: string;
   apiBase: string;
   listHref: string;
+  /** 当前看的是哪个门户的视角：IP 与 GC 共用本组件，但可见字段不同 */
+  viewer: PartyViewer;
   /** IP / 孕妈均可发留言 */
   canPostMessages?: boolean;
   /** 仅准父母端展示信托 */
@@ -173,7 +177,7 @@ export function PartyCaseDetailPage({
               title={t("case_detail.section_surrogate")}
               subtitle={data.surrogate.displayName || null}
               profileTitle={t("case_detail.section_gc_profile")}
-              sections={partyVisibleGcProfileSectionsForClient()}
+              sections={partyGcProfileSections()}
               profileData={data.surrogate.profile_data}
               lng={lng}
               emptyMessage={t("case_detail.profile_empty_gc")}
@@ -183,7 +187,7 @@ export function PartyCaseDetailPage({
               title={t("case_detail.section_intended_parents")}
               subtitle={data.intended_parent.displayName || data.intended_parent.email || null}
               profileTitle={t("case_detail.section_ip_profile")}
-              sections={partyVisibleIpProfileSections()}
+              sections={partyIpProfileSectionsFor(viewer)}
               profileData={data.intended_parent.profile_data}
               lng={lng}
               emptyMessage={t("case_detail.profile_empty_ip")}

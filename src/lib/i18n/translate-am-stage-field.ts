@@ -15,6 +15,7 @@ const exactZh: Record<string, string> = {
   "Case Manager": "案例经理",
   "GC Coordinator": "代孕母亲协调员",
   "Matching Coordinator": "匹配协调员",
+  "Anticipated Day 1": "预计例假第一天",
   "Base Compensation": "基础补偿",
   "Experienced Surrogate": "有经验的代孕母亲",
   Phone: "电话",
@@ -101,6 +102,18 @@ const exactZh: Record<string, string> = {
   "Medical Clearance Complete Date": "医疗筛查通过日期",
   "Medical Records Approval Date": "医疗报告审核通过日期",
   "Medical Screening Appointment Date": "医学筛查预约日期",
+  // 以下为对客清单（CRM IP 端口.xlsx）里点名的字段，避免拼成「IVFGraduated日期」这类中英混杂
+  "IVF Graduated Date": "IVF 疗程结案日期",
+  "First OB Date": "第一次产科B超检查",
+  "NT Date": "NT 检查日期",
+  "NIPT Date": "NIPT 检查日期",
+  "Anatomy Scan Date": "大排畸超声检查日期",
+  "Glucose Test Date": "妊娠糖尿病筛查日期",
+  "Group B Strep": "B 群链球菌（GBS）检测",
+  "OB/GYN Physician Name": "妇产科医师姓名",
+  "OB/GYN Clinic": "妇产科诊所",
+  "OB/GYN Phone": "妇产科诊所电话",
+  "OB/GYN Email": "妇产科诊所邮箱",
 };
 
 const phraseZh: Array<[RegExp, string]> = [

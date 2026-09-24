@@ -42,6 +42,10 @@ export const IP_PROFILE_SECTIONS: ProfileSectionDef[] = [
       { key: "ivf_doctor", labelEn: "IVF Doctor", labelZh: "IVF 主治医生" },
       { key: "ivf_coordinator", labelEn: "IVF Coordinator", labelZh: "IVF 协调员" },
       { key: "ivf_clinic_contact_email", labelEn: "IVF Clinic Contact Email", labelZh: "IVF 诊所邮箱" },
+      /** 补：客户「CRM IP 端口.xlsx / Service Provider Information」还列了地址、电话、传真 */
+      { key: "ivf_clinic_location", labelEn: "IVF Clinic Location", labelZh: "IVF 诊所地址" },
+      { key: "ivf_clinic_phone", labelEn: "IVF Clinic Phone", labelZh: "IVF 诊所电话" },
+      { key: "ivf_clinic_fax", labelEn: "IVF Clinic Fax", labelZh: "IVF 诊所传真" },
     ],
   },
   {

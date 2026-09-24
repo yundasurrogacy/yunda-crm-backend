@@ -13,6 +13,7 @@ export default function IntendedParentCaseDetailPage() {
       caseId={id}
       apiBase="/api/intended-parent/cases"
       listHref={safeReturnTo(searchParams.get("returnTo"), ["/intended_parent"], "/intended_parent/my-cases")}
+      viewer="intended_parent"
       canPostMessages
       showTrust
     />

@@ -225,7 +225,10 @@ export async function fetchCaseDetail(
   };
 
   if (options.mode === "intended_parent_api" || options.mode === "surrogate_mother_api") {
-    return redactCaseDetailForParty(detail);
+    return redactCaseDetailForParty(
+      detail,
+      options.mode === "intended_parent_api" ? "intended_parent" : "surrogate_mother",
+    );
   }
   return detail;
 }

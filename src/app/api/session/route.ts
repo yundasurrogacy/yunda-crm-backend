@@ -41,6 +41,12 @@ export async function POST(req: Request) {
             { status: 503 },
           );
         }
+        if (result.reason === "disabled") {
+          return NextResponse.json(
+            { error: "该账号已被停用，无法登录。如有疑问请联系管理员。" },
+            { status: 403 },
+          );
+        }
         return NextResponse.json(
           { error: "邮箱或密码不正确，请重新输入。" },
           { status: 401 },

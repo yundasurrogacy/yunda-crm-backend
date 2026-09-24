@@ -8,6 +8,7 @@ type UserLoginRow = {
   email: string;
   password: string;
   role: string;
+  disabled_at: string | null;
   case_managers: { id: string }[];
   intended_parents: { id: string }[];
   surrogate_mothers: { id: string }[];
@@ -20,6 +21,7 @@ const LOGIN_QUERY = `
       email
       password
       role
+      disabled_at
       case_managers(where: { deleted_at: { _is_null: true } }, limit: 1) { id }
       intended_parents(where: { deleted_at: { _is_null: true } }, limit: 1) { id }
       surrogate_mothers(where: { deleted_at: { _is_null: true } }, limit: 1) { id }
@@ -32,7 +34,7 @@ export async function authenticateCrmUser(
   passwordPlain: string,
 ): Promise<
   | { ok: true; session: CrmSession }
-  | { ok: false; reason: "invalid_credentials" | "misconfigured" }
+  | { ok: false; reason: "invalid_credentials" | "disabled" | "misconfigured" }
 > {
   const secret =
     graphqlClientInstanceConfig.headers["x-hasura-admin-secret"] ?? "";
@@ -60,6 +62,11 @@ export async function authenticateCrmUser(
   const row = rows[0];
   if (!row || !verifyStoredPassword(passwordPlain, row.password)) {
     return { ok: false, reason: "invalid_credentials" };
+  }
+
+  // 停用账号：即使密码正确也拒绝登录。已登录的会话由会话校验兜住。
+  if (row.disabled_at) {
+    return { ok: false, reason: "disabled" };
   }
 
   const portals: PortalId[] = [];

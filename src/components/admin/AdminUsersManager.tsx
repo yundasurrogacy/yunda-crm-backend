@@ -8,8 +8,10 @@ import { CrmModal } from "@/components/ui/CrmModal";
 import { ListPager } from "@/components/ui/ListPager";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { SelectMenu } from "@/components/ui/SelectMenu";
+import { RecordFilterControl } from "@/components/ui/RecordFilterControl";
 import { useSyncedListQuery } from "@/lib/use-synced-list-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { parseRecordFilterFromParams } from "@/constants/record-filter";
 import {
   USER_BINDING_FILTERS,
   USER_BINDING_LABEL_KEY,
@@ -30,11 +32,26 @@ function roleKeyOf(raw: string): UserRoleFilter {
   return (USER_ROLE_FILTERS as readonly string[]).includes(raw) ? (raw as UserRoleFilter) : "user";
 }
 
+/** 停用接口的错误码 → 文案 key */
+function errorKeyForDisable(code: string | undefined): string {
+  switch (code) {
+    case "cannot_disable_self":
+      return "admin_users.error_disable_self";
+    case "last_admin":
+      return "admin_users.error_disable_last_admin";
+    case "not_found":
+      return "admin_users.error_disable_not_found";
+    default:
+      return "admin_users.error_disable";
+  }
+}
+
 type UserRow = {
   userId: string;
   email: string;
   role: string;
   createdAt: string;
+  disabledAt: string | null;
   caseManagerId: string | null;
   intendedParentId: string | null;
   surrogateId: string | null;
@@ -77,9 +94,11 @@ export function AdminUsersManager() {
   const searchParams = useSearchParams();
   const role = parseUserRoleFilter(searchParams.get("role"));
   const binding = parseUserBindingFilter(searchParams.get("binding"));
+  const status = parseRecordFilterFromParams(searchParams.get("status"));
   const [rows, setRows] = useState<UserRow[]>([]);
   const [qInput, setQInput] = useState(q);
   const [total, setTotal] = useState(0);
+  const [busyUserId, setBusyUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
@@ -110,6 +129,7 @@ export function AdminUsersManager() {
       if (q.trim()) url.searchParams.set("q", q.trim());
       if (role !== "all") url.searchParams.set("role", role);
       if (binding !== "all") url.searchParams.set("binding", binding);
+      if (status !== "active") url.searchParams.set("status", status);
       const res = await fetch(url.pathname + url.search);
       if (!res.ok) throw new Error("load");
       const json = (await res.json()) as { rows: UserRow[]; total: number };
@@ -120,13 +140,14 @@ export function AdminUsersManager() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, q, role, binding, t]);
+  }, [page, pageSize, q, role, binding, status, t]);
 
-  /** 切换角色 / 绑定状态筛选：写 URL 并回到第 1 页 */
+  /** 切换角色 / 绑定状态 / 账号状态筛选：写 URL 并回到第 1 页 */
   const setFilterParam = useCallback(
-    (key: "role" | "binding", value: string) => {
+    (key: "role" | "binding" | "status", value: string) => {
       const params = new URLSearchParams(searchParams.toString());
-      if (value === "all") params.delete(key);
+      const isDefault = key === "status" ? value === "active" : value === "all";
+      if (isDefault) params.delete(key);
       else params.set(key, value);
       params.delete("page");
       const qs = params.toString();
@@ -142,6 +163,37 @@ export function AdminUsersManager() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  /** 停用 / 恢复账号：停用后该账号立即无法登录，且进行中的会话立即失效 */
+  async function onToggleDisabled(userId: string, email: string, disabled: boolean) {
+    const ok = await confirm({
+      message: t(disabled ? "admin_users.disable_confirm" : "admin_users.enable_confirm", {
+        email,
+      }),
+      danger: disabled,
+    });
+    if (!ok) return;
+    setMessage(null);
+    setBusyUserId(userId);
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/disabled`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ disabled }),
+      });
+      const json = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) {
+        setMessage(t(errorKeyForDisable(json.error)));
+        return;
+      }
+      await load();
+      setMessage(t(disabled ? "admin_users.disable_ok" : "admin_users.enable_ok", { email }));
+    } catch {
+      setMessage(t("admin_users.error_disable"));
+    } finally {
+      setBusyUserId(null);
+    }
+  }
 
   async function onUnbind(userId: string, kind: BindRoleKind) {
     const confirmKey =
@@ -218,7 +270,12 @@ export function AdminUsersManager() {
         body: JSON.stringify(body),
       });
       if (!res.ok) {
-        setEditError(t("admin_users.error_update"));
+        const json = (await res.json().catch(() => ({}))) as { error?: string };
+        setEditError(
+          json.error === "last_admin"
+            ? t("admin_users.error_demote_last_admin")
+            : t("admin_users.error_update"),
+        );
         return;
       }
       setEdit(null);
@@ -317,6 +374,12 @@ export function AdminUsersManager() {
                 }))}
               />
             </div>
+            <RecordFilterControl
+              value={status}
+              disabled={loading}
+              deletedLabel={t("admin_users.filter_status_disabled")}
+              onChange={(v) => setFilterParam("status", v)}
+            />
           </div>
         </div>
         </div>
@@ -328,6 +391,7 @@ export function AdminUsersManager() {
                 <th className="crm-freeze-start">{t("admin_users.col_user_id")}</th>
                 <th>{t("admin_users.col_email")}</th>
                 <th>{t("admin_users.col_role")}</th>
+                <th>{t("admin_users.col_status")}</th>
                 <th>{t("admin_users.col_cm")}</th>
                 <th>{t("admin_users.col_ip")}</th>
                 <th>{t("admin_users.col_sm")}</th>
@@ -337,13 +401,13 @@ export function AdminUsersManager() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="px-3 py-8 text-sage-600">
+                  <td colSpan={8} className="px-3 py-8 text-sage-600">
                     {t("admin_users.loading")}
                   </td>
                 </tr>
               ) : rows.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-3 py-8 text-sage-600">
+                  <td colSpan={8} className="px-3 py-8 text-sage-600">
                     {t("admin_users.empty")}
                   </td>
                 </tr>
@@ -353,11 +417,36 @@ export function AdminUsersManager() {
                     <td className="crm-freeze-start tabular-nums">{r.userId}</td>
                     <td className="break-all">{r.email}</td>
                     <td>{t(USER_ROLE_LABEL_KEY[roleKeyOf(r.role)])}</td>
+                    <td>
+                      {r.disabledAt ? (
+                        <span className="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium bg-red-50 text-red-700">
+                          {t("admin_users.status_disabled")}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium bg-sage-100 text-sage-700">
+                          {t("admin_users.status_active")}
+                        </span>
+                      )}
+                    </td>
                     <td className="tabular-nums">{r.caseManagerId ?? "—"}</td>
                     <td className="tabular-nums">{r.intendedParentId ?? "—"}</td>
                     <td className="tabular-nums">{r.surrogateId ?? "—"}</td>
                     <td className="crm-freeze-end">
                       <div className="flex flex-col items-stretch gap-1.5">
+                        <button
+                          type="button"
+                          disabled={busyUserId === r.userId}
+                          onClick={() => void onToggleDisabled(r.userId, r.email, !r.disabledAt)}
+                          className={
+                            r.disabledAt
+                              ? "crm-btn crm-btn-secondary crm-btn-xs"
+                              : "crm-btn crm-btn-danger crm-btn-xs"
+                          }
+                        >
+                          {r.disabledAt
+                            ? t("admin_users.action_enable")
+                            : t("admin_users.action_disable")}
+                        </button>
                         {r.caseManagerId ? (
                           <button
                             type="button"

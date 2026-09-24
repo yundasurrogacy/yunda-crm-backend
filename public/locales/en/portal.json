@@ -493,7 +493,22 @@
     "error_create": "Create failed. Check input and try again.",
     "create_ok": "Created successfully.",
     "error_update": "Update failed. Try again.",
-    "update_ok": "Updated successfully."
+    "update_ok": "Updated successfully.",
+    "col_status": "Status",
+    "status_active": "Active",
+    "status_disabled": "Disabled",
+    "filter_status_disabled": "Disabled",
+    "action_disable": "Disable",
+    "action_enable": "Re-enable",
+    "disable_confirm": "Disable \"{{email}}\"? They will be unable to sign in, and any active session will be revoked immediately. No data is deleted and this can be undone.",
+    "enable_confirm": "Restore sign-in access for \"{{email}}\"?",
+    "disable_ok": "\"{{email}}\" has been disabled and signed out.",
+    "enable_ok": "Sign-in access restored for \"{{email}}\".",
+    "error_disable": "Operation failed. Please try again.",
+    "error_disable_self": "You cannot disable the account you are signed in with. Ask another admin.",
+    "error_disable_last_admin": "This is the last active admin account. Disabling it would lock everyone out. Add or re-enable another admin first.",
+    "error_disable_not_found": "Account not found.",
+    "error_demote_last_admin": "This is the last active admin account. Demoting it would lock everyone out of the admin area. Add or re-enable another admin first."
   },
   "case_detail": {
     "workflow": {

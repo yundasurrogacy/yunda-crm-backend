@@ -18,11 +18,17 @@ export function RecordFilterControl({
   onChange,
   disabled = false,
   className = "",
+  deletedLabel,
 }: {
   value: RecordFilter;
   onChange: (next: RecordFilter) => void;
   disabled?: boolean;
   className?: string;
+  /**
+   * 覆盖第三个选项的文案。部分列表的「已删除」实际语义是「已停用」
+   * （如账号列表用 disabled_at），传入该 prop 即可复用本控件。
+   */
+  deletedLabel?: string;
 }) {
   const { t } = useTranslation("common");
 
@@ -36,6 +42,10 @@ export function RecordFilterControl({
       >
         {RECORD_FILTERS.map((filter, i) => {
           const active = filter === value;
+          const label =
+            filter === "deleted" && deletedLabel
+              ? deletedLabel
+              : t(`record_filter.${filter}`);
           return (
             <button
               key={filter}
@@ -54,7 +64,7 @@ export function RecordFilterControl({
                 disabled ? "cursor-not-allowed opacity-60" : "",
               ].join(" ")}
             >
-              {t(`record_filter.${filter}`)}
+              {label}
             </button>
           );
         })}

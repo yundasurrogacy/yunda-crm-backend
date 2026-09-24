@@ -3,6 +3,7 @@ import { getClient } from "@/config-lib/graphql-client";
 import { bindUserToBusinessRole, type BindRoleKind } from "@/lib/admin/bind-user-role";
 import { md5PasswordHexLower } from "@/lib/auth/password";
 import { getServerSession } from "@/lib/auth/session-cookie";
+import { isLastActiveAdmin } from "@/lib/admin/user-disabled";
 import {
   BINDING_RELATION,
   parseUserBindingFilter,
@@ -10,6 +11,7 @@ import {
   type UserBindingFilter,
   type UserRoleFilter,
 } from "@/constants/user-filters";
+import { parseRecordFilterFromParams, type RecordFilter } from "@/constants/record-filter";
 
 const LIST_USERS = `
   query AdminListUsers($where: users_bool_exp!, $limit: Int!, $offset: Int!) {
@@ -23,6 +25,7 @@ const LIST_USERS = `
       email
       role
       created_at
+      disabled_at
       case_manager {
         id
       }
@@ -83,10 +86,14 @@ function buildUsersWhere(
   q: string,
   role: UserRoleFilter,
   binding: UserBindingFilter,
+  status: RecordFilter,
 ): Record<string, unknown> {
   const clauses: Record<string, unknown>[] = [];
   if (q) clauses.push({ email: { _ilike: `%${q}%` } });
   if (role !== "all") clauses.push({ role: { _eq: role } });
+  // 账号用 disabled_at 表达「停用」；沿用三态枚举，deleted 即「已停用」
+  if (status === "active") clauses.push({ disabled_at: { _is_null: true } });
+  else if (status === "deleted") clauses.push({ disabled_at: { _is_null: false } });
 
   if (binding === "unbound") {
     clauses.push({
@@ -114,11 +121,15 @@ export async function GET(req: Request) {
   const q = (searchParams.get("q") ?? "").trim();
   const role = parseUserRoleFilter(searchParams.get("role"));
   const binding = parseUserBindingFilter(searchParams.get("binding"));
+  const status = parseRecordFilterFromParams(
+    searchParams.get("status"),
+    searchParams.get("includeDisabled"),
+  );
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
   const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get("pageSize") ?? "20", 10) || 20));
   const limit = pageSize;
   const offset = (page - 1) * limit;
-  const where = buildUsersWhere(q, role, binding);
+  const where = buildUsersWhere(q, role, binding, status);
   try {
     const client = getClient();
     const data = await client.execute<{
@@ -128,6 +139,7 @@ export async function GET(req: Request) {
         email: string;
         role: string;
         created_at: string;
+        disabled_at: string | null;
         case_manager: { id: string | number } | null;
         intended_parent: { id: string | number } | null;
         surrogate_mother: { id: string | number } | null;
@@ -142,6 +154,7 @@ export async function GET(req: Request) {
         email: u.email,
         role: u.role,
         createdAt: u.created_at,
+        disabledAt: u.disabled_at ?? null,
         caseManagerId: u.case_manager?.id != null ? String(u.case_manager.id) : null,
         intendedParentId: u.intended_parent?.id != null ? String(u.intended_parent.id) : null,
         surrogateId: u.surrogate_mother?.id != null ? String(u.surrogate_mother.id) : null,
@@ -241,6 +254,14 @@ export async function PATCH(req: Request) {
   if (Object.keys(changes).length === 0) {
     return NextResponse.json({ error: "empty_changes" }, { status: 400 });
   }
+
+  // 把管理员降级会让可用管理员数 -1：若目标是最后一个，降级后后台将无人可进
+  if (changes.role && changes.role !== "admin") {
+    if (await isLastActiveAdmin(userId)) {
+      return NextResponse.json({ error: "last_admin" }, { status: 409 });
+    }
+  }
+
   try {
     const client = getClient();
     await client.execute<{ update_users_by_pk: { id: string | number } | null }>({

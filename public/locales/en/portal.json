@@ -506,7 +506,6 @@
     "enable_ok": "Sign-in access restored for \"{{email}}\".",
     "error_disable": "Operation failed. Please try again.",
     "error_disable_self": "You cannot disable the account you are signed in with. Ask another admin.",
-    "error_disable_last_admin": "This is the last active admin account. Disabling it would lock everyone out. Add or re-enable another admin first.",
     "error_disable_not_found": "Account not found.",
     "error_demote_last_admin": "This is the last active admin account. Demoting it would lock everyone out of the admin area. Add or re-enable another admin first."
   },

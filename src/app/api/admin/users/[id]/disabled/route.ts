@@ -10,7 +10,6 @@ type Body = { disabled?: unknown };
 const STATUS_BY_ERROR: Record<UserDisableError, number> = {
   not_found: 404,
   cannot_disable_self: 400,
-  last_admin: 409,
   update_failed: 500,
 };
 

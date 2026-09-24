@@ -506,7 +506,6 @@
     "enable_ok": "已恢复「{{email}}」的登录权限。",
     "error_disable": "操作失败，请稍后重试。",
     "error_disable_self": "不能停用当前登录的账号，请换一个管理员操作。",
-    "error_disable_last_admin": "这是最后一个可用的管理员账号，停用后后台将无人可进。请先新增或恢复另一个管理员。",
     "error_disable_not_found": "账号不存在。",
     "error_demote_last_admin": "这是最后一个可用的管理员账号，不能降级，否则后台将无人可进。请先新增或恢复另一个管理员。"
   },

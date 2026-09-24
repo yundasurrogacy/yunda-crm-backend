@@ -37,8 +37,6 @@ function errorKeyForDisable(code: string | undefined): string {
   switch (code) {
     case "cannot_disable_self":
       return "admin_users.error_disable_self";
-    case "last_admin":
-      return "admin_users.error_disable_last_admin";
     case "not_found":
       return "admin_users.error_disable_not_found";
     default:

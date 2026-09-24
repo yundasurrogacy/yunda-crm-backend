@@ -35,7 +35,6 @@ const COUNT_ACTIVE_ADMINS = `
 export type UserDisableError =
   | "not_found"
   | "cannot_disable_self"
-  | "last_admin"
   | "update_failed";
 
 export type UserDisableResult =

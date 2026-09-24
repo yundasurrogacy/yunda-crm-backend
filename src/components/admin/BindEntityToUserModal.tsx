@@ -103,10 +103,21 @@ export function BindEntityToUserModal({
         error?: string;
         alreadyLinked?: boolean;
         reclaimed?: boolean;
+        conflictEntityId?: string;
+        conflictDeleted?: boolean;
       };
       if (!res.ok) {
         if (json.error === "user_bound_elsewhere") {
           setBanner(t("admin_users.error_bind_conflict"));
+        } else if (json.error === "email_taken_by_other_entity") {
+          setBanner(
+            t(
+              json.conflictDeleted
+                ? "admin_users.error_bind_email_taken_deleted"
+                : "admin_users.error_bind_email_taken",
+              { id: json.conflictEntityId ?? "—" },
+            ),
+          );
         } else if (json.error === "insert_failed") {
           setBanner(t("admin_users.error_bind_insert"));
         } else {

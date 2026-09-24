@@ -1,8 +1,18 @@
 import type { GraphQLClient } from "@/config-lib/graphql-client";
 
-import { linkEntityToUser } from "./link-entity-user";
+import { linkEntityToUser, type LinkEntityResult } from "./link-entity-user";
 
 export type BindRoleKind = "case_manager" | "intended_parent" | "surrogate_mother";
+
+/** 把 linkEntityToUser 的失败结果原样透出，便于上层区分「账号已绑」与「邮箱被占用」。 */
+function linkFailure(linked: Extract<LinkEntityResult, { ok: false }>) {
+  return {
+    ok: false as const,
+    message: linked.code,
+    conflictEntityId: linked.conflictEntityId,
+    conflictDeleted: linked.conflictDeleted,
+  };
+}
 
 const Q_CM = `
   query BindExistsCm($uid: bigint!) {
@@ -206,14 +216,20 @@ export async function bindUserToBusinessRole(
   opts?: { entityId?: string },
 ): Promise<
   | { ok: true; entityId: string; alreadyLinked: boolean; reclaimed: boolean }
-  | { ok: false; message: string }
+  | {
+      ok: false;
+      message: string;
+      /** message 为 email_taken_by_other_entity 时，占用该邮箱的档案 id */
+      conflictEntityId?: string;
+      conflictDeleted?: boolean;
+    }
 > {
   const email = userEmail.trim().toLowerCase();
   const preferredId = opts?.entityId?.trim();
 
   if (preferredId && /^\d+$/u.test(preferredId)) {
     const linked = await linkEntityToUser(client, kind, preferredId, email);
-    if (!linked.ok) return { ok: false, message: linked.code };
+    if (!linked.ok) return linkFailure(linked);
     return { ok: true, entityId: preferredId, alreadyLinked: false, reclaimed: true };
   }
 
@@ -232,7 +248,7 @@ export async function bindUserToBusinessRole(
     const reclaimId = unbound.case_managers?.[0]?.id;
     if (reclaimId != null) {
       const linked = await linkEntityToUser(client, kind, String(reclaimId), email);
-      if (!linked.ok) return { ok: false, message: linked.code };
+      if (!linked.ok) return linkFailure(linked);
       return { ok: true, entityId: String(reclaimId), alreadyLinked: false, reclaimed: true };
     }
 
@@ -264,7 +280,7 @@ export async function bindUserToBusinessRole(
     const reclaimId = unbound.intended_parents?.[0]?.id;
     if (reclaimId != null) {
       const linked = await linkEntityToUser(client, kind, String(reclaimId), email);
-      if (!linked.ok) return { ok: false, message: linked.code };
+      if (!linked.ok) return linkFailure(linked);
       return { ok: true, entityId: String(reclaimId), alreadyLinked: false, reclaimed: true };
     }
 
@@ -295,7 +311,7 @@ export async function bindUserToBusinessRole(
   const reclaimId = unbound.surrogate_mothers?.[0]?.id;
   if (reclaimId != null) {
     const linked = await linkEntityToUser(client, kind, String(reclaimId), email);
-    if (!linked.ok) return { ok: false, message: linked.code };
+    if (!linked.ok) return linkFailure(linked);
     return { ok: true, entityId: String(reclaimId), alreadyLinked: false, reclaimed: true };
   }
 

@@ -62,12 +62,20 @@ export async function POST(req: Request) {
     });
     if (!r.ok) {
       const status =
-        r.message === "user_bound_elsewhere"
+        r.message === "user_bound_elsewhere" || r.message === "email_taken_by_other_entity"
           ? 409
           : r.message === "entity_not_found" || r.message === "user_not_found"
             ? 404
             : 500;
-      return NextResponse.json({ error: r.message }, { status });
+      return NextResponse.json(
+        {
+          error: r.message,
+          ...(r.conflictEntityId
+            ? { conflictEntityId: r.conflictEntityId, conflictDeleted: r.conflictDeleted }
+            : {}),
+        },
+        { status },
+      );
     }
     return NextResponse.json({
       entityId: r.entityId,

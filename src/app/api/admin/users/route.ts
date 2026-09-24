@@ -157,7 +157,12 @@ export async function POST(req: Request) {
       if (r.ok) {
         linked[kind] = { entityId: r.entityId, alreadyLinked: r.alreadyLinked };
       } else {
-        linked[kind] = { error: r.message };
+        linked[kind] = {
+          error: r.message,
+          ...(r.conflictEntityId
+            ? { conflictEntityId: r.conflictEntityId, conflictDeleted: r.conflictDeleted }
+            : {}),
+        };
       }
     }
     return NextResponse.json({ userId: uid, linked }, { status: 201 });

@@ -54,9 +54,17 @@ export async function POST(req: Request) {
   const status =
     result.code === "user_not_found" || result.code === "entity_not_found"
       ? 404
-      : result.code === "user_bound_elsewhere"
+      : result.code === "user_bound_elsewhere" || result.code === "email_taken_by_other_entity"
         ? 409
         : 500;
 
-  return NextResponse.json({ error: result.code }, { status });
+  return NextResponse.json(
+    {
+      error: result.code,
+      ...(result.conflictEntityId
+        ? { conflictEntityId: result.conflictEntityId, conflictDeleted: result.conflictDeleted }
+        : {}),
+    },
+    { status },
+  );
 }

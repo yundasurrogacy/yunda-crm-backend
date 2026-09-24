@@ -119,13 +119,26 @@ export function BindLoginUserModal({ open, mode, kind, entityId, onClose, onLink
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ kind, entityId, userEmail: selected.email }),
       });
-      const errJson = (await res.json().catch(() => ({}))) as { error?: string };
+      const errJson = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        conflictEntityId?: string;
+        conflictDeleted?: boolean;
+      };
       if (!res.ok) {
         const code = errJson.error;
         if (code === "user_not_found") setBanner(t("admin_accounts.error_link_user_not_found"));
         else if (code === "entity_not_found") setBanner(t("admin_accounts.error_link_entity_not_found"));
         else if (code === "user_bound_elsewhere") setBanner(t("admin_accounts.error_link_user_conflict"));
-        else setBanner(t("admin_accounts.error_link"));
+        else if (code === "email_taken_by_other_entity") {
+          setBanner(
+            t(
+              errJson.conflictDeleted
+                ? "admin_accounts.error_link_email_taken_deleted"
+                : "admin_accounts.error_link_email_taken",
+              { id: errJson.conflictEntityId ?? "—" },
+            ),
+          );
+        } else setBanner(t("admin_accounts.error_link"));
         return;
       }
       setBanner(t("admin_accounts.linked"));
